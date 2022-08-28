@@ -497,7 +497,7 @@ type Opts struct {
 	// The Formatter to use.
 	//
 	// Default:
-	// 	DefaultReplacer
+	// 	DefaultFormatter
 	Formatter FormatterInterface
 
 	// Styles overwrites the way words are replaced.
