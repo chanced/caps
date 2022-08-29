@@ -1,38 +1,76 @@
 package caps_test
 
+import (
+	"fmt"
+
+	"github.com/chanced/caps"
+)
+
 func ExampleToCamel() {
-	// fmt.Println(caps.ToCamel("This is [an] {example}${id32}."))
-	// fmt.Println(caps.ToCamel("This is [an] {example}${id32}.break32"))
-	// fmt.Println(caps.ToCamel("This example allows for $ symbols", caps.Opts{AllowedSymbols: "$"}))
-
-	// customReplacer := caps.NewFormatter([]caps.R{{"Http", "HTTP"}, {"Https", "HTTPS"}})
-	// fmt.Println(caps.ToCamel("No Id just http And Https", caps.Opts{Formatter: customReplacer}))
-
-	// Outputx:
-	// thisIsAnExampleID32
-	// thisIsAnExampleID32Break32
-	// thisExampleAllowsFor$symbols
-	// noIdJustHTTPAndHTTPS
+	fmt.Println(caps.ToCamel("This is [an] {example}${id32}."))
+	fmt.Println(caps.ToCamel("AN_EXAMPLE_STRING"))
+	// Output:
+	// ThisIsAnExampleID32
+	// AnExampleString
 }
 
-func ExampleToDelimited() {
-	// fmt.Println(caps.ToDelimited("A # B _ C", '.', true))
-	// fmt.Println(caps.ToDelimited("$id", '.', false))
-	// fmt.Println(caps.ToDelimited("$id", '.', true, caps.Opts{AllowedSymbols: "$"}))
-	// fmt.Println(caps.ToDelimited("fromCamelcaseString", '.', true))
-	// Outputx:
-	// a.b.c
-	// ID
-	// $id
-	// from.camelcase.string
+func ExampleToLowerCamel() {
+	fmt.Println(caps.ToLowerCamel("This is [an] {example}${id32}."))
+	// Output:
+	// thisIsAnExampleID32
 }
 
 func ExampleToSnake() {
-	// fmt.Println(caps.ToSnake("A long string with spaces"))
-	// fmt.Println(caps.ToSnake(strings.ToLower("A_SCREAMING_SNAKE_MUST_BE_LOWERED_FIRST")))
-	// fmt.Println(caps.ToSnake("$word", caps.Opts{AllowedSymbols: "$"}))
-	// OutputX:
-	// a_long_string_with_spaces
-	// a_screaming_snake_must_be_lowered_first
-	// $word
+	fmt.Println(caps.ToSnake("This is [an] {example}${id32}."))
+	fmt.Println(caps.ToSnake("v3.2.2"))
+	// Output:
+	// this_is_an_example_id_32
+	// v3_2_2
+}
+
+func ExampleToScreamingSnake() {
+	fmt.Println(caps.ToScreamingSnake("This is [an] {example}${id32}."))
+	// Output:
+	// THIS_IS_AN_EXAMPLE_ID_32
+}
+
+func ExampleToKebab() {
+	fmt.Println(caps.ToKebab("This is [an] {example}${id32}."))
+	// Output:
+	// this-is-an-example-id-32
+}
+
+func ExampleToScreamingKebab() {
+	fmt.Println(caps.ToScreamingKebab("This is [an] {example}${id32}."))
+	// Output:
+	// THIS-IS-AN-EXAMPLE-ID-32
+}
+
+func ExampleToDot() {
+	fmt.Println(caps.ToDot("This is [an] {example}${id32}."))
+	// Output:
+	// this.is.an.example.id.32
+}
+
+func ExampleToScreamingDot() {
+	fmt.Println(caps.ToScreamingDot("This is [an] {example}${id32}."))
+	// Output:
+	// THIS.IS.AN.EXAMPLE.ID.32
+}
+
+func ExampleToDelimited() {
+	fmt.Println(caps.ToDelimited("This is [an] {example}${id}.#32", '.', true))
+	fmt.Println(caps.ToDelimited("This is [an] {example}${id}.break32", '.', false))
+	fmt.Println(caps.ToDelimited("This is [an] {example}${id}.v32", '.', true, caps.Opts{AllowedSymbols: "$"}))
+
+	// Output:
+	// this.is.an.example.id.32
+	// THIS.IS.AN.EXAMPLE.ID.BREAK.32
+	// this.is.an.example.$.id.v32
+}
+
+func ExampleToTitle() {
+	fmt.Println(caps.ToTitle("This is [an] {example}${id32}."))
+	// Output:
+	// This Is An Example ID 32
 }

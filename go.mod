@@ -1,3 +1,3 @@
 module github.com/chanced/caps
 
-go 1.19
+go 1.18

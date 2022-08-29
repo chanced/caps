@@ -90,7 +90,7 @@ type Tokenizer interface {
 //
 //	style:          Expected output caps.Style of the string.
 //	repStyle:       The caps.ReplaceStyle to use if a word needs to be replaced.
-//	join:           The delimiter to use when joining the words. For CamelCase, this is an empty string.
+//	join:           The delimiter to use when joining the words. For Camel, this is an empty string.
 //	allowedSymbols: The set of allowed symbols. If set, these should take precedence over any delimiters
 //	numberRules:    Any custom rules dictating how to handle special characters in numbers.
 type Formatter interface {
@@ -153,8 +153,6 @@ func (t TokenizerImpl) Tokenize(str string, allowedSymbols []rune, numberRules m
 	allowed := newRunes(allowedSymbols)
 
 	for i, r := range str {
-		rStr := string(r)
-		_ = rStr
 		switch {
 		case unicode.IsUpper(r):
 			if foundLower && current.Len() > 0 {
@@ -304,10 +302,10 @@ type ReplaceStyle uint8
 
 type (
 	Replacement struct {
-		// Camelcase variant of the word which should be replaced.
+		// Camel case variant of the word which should be replaced.
 		// e.g. "Http"
 		Camel string
-		// Screaming (all uppercase) representation of the word to replace.
+		// Screaming (all upper case) representation of the word to replace.
 		// e.g. "HTTP"
 		Screaming string
 	}
@@ -318,8 +316,8 @@ type Style uint8
 const (
 	StyleLower      Style = iota // The output should be lowercase (e.g. "an_example")
 	StyleScreaming               // The output should be screaming (e.g. "AN_EXAMPLE")
-	StyleCamel                   // The output should be camelcase (e.g. "AnExample")
-	StyleLowerCamel              // The output should be lower camelcase (e.g. "anExample")
+	StyleCamel                   // The output should be camel case (e.g. "AnExample")
+	StyleLowerCamel              // The output should be lower camel case (e.g. "anExample")
 )
 
 const (
@@ -616,7 +614,7 @@ func loadOpts(opts []Opts) Opts {
 	result := Opts{
 		AllowedSymbols: "",
 		Formatter:      DefaultFormatter,
-		ReplaceStyle:   ReplaceStyleNotSpecified,
+		ReplaceStyle:   ReplaceStyleScreaming,
 	}
 	if len(opts) == 0 {
 		return result
@@ -628,6 +626,13 @@ func loadOpts(opts []Opts) Opts {
 	if opts[0].Formatter != nil {
 		result.Formatter = opts[0].Formatter
 	}
+	if opts[0].ReplaceStyle != ReplaceStyleNotSpecified {
+		result.ReplaceStyle = opts[0].ReplaceStyle
+	}
+	if opts[0].NumberRules != nil {
+		result.NumberRules = opts[0].NumberRules
+	}
+
 	return result
 }
 
@@ -653,7 +658,7 @@ func WithoutNumbers[T ~string](s T) T {
 	}, string(s)))
 }
 
-// ToCamel transforms the case of str into Camelcase (e.g. AnExampleString) using
+// ToCamel transforms the case of str into Camel Case (e.g. AnExampleString) using
 // either the provided Formatter or the DefaultFormatter otherwise.
 //
 // The default Formatter detects case so that "AN_EXAMPLE_STRING" becomes "AnExampleString".
@@ -661,14 +666,14 @@ func WithoutNumbers[T ~string](s T) T {
 // so long as opts.ReplacementStyle is set to ReplaceStyleScreaming. A ReplaceStyle of
 // ReplaceStyleCamel would result in "SomeJson".
 //
-//	caps.ToCamel("This is [an] {example}${id32}.") // thisIsAnExampleID32
-//	caps.ToCamel("AN_EXAMPLE_STRING", ) // anExampleString
+//	caps.ToCamel("This is [an] {example}${id32}.") // ThisIsAnExampleID32
+//	caps.ToCamel("AN_EXAMPLE_STRING", ) // AnExampleString
 func ToCamel[T ~string](str T, options ...Opts) T {
 	opts := loadOpts(options)
 	return T(opts.Formatter.Format(StyleCamel, opts.ReplaceStyle, string(str), "", []rune(opts.AllowedSymbols), opts.NumberRules))
 }
 
-// ToLowerCamel transforms the case of str into Lower Camelcase (e.g. anExampleString) using
+// ToLowerCamel transforms the case of str into Lower Camel Case (e.g. anExampleString) using
 // either the provided Formatter or the DefaultFormatter otherwise.
 //
 // The default Formatter detects case so that "AN_EXAMPLE_STRING" becomes "anExampleString".
@@ -682,7 +687,7 @@ func ToLowerCamel[T ~string](str T, options ...Opts) T {
 	return T(opts.Formatter.Format(StyleLowerCamel, opts.ReplaceStyle, string(str), "", []rune(opts.AllowedSymbols), opts.NumberRules))
 }
 
-// ToSnake transforms the case of str into Lower Snakecase (e.g. an_example_string) using
+// ToSnake transforms the case of str into Lower Snake Case (e.g. an_example_string) using
 // either the provided Formatter or the DefaultFormatter otherwise.
 //
 //	caps.ToSnake("This is [an] {example}${id32}.") // this_is_an_example_id_32
@@ -690,7 +695,7 @@ func ToSnake[T ~string](str T, options ...Opts) T {
 	return ToDelimited(str, '_', true, options...)
 }
 
-// ToScreamingSnake transforms the case of str into Screaming Snakecase (e.g.
+// ToScreamingSnake transforms the case of str into Screaming Snake Case (e.g.
 // AN_EXAMPLE_STRING) using either the provided Formatter or the
 // DefaultFormatter otherwise.
 //
@@ -699,41 +704,41 @@ func ToScreamingSnake[T ~string](str T, options ...Opts) T {
 	return ToDelimited(str, '_', false, options...)
 }
 
-// ToKebab transforms the case of str into Lower Kebabcase (e.g. an-example-string) using
+// ToKebab transforms the case of str into Lower Kebab Case (e.g. an-example-string) using
 // either the provided Formatter or the DefaultFormatter otherwise.
 //
 //	caps.ToKebab("This is [an] {example}${id32}.") // this-is-an-example-id-32
 func ToKebab[T ~string](str T, options ...Opts) T {
-	return ToDelimited(str, '_', true, options...)
+	return ToDelimited(str, '-', true, options...)
 }
 
-// ToScreamingKebab transforms the case of str into Screaming Kebab (e.g.
+// ToScreamingKebab transforms the case of str into Screaming Kebab Snake (e.g.
 // AN-EXAMPLE-STRING) using either the provided Formatter or the
 // DefaultFormatter otherwise.
 //
-//	caps.ToScreamingSnake("This is [an] {example}${id32}.") // THIS-IS-AN-EXAMPLE-ID-32
+//	caps.ToScreamingKebab("This is [an] {example}${id32}.") // THIS-IS-AN-EXAMPLE-ID-32
 func ToScreamingKebab[T ~string](str T, options ...Opts) T {
-	return ToDelimited(str, '_', false, options...)
+	return ToDelimited(str, '-', false, options...)
 }
 
-// ToDot transforms the case of str into Lower Dot notation case (e.g. an.example.string) using
+// ToDot transforms the case of str into Lower Dot Notation Case (e.g. an.example.string) using
 // either the provided Formatter or the DefaultFormatter otherwise.
 //
 //	caps.ToDot("This is [an] {example}${id32}.") // this.is.an.example.id.32
 func ToDot[T ~string](str T, options ...Opts) T {
-	return ToDelimited(str, '_', true, options...)
+	return ToDelimited(str, '.', true, options...)
 }
 
-// ToScreamingKebab transforms the case of str into Screaming Kebab (e.g.
+// ToScreamingKebab transforms the case of str into Screaming Kebab Case (e.g.
 // AN-EXAMPLE-STRING) using either the provided Formatter or the
 // DefaultFormatter otherwise.
 //
 //	caps.ToScreamingDot("This is [an] {example}${id32}.") // THIS.IS.AN.EXAMPLE.ID.32
 func ToScreamingDot[T ~string](str T, options ...Opts) T {
-	return ToDelimited(str, '_', false, options...)
+	return ToDelimited(str, '.', false, options...)
 }
 
-// ToTitle transforms the case of str into Lower Dot notation case (e.g. An Example String) using
+// ToTitle transforms the case of str into Title Case (e.g. An Example String) using
 // either the provided Formatter or the DefaultFormatter otherwise.
 //
 //	caps.ToTitle("This is [an] {example}${id32}.") // This Is An Example ID 32
@@ -752,8 +757,8 @@ func ToTitle[T ~string](str T, options ...Opts) T {
 // # Example
 //
 //	caps.ToDelimited("This is [an] {example}${id}.#32", '.', true) // this.is.an.example.id.32
-//	caps.ToDelimited("This is [an] {example}${id32}.break32", '.', false) // THIS.IS.AN.EXAMPLE.ID.BREAK.32
-//	caps.ToDelimited("This is [an] {example}${id32}.v32", '.', true, caps.Opts{AllowedSymbols: "$" }) // this.is.an.example.id.$.v32
+//	caps.ToDelimited("This is [an] {example}${id}.break32", '.', false) // THIS.IS.AN.EXAMPLE.ID.BREAK.32
+//	caps.ToDelimited("This is [an] {example}${id}.v32", '.', true, caps.Opts{AllowedSymbols: "$"}) // this.is.an.example.$.id.v32
 func ToDelimited[T ~string](str T, delimiter rune, lowercase bool, options ...Opts) T {
 	opts := loadOpts(options)
 	var style Style
