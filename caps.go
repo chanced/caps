@@ -420,34 +420,57 @@ func (r ConverterImpl) Replacements() []Replacement {
 func (r *ConverterImpl) set(key, value string) {
 	from := token.FromString(key)
 	to := token.FromString(value)
-	r.lookup[string(from.Lower())] = lookupResult{
+	r.lookup[from.Lower()] = lookupResult{
 		from: from,
 		to:   to,
 	}
-	r.lookup[string(to.Lower())] = lookupResult{
-		from: from,
-		to:   to,
+	if to.Lower() != from.Lower() {
+		r.lookup[to.Lower()] = lookupResult{
+			from: from,
+			to:   to,
+		}
 	}
 	r.from[key] = from
 	r.to[value] = to
 }
 
+func lowerAndCheck(input string) (string, bool) {
+	bldr := strings.Builder{}
+	bldr.Grow(len(input))
+	foundLower := false
+	for _, r := range input {
+		if !foundLower && unicode.IsLower(r) {
+			foundLower = true
+		}
+		bldr.WriteRune(r)
+	}
+	return bldr.String(), foundLower
+}
+
 // Set adds the key/value pair to the table.
 func (r *ConverterImpl) Set(key, value string) {
-	l := strings.ToLower(key)
-	if v, ok := r.lookup[l]; ok {
+	kstr, keyHasLower := lowerAndCheck(key)
+	vstr, valueHasLower := lowerAndCheck(value)
+
+	if v, ok := r.lookup[kstr]; ok {
 		delete(r.from, v.from.String())
 		delete(r.to, v.to.String())
-		delete(r.lookup, l)
+		delete(r.lookup, key)
 		return
 	}
-	l = strings.ToLower(value)
-	if v, ok := r.lookup[l]; ok {
+
+	if v, ok := r.lookup[vstr]; ok {
 		delete(r.from, v.from.String())
 		delete(r.to, v.to.String())
-		delete(r.lookup, l)
+		delete(r.lookup, key)
 	}
-	r.set(key, value)
+
+	// checking to see if we need to swap these.
+	if !keyHasLower && valueHasLower {
+		r.set(value, key)
+	} else {
+		r.set(key, value)
+	}
 }
 
 // Remove deletes the key from the map. Either variant is sufficient.
@@ -638,17 +661,36 @@ func loadOpts(opts []Opts) Opts {
 
 // UpperFirst converts the first rune of str to uppercase.
 func UpperFirst[T ~string](str T) T {
-	t := token.FromString(str)
-	return T(t.UpperFirst())
+	runes := []rune(str)
+	switch len(runes) {
+	case 0:
+		return ""
+	case 1:
+		return T(unicode.ToUpper(runes[0]))
+	default:
+		runes[0] = unicode.ToUpper(runes[0])
+		return T(runes)
+	}
 }
 
 // LowerFirst converts the first rune of str to lowercase.
 func LowerFirst[T ~string](str T) T {
-	t := token.FromString(str)
-	return T(t.LowerFirst())
+	runes := []rune(str)
+	switch len(runes) {
+	case 0:
+		return ""
+	case 1:
+		return T(unicode.ToLower(runes[0]))
+	default:
+		runes[0] = unicode.ToLower(runes[0])
+		return T(runes)
+	}
 }
 
-// Without numbers returns the string with numbers removed.
+// Without numbers returns the string with all numeric runes removed.
+//
+// It does not currently use any logic to determine if a rune (e.g. '.')
+// is part of a number. This may change in the future.
 func WithoutNumbers[T ~string](s T) T {
 	return T(strings.Map(func(r rune) rune {
 		if unicode.IsDigit(r) {

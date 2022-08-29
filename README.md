@@ -17,6 +17,7 @@ Out of the box, the following case conversion are supported:
 -   Kebab Case (e.g. kebab-case)
 -   Screaming Kebab Case(e.g. SCREAMING-KEBAB-CASE)
 -   Dot Notation Case (e.g. dot.notation.case)
+-   Screaming Dot Notation Case (e.g. DOT.NOTATION.CASE)
 -   Title Case (e.g. Title Case)
 -   Other deliminations
 

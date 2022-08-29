@@ -50,7 +50,7 @@ func TestTokenizer(t *testing.T) {
 	}
 }
 
-func TestConverter(t *testing.T) {
+func TestConverterConvert(t *testing.T) {
 	converter := caps.NewConverter(caps.DefaultReplacements, caps.DefaultTokenizer)
 
 	tests := []struct {
@@ -88,96 +88,113 @@ func TestConverter(t *testing.T) {
 	}
 }
 
-// func TestReplacer(t *testing.T) {
-// 	assert := require.New(t)
-// }
+func TestConverterTableOps(t *testing.T) {
+	c := caps.NewConverter(caps.DefaultReplacements, caps.DefaultTokenizer)
 
-// func TestToCamel(t *testing.T) {
-// 	assert := require.New(t)
+	hasCamel := false
+	for _, v := range caps.DefaultReplacements {
+		if v.Camel == "Http" {
+			hasCamel = true
+			break
+		}
+	}
+	if !hasCamel {
+		t.Error("expected \"Http\" to be in the default replacements")
+	}
+	if !c.Contains("http") {
+		t.Errorf("expected caps.ConverterImpl to contain \"http\"")
+	}
 
-// 	runs := []struct {
-// 		input    string
-// 		expected string
-// 		opts     *caps.Opts
-// 	}{
-// 		{
-// 			"This is [an] {example}${id32}.",
-// 			"thisIsAnExampleID32",
-// 			nil,
-// 		},
-// 		{
-// 			"This is [an] {example}${id32}.break32",
-// 			"thisIsAnExampleID32Break32",
-// 			nil,
-// 		},
-// 		{
-// 			"This is an_example_with !Custom Replacements: http And Https",
-// 			"thisIsAnExampleWithCustomReplacementsHTTPAndHTTPS",
-// 			&caps.Opts{
-// 				Converter: caps.NewConverter([]caps.R{
-// 					{"Http", "HTTP"},
-// 				}),
-// 			},
-// 		},
-// 		{"$word", "$word", &caps.Opts{AllowedSymbols: "$"}},
-// 	}
+	c.Delete("http")
+	if c.Contains("http") || c.Contains("Http") || c.Contains("HTTP") {
+		t.Errorf("expected caps.ConverterImpl to have removed \"http\"")
+	}
 
-// 	for _, run := range runs {
-// 		var opts []caps.Opts
-// 		if run.opts != nil {
-// 			opts = []caps.Opts{*run.opts}
-// 		}
-// 		actual := caps.ToCamel(run.input, opts...)
-// 		assert.Equal(run.expected, actual)
-// 	}
-// }
+	c.Set("Tcp", "TCP")
+	if !(c.Contains("Tcp") && c.Contains("TCP") && c.Contains("tcp")) {
+		t.Errorf("expected caps.ConverterImpl to contain \"http\"")
+	}
 
-// func TestToDelimited(t *testing.T) {
-// 	assert := require.New(t)
+	tcp := c.Lookup("tcp")
+	if tcp.Camel != "Tcp" {
+		t.Errorf("expected \"Tcp\", got \"%s\"", tcp.Camel)
+	}
+	if tcp.Screaming != "TCP" {
+		t.Errorf("expected \"TCP\", got \"%s\"", tcp.Screaming)
+	}
 
-// 	runs := []struct {
-// 		input     string
-// 		expected  string
-// 		delimiter rune
-// 		opts      *caps.Opts
-// 	}{
-// 		{
-// 			"This is [an] {example}${id32}.",
-// 			"this.is.an.example.id.32",
-// 			'.',
-// 			nil,
-// 		},
-// 		{
-// 			"This is [an] {example}${id32}.break v32",
-// 			"this.is.an.example.id.32.break.v32",
-// 			'.',
-// 			nil,
-// 		},
-// 		{
-// 			"This is an_example_with !Custom Replacements: http And Https",
-// 			"this.is.an.example.with.custom.replacements.http.and.https",
-// 			'.',
-// 			&caps.Opts{
-// 				Converter: caps.NewConverter([]caps.R{
-// 					{"Http", "HTTP"},
-// 					{"Https", "HTTPS"},
-// 				}),
-// 			},
-// 		},
-// 		{"$word", "$word", '.', &caps.Opts{AllowedSymbols: "$"}},
-// 		{"using a different delimiter", "using_a_different_delimiter", '_', nil},
-// 	}
+	// this just checks to see if we StdReplacer.Set will swap incase the user
+	// flips the order of the strings
 
-// 	for _, run := range runs {
-// 		var opts []caps.Opts
-// 		if run.opts != nil {
-// 			opts = []caps.Opts{*run.opts}
-// 		}
-// 		lower := caps.ToDelimited(run.input, run.delimiter, true, opts...)
-// 		assert.Equal(run.expected, lower)
-// 		upper := caps.ToDelimited(run.input, run.delimiter, false, opts...)
+	c.Set("WSS", "Wss")
+	wss := c.Lookup("wss")
+	if wss.Camel != "Wss" {
+		t.Errorf("expected \"Wss\", got \"%s\"", wss.Camel)
+	}
+	if wss.Screaming != "WSS" {
+		t.Errorf("expected \"WSS\", got \"%s\"", wss.Screaming)
+	}
+}
 
-// 		assert.Equal(strings.ToUpper(run.expected), upper)
+func TestWithoutNumbers(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"123.456", "."},
+		{"a12bc3d", "abcd"},
+		{"a", "a"},
+		{"", ""},
+	}
+	for _, test := range tests {
+		t.Run(test.input, func(t *testing.T) {
+			output := caps.WithoutNumbers(test.input)
+			if output != test.expected {
+				t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
+			}
+		})
+	}
+}
 
-// 	}
-// }
+func TestLowerFirst(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"anExampleString", "anExampleString"},
+		{"ANEXAMPLESTRING", "aNEXAMPLESTRING"},
+		{"AnExampleString, ", "anExampleString, "},
+		{"a", "a"},
+		{"", ""},
+		{"123", "123"},
+	}
+	for _, test := range tests {
+		t.Run(test.input, func(t *testing.T) {
+			output := caps.LowerFirst(test.input)
+			if output != test.expected {
+				t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
+			}
+		})
+	}
+}
+
+func TestUpperFirst(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"anExampleString", "AnExampleString"},
+		{"ANEXAMPLESTRING", "ANEXAMPLESTRING"},
+		{"a", "A"},
+		{"", ""},
+		{"123", "123"},
+	}
+	for _, test := range tests {
+		t.Run(test.input, func(t *testing.T) {
+			output := caps.UpperFirst(test.input)
+			if output != test.expected {
+				t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
+			}
+		})
+	}
+}
