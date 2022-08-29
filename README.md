@@ -22,7 +22,7 @@ Out of the box, the following case conversion are supported:
 
 Word boundaries are determined by the `caps.Formatter`. The provided implementation, `caps.FormatterImpl`,
 delegates the boundary detection to `caps.Tokenizer`. The provided implementation, `caps.TokenizerImpl`,
-uses the following tokens as delimiters: `" _.!?:;$-(){}[]#@&+~"`.
+uses the following runes as delimiters: `" _.!?:;$-(){}[]#@&+~"`.
 
 `caps.StdFormatter` also allows users to register `caps.Replacement`s for acronym replacement. The default list is:
 
