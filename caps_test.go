@@ -50,8 +50,8 @@ func TestTokenizer(t *testing.T) {
 	}
 }
 
-func TestFormatter(t *testing.T) {
-	formatter := caps.NewFormatter(caps.DefaultReplacements, caps.DefaultTokenizer)
+func TestConverter(t *testing.T) {
+	converter := caps.NewConverter(caps.DefaultReplacements, caps.DefaultTokenizer)
 
 	tests := []struct {
 		input          string
@@ -60,7 +60,7 @@ func TestFormatter(t *testing.T) {
 		style          caps.Style
 		repStyle       caps.ReplaceStyle
 		allowedSymbols []rune
-		formatter      caps.Formatter
+		converter      caps.Converter
 		numberRules    map[rune]func(index int, r rune, val []rune) bool
 	}{
 		// {"An example string", "AnExampleString", "", caps.StyleCamel, caps.ReplaceStyleScreaming, nil, nil, nil},
@@ -80,7 +80,7 @@ func TestFormatter(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.input, func(t *testing.T) {
-			output := formatter.Format(test.style, test.repStyle, test.input, test.join, test.allowedSymbols, test.numberRules)
+			output := converter.Convert(test.style, test.repStyle, test.input, test.join, test.allowedSymbols, test.numberRules)
 			if output != test.expected {
 				t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
 			}
@@ -114,7 +114,7 @@ func TestFormatter(t *testing.T) {
 // 			"This is an_example_with !Custom Replacements: http And Https",
 // 			"thisIsAnExampleWithCustomReplacementsHTTPAndHTTPS",
 // 			&caps.Opts{
-// 				Formatter: caps.NewFormatter([]caps.R{
+// 				Converter: caps.NewConverter([]caps.R{
 // 					{"Http", "HTTP"},
 // 				}),
 // 			},
@@ -158,7 +158,7 @@ func TestFormatter(t *testing.T) {
 // 			"this.is.an.example.with.custom.replacements.http.and.https",
 // 			'.',
 // 			&caps.Opts{
-// 				Formatter: caps.NewFormatter([]caps.R{
+// 				Converter: caps.NewConverter([]caps.R{
 // 					{"Http", "HTTP"},
 // 					{"Https", "HTTPS"},
 // 				}),

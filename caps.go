@@ -9,14 +9,14 @@ import (
 )
 
 const (
-	// DEFAULT_DELIMITERS is the default set of delimiters in string format.
+	// DEFAULT_DELIMITERS is the default set of delimiters in string convert.
 	DEFAULT_DELIMITERS string = " _.!?:;$-(){}[]#@&+~"
 )
 
 var (
 	// DefaultTokenizer is the default Tokenizer.
 	DefaultTokenizer TokenizerImpl = NewTokenizer(DEFAULT_DELIMITERS)
-	// DefaultReplacements is the list of Replacements passed to DefaultFormatter.
+	// DefaultReplacements is the list of Replacements passed to DefaultConverter.
 	//
 	//  {"Http", "HTTP"},
 	//  {"Https", "HTTPS"},
@@ -43,7 +43,7 @@ var (
 		{"Sql", "SQL"},
 	}
 
-	// DefaultFormatter is the default Formatter instance.
+	// DefaultConverter is the default Converter instance.
 	//
 	// # Default parameters:
 	//
@@ -63,7 +63,7 @@ var (
 	//
 	// tokenizer:
 	//  DefaultTokenizer
-	DefaultFormatter = NewFormatter(DefaultReplacements, DefaultTokenizer)
+	DefaultConverter = NewConverter(DefaultReplacements, DefaultTokenizer)
 )
 
 // Tokenizer is an interface satisfied by tyeps which can
@@ -71,15 +71,15 @@ type Tokenizer interface {
 	Tokenize(value string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) []token.Token
 }
 
-// Formatter is an interface satisfied by types which can format the case of a
+// Converter is an interface satisfied by types which can convert the case of a
 // string.
 //
-// FormatterImpl is provided as a default implementation. If you have edge cases which require custom formatting,
-// you can implement your own Formatter by wrapping FormatterImpl:
+// ConverterImpl is provided as a default implementation. If you have edge cases which require custom formatting,
+// you can implement your own Converter by wrapping ConverterImpl:
 //
-//	type MyFormatter struct {}
-//	func(MyFormatter) Format(style Style, repStyle ReplaceStyle, input string, join string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) string{
-//		formatted := caps.DefaultFormatter.Format(style, repStyle, input, join, allowedSymbols, numberRules)
+//	type MyConverter struct {}
+//	func(MyConverter) Convert(style Style, repStyle ReplaceStyle, input string, join string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) string{
+//		formatted := caps.DefaultConverter.Convert(style, repStyle, input, join, allowedSymbols, numberRules)
 //		if formatted == "something_unusual" {
 //		  	return "replaced"
 //	 	}
@@ -93,14 +93,14 @@ type Tokenizer interface {
 //	join:           The delimiter to use when joining the words. For Camel, this is an empty string.
 //	allowedSymbols: The set of allowed symbols. If set, these should take precedence over any delimiters
 //	numberRules:    Any custom rules dictating how to handle special characters in numbers.
-type Formatter interface {
-	Format(style Style, repStyle ReplaceStyle, input string, join string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) string
+type Converter interface {
+	Convert(style Style, repStyle ReplaceStyle, input string, join string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) string
 }
 
 // NewTokenizer creates and returns a new TokenizerImpl which implements the
 // Tokenizer interface.
 //
-// Tokenizers are used by FormatterImpl to tokenize the input text into
+// Tokenizers are used by ConverterImpl to tokenize the input text into
 // token.Tokens that are then formatted.
 func NewTokenizer(delimiters string) TokenizerImpl {
 	d := runes(delimiters)
@@ -290,7 +290,7 @@ func (t TokenizerImpl) Tokenize(str string, allowedSymbols []rune, numberRules m
 var _ Tokenizer = TokenizerImpl{}
 
 // ReplaceStyle is used to indicate the case style the text should be transformed to
-// when seeking replacement text in a Formatter.
+// when seeking replacement text in a Converter.
 //
 // When a Replacer is configured, the expected input is:
 //
@@ -327,14 +327,14 @@ const (
 	ReplaceStyleLower        // Text should be replaced with the lowercase variant (e.g. "json").
 )
 
-// NewFormatter creates a new Formatter which is used to format the input text to the desired output.
+// NewConverter creates a new Converter which is used to convert the input text to the desired output.
 //
 // replacements are used to make replacements of tokens to the specified
 // formatting (e.g. { "Json", "JSON"}).
 //
 // tokenizer is used to tokenize the input text.
-func NewFormatter(replacements []Replacement, tokenizer Tokenizer) FormatterImpl {
-	r := FormatterImpl{
+func NewConverter(replacements []Replacement, tokenizer Tokenizer) ConverterImpl {
+	r := ConverterImpl{
 		from:      make(map[string]token.Token, len(replacements)),
 		to:        make(map[string]token.Token, len(replacements)),
 		lookup:    make(map[string]lookupResult, len(replacements)*2),
@@ -346,7 +346,7 @@ func NewFormatter(replacements []Replacement, tokenizer Tokenizer) FormatterImpl
 	return r
 }
 
-// FormatterImpl contains a table of words to their desired replacement. Tokens
+// ConverterImpl contains a table of words to their desired replacement. Tokens
 // will be compared against the keys of this table to determine if the string
 // should be replaced with the value of the table.
 //
@@ -364,7 +364,7 @@ func NewFormatter(replacements []Replacement, tokenizer Tokenizer) FormatterImpl
 //	{ "Aws",   "AWS" },
 //	{ "Gcp",   "GCP" },
 //	{ "Sql",   "SQL" },
-type FormatterImpl struct {
+type ConverterImpl struct {
 	from      map[string]token.Token
 	to        map[string]token.Token
 	lookup    map[string]lookupResult
@@ -376,15 +376,15 @@ type lookupResult struct {
 	to   token.Token
 }
 
-// Contains reports whether a key is in the Formatter's replacement table.
-func (f FormatterImpl) Contains(key string) bool {
+// Contains reports whether a key is in the Converter's replacement table.
+func (f ConverterImpl) Contains(key string) bool {
 	_, ok := f.lookup[strings.ToLower(key)]
 	return ok
 }
 
 // Lookup returns the Replacement for the given key, returning nil if it does
 // not exist.
-func (r FormatterImpl) Lookup(key string) *Replacement {
+func (r ConverterImpl) Lookup(key string) *Replacement {
 	res, ok := r.lookup[key]
 	if ok {
 		return &Replacement{Camel: res.from.String(), Screaming: res.to.String()}
@@ -397,7 +397,7 @@ func (r FormatterImpl) Lookup(key string) *Replacement {
 }
 
 // Table returns a representation of the internal table.
-func (r FormatterImpl) Table(key string) map[string]token.Token {
+func (r ConverterImpl) Table(key string) map[string]token.Token {
 	m := make(map[string]token.Token, len(r.from))
 	for k, v := range r.from {
 		m[k] = v
@@ -406,7 +406,7 @@ func (r FormatterImpl) Table(key string) map[string]token.Token {
 }
 
 // Replacements returns a slice of Replacement in the lookup table.
-func (r FormatterImpl) Replacements() []Replacement {
+func (r ConverterImpl) Replacements() []Replacement {
 	res := make([]Replacement, 0, len(r.from))
 	for upper, screaming := range r.from {
 		res = append(res, Replacement{
@@ -417,7 +417,7 @@ func (r FormatterImpl) Replacements() []Replacement {
 	return res
 }
 
-func (r *FormatterImpl) set(key, value string) {
+func (r *ConverterImpl) set(key, value string) {
 	from := token.FromString(key)
 	to := token.FromString(value)
 	r.lookup[string(from.Lower())] = lookupResult{
@@ -433,7 +433,7 @@ func (r *FormatterImpl) set(key, value string) {
 }
 
 // Set adds the key/value pair to the table.
-func (r *FormatterImpl) Set(key, value string) {
+func (r *ConverterImpl) Set(key, value string) {
 	l := strings.ToLower(key)
 	if v, ok := r.lookup[l]; ok {
 		delete(r.from, v.from.String())
@@ -451,7 +451,7 @@ func (r *FormatterImpl) Set(key, value string) {
 }
 
 // Remove deletes the key from the map. Either variant is sufficient.
-func (r *FormatterImpl) Delete(key string) {
+func (r *ConverterImpl) Delete(key string) {
 	l := strings.ToLower(key)
 	if v, ok := r.lookup[l]; ok {
 		delete(r.from, v.from.String())
@@ -460,7 +460,7 @@ func (r *FormatterImpl) Delete(key string) {
 	}
 }
 
-func (r *FormatterImpl) resolve(tok token.Token, style ReplaceStyle) (token.Token, bool) {
+func (r *ConverterImpl) resolve(tok token.Token, style ReplaceStyle) (token.Token, bool) {
 	l := string(tok.Lower())
 	if lookup, ok := r.lookup[l]; ok {
 		switch style {
@@ -494,8 +494,8 @@ func FormatToken(style Style, index int, tok token.Token) string {
 	return tok.String()
 }
 
-// Format formats the string with the desired style.
-func (r FormatterImpl) Format(style Style, repStyle ReplaceStyle, input string, join string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) string {
+// Convert formats the string with the desired style.
+func (r ConverterImpl) Convert(style Style, repStyle ReplaceStyle, input string, join string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) string {
 	tokens := r.tokenizer.Tokenize(input, allowedSymbols, numberRules)
 	var chain token.Token
 	var parts []string
@@ -586,11 +586,11 @@ type Opts struct {
 	// Default:
 	// 	""
 	AllowedSymbols string
-	// The Formatter to use.
+	// The Converter to use.
 	//
 	// Default:
-	// 	DefaultFormatter
-	Formatter Formatter
+	// 	DefaultConverter
+	Converter Converter
 
 	// Styles overwrites the way words are replaced.
 	//
@@ -613,7 +613,7 @@ type Opts struct {
 func loadOpts(opts []Opts) Opts {
 	result := Opts{
 		AllowedSymbols: "",
-		Formatter:      DefaultFormatter,
+		Converter:      DefaultConverter,
 		ReplaceStyle:   ReplaceStyleScreaming,
 	}
 	if len(opts) == 0 {
@@ -623,8 +623,8 @@ func loadOpts(opts []Opts) Opts {
 	if opts[0].AllowedSymbols != "" {
 		result.AllowedSymbols = opts[0].AllowedSymbols
 	}
-	if opts[0].Formatter != nil {
-		result.Formatter = opts[0].Formatter
+	if opts[0].Converter != nil {
+		result.Converter = opts[0].Converter
 	}
 	if opts[0].ReplaceStyle != ReplaceStyleNotSpecified {
 		result.ReplaceStyle = opts[0].ReplaceStyle
@@ -659,9 +659,9 @@ func WithoutNumbers[T ~string](s T) T {
 }
 
 // ToCamel transforms the case of str into Camel Case (e.g. AnExampleString) using
-// either the provided Formatter or the DefaultFormatter otherwise.
+// either the provided Converter or the DefaultConverter otherwise.
 //
-// The default Formatter detects case so that "AN_EXAMPLE_STRING" becomes "AnExampleString".
+// The default Converter detects case so that "AN_EXAMPLE_STRING" becomes "AnExampleString".
 // It also has a configurable set of replacements, such that "some_json" becomes "SomeJSON"
 // so long as opts.ReplacementStyle is set to ReplaceStyleScreaming. A ReplaceStyle of
 // ReplaceStyleCamel would result in "SomeJson".
@@ -670,13 +670,13 @@ func WithoutNumbers[T ~string](s T) T {
 //	caps.ToCamel("AN_EXAMPLE_STRING", ) // AnExampleString
 func ToCamel[T ~string](str T, options ...Opts) T {
 	opts := loadOpts(options)
-	return T(opts.Formatter.Format(StyleCamel, opts.ReplaceStyle, string(str), "", []rune(opts.AllowedSymbols), opts.NumberRules))
+	return T(opts.Converter.Convert(StyleCamel, opts.ReplaceStyle, string(str), "", []rune(opts.AllowedSymbols), opts.NumberRules))
 }
 
 // ToLowerCamel transforms the case of str into Lower Camel Case (e.g. anExampleString) using
-// either the provided Formatter or the DefaultFormatter otherwise.
+// either the provided Converter or the DefaultConverter otherwise.
 //
-// The default Formatter detects case so that "AN_EXAMPLE_STRING" becomes "anExampleString".
+// The default Converter detects case so that "AN_EXAMPLE_STRING" becomes "anExampleString".
 // It also has a configurable set of replacements, such that "some_json" becomes "someJSON"
 // so long as opts.ReplacementStyle is set to ReplaceStyleScreaming. A ReplaceStyle of
 // ReplaceStyleCamel would result in "someJson".
@@ -684,11 +684,11 @@ func ToCamel[T ~string](str T, options ...Opts) T {
 //	caps.ToLowerCamel("This is [an] {example}${id32}.") // thisIsAnExampleID32
 func ToLowerCamel[T ~string](str T, options ...Opts) T {
 	opts := loadOpts(options)
-	return T(opts.Formatter.Format(StyleLowerCamel, opts.ReplaceStyle, string(str), "", []rune(opts.AllowedSymbols), opts.NumberRules))
+	return T(opts.Converter.Convert(StyleLowerCamel, opts.ReplaceStyle, string(str), "", []rune(opts.AllowedSymbols), opts.NumberRules))
 }
 
 // ToSnake transforms the case of str into Lower Snake Case (e.g. an_example_string) using
-// either the provided Formatter or the DefaultFormatter otherwise.
+// either the provided Converter or the DefaultConverter otherwise.
 //
 //	caps.ToSnake("This is [an] {example}${id32}.") // this_is_an_example_id_32
 func ToSnake[T ~string](str T, options ...Opts) T {
@@ -696,8 +696,8 @@ func ToSnake[T ~string](str T, options ...Opts) T {
 }
 
 // ToScreamingSnake transforms the case of str into Screaming Snake Case (e.g.
-// AN_EXAMPLE_STRING) using either the provided Formatter or the
-// DefaultFormatter otherwise.
+// AN_EXAMPLE_STRING) using either the provided Converter or the
+// DefaultConverter otherwise.
 //
 //	caps.ToScreamingSnake("This is [an] {example}${id32}.") // THIS_IS_AN_EXAMPLE_ID_32
 func ToScreamingSnake[T ~string](str T, options ...Opts) T {
@@ -705,7 +705,7 @@ func ToScreamingSnake[T ~string](str T, options ...Opts) T {
 }
 
 // ToKebab transforms the case of str into Lower Kebab Case (e.g. an-example-string) using
-// either the provided Formatter or the DefaultFormatter otherwise.
+// either the provided Converter or the DefaultConverter otherwise.
 //
 //	caps.ToKebab("This is [an] {example}${id32}.") // this-is-an-example-id-32
 func ToKebab[T ~string](str T, options ...Opts) T {
@@ -713,8 +713,8 @@ func ToKebab[T ~string](str T, options ...Opts) T {
 }
 
 // ToScreamingKebab transforms the case of str into Screaming Kebab Snake (e.g.
-// AN-EXAMPLE-STRING) using either the provided Formatter or the
-// DefaultFormatter otherwise.
+// AN-EXAMPLE-STRING) using either the provided Converter or the
+// DefaultConverter otherwise.
 //
 //	caps.ToScreamingKebab("This is [an] {example}${id32}.") // THIS-IS-AN-EXAMPLE-ID-32
 func ToScreamingKebab[T ~string](str T, options ...Opts) T {
@@ -722,7 +722,7 @@ func ToScreamingKebab[T ~string](str T, options ...Opts) T {
 }
 
 // ToDot transforms the case of str into Lower Dot Notation Case (e.g. an.example.string) using
-// either the provided Formatter or the DefaultFormatter otherwise.
+// either the provided Converter or the DefaultConverter otherwise.
 //
 //	caps.ToDot("This is [an] {example}${id32}.") // this.is.an.example.id.32
 func ToDot[T ~string](str T, options ...Opts) T {
@@ -730,8 +730,8 @@ func ToDot[T ~string](str T, options ...Opts) T {
 }
 
 // ToScreamingKebab transforms the case of str into Screaming Kebab Case (e.g.
-// AN-EXAMPLE-STRING) using either the provided Formatter or the
-// DefaultFormatter otherwise.
+// AN-EXAMPLE-STRING) using either the provided Converter or the
+// DefaultConverter otherwise.
 //
 //	caps.ToScreamingDot("This is [an] {example}${id32}.") // THIS.IS.AN.EXAMPLE.ID.32
 func ToScreamingDot[T ~string](str T, options ...Opts) T {
@@ -739,16 +739,16 @@ func ToScreamingDot[T ~string](str T, options ...Opts) T {
 }
 
 // ToTitle transforms the case of str into Title Case (e.g. An Example String) using
-// either the provided Formatter or the DefaultFormatter otherwise.
+// either the provided Converter or the DefaultConverter otherwise.
 //
 //	caps.ToTitle("This is [an] {example}${id32}.") // This Is An Example ID 32
 func ToTitle[T ~string](str T, options ...Opts) T {
 	opts := loadOpts(options)
-	return T(opts.Formatter.Format(StyleCamel, opts.ReplaceStyle, string(str), " ", []rune(opts.AllowedSymbols), opts.NumberRules))
+	return T(opts.Converter.Convert(StyleCamel, opts.ReplaceStyle, string(str), " ", []rune(opts.AllowedSymbols), opts.NumberRules))
 }
 
 // ToDelimited transforms the case of str into a string seperated by delimiter,
-// using either the provided Formatter or the DefaultFormatter otherwise.
+// using either the provided Converter or the DefaultConverter otherwise.
 //
 // If lowercase is false, the output will be all uppercase.
 //
@@ -770,7 +770,7 @@ func ToDelimited[T ~string](str T, delimiter rune, lowercase bool, options ...Op
 		style = StyleScreaming
 		replacementStyle = ReplaceStyleScreaming
 	}
-	return T(opts.Formatter.Format(style, replacementStyle, string(str), string(delimiter), []rune(opts.AllowedSymbols), opts.NumberRules))
+	return T(opts.Converter.Convert(style, replacementStyle, string(str), string(delimiter), []rune(opts.AllowedSymbols), opts.NumberRules))
 }
 
 type runes []rune
