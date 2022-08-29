@@ -116,7 +116,7 @@ func (t Token) LowerFirst() string {
 // - If the Token is prefixed with any of the following: + - . v V # and
 // followed by a number
 //
-// - Numbers may only be seperated by a single '.' and '.' may be the first rune
+// - Numbers may only be separated by a single '.' and '.' may be the first rune
 // or proceeded by a number, '+', or '-'
 //
 // - A single 'e' or 'E' may only be used in the exponent portion of a number

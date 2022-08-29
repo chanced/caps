@@ -747,7 +747,7 @@ func ToTitle[T ~string](str T, options ...Opts) T {
 	return T(opts.Converter.Convert(StyleCamel, opts.ReplaceStyle, string(str), " ", []rune(opts.AllowedSymbols), opts.NumberRules))
 }
 
-// ToDelimited transforms the case of str into a string seperated by delimiter,
+// ToDelimited transforms the case of str into a string separated by delimiter,
 // using either the provided Converter or the DefaultConverter otherwise.
 //
 // If lowercase is false, the output will be all uppercase.
