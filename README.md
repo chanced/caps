@@ -1,5 +1,9 @@
 # caps
 
+[![GoDoc reference example](https://img.shields.io/badge/godoc-reference-blue.svg)](https://pkg.go.dev/github.com/chanced/caps)
+[![GoReportCard example](https://goreportcard.com/badge/github.com/chanced/caps)](https://goreportcard.com/report/github.com/chanced/caps)
+[![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/gomods/athens.svg)](https://github.com/chanced/caps)
+
 caps is a case conversion library for Go. It was built with the following
 priorites in mind: configurability, consistency, correctness, ergonomic, and
 reasonable performance; in that order.
