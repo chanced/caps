@@ -20,11 +20,11 @@ Out of the box, the following case conversion are supported:
 -   Title Case (e.g. Title Case)
 -   Other deliminations
 
-Word boundaries are determined by the `caps.Formatter`. The provided implementation, `caps.FormatterImpl`,
+Word boundaries are determined by the `caps.Converter`. The provided implementation, `caps.ConverterImpl`,
 delegates the boundary detection to `caps.Tokenizer`. The provided implementation, `caps.TokenizerImpl`,
 uses the following runes as delimiters: `" _.!?:;$-(){}[]#@&+~"`.
 
-`caps.StdFormatter` also allows users to register `caps.Replacement`s for acronym replacement. The default list is:
+`caps.StdConverter` also allows users to register `caps.Replacement`s for acronym replacement. The default list is:
 
 ```go
 {"Http", "HTTP"}
@@ -43,14 +43,14 @@ uses the following runes as delimiters: `" _.!?:;$-(){}[]#@&+~"`.
 If you would like to add or remove entries from that list, you have a few
 options.
 
-You can pass a new instance of `caps.StdFormatter` with a new set of
+You can pass a new instance of `caps.StdConverter` with a new set of
 `caps.Replacement` (likely preferred).
 
-You can create your own `caps.Formatter`. This could be as simple as
-implementing the single `Format` method, calling `caps.DefaultFormatter.Format`,
+You can create your own `caps.Converter`. This could be as simple as
+implementing the single `Convert` method, calling `caps.DefaultConverter.Convert`,
 and then modifying the result.
 
-Finally, if you are so inclined, you can update `caps.DefaultFormatter`. Just be aware that the
+Finally, if you are so inclined, you can update `caps.DefaultConverter`. Just be aware that the
 module was not built with thread-safety in mind so you should set it once.
 Otherwise, you'll need guard your usage of the library accordingly.
 
