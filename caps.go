@@ -212,7 +212,7 @@ func (t TokenizerImpl) Tokenize(str string, allowedSymbols []rune, numberRules m
 						// this gets a bit tricky because we need to check if adding the
 						// rune to the current makes it a number. However, in all
 						// default cases, a non-numeric rune must be followed either by
-						// a number or a 'e' and a number. as such, we have to check if
+						// a number or an 'e' and a number. as such, we have to check if
 						// both this and the next rune (and possibly the rune after
 						// that) make it a number.
 						n := token.AppendRune(current, r)
@@ -813,6 +813,16 @@ func ToDelimited[T ~string](str T, delimiter rune, lowercase bool, options ...Op
 		replacementStyle = ReplaceStyleScreaming
 	}
 	return T(opts.Converter.Convert(style, replacementStyle, string(str), string(delimiter), []rune(opts.AllowedSymbols), opts.NumberRules))
+}
+
+// ToLower returns s with all Unicode letters mapped to their lower case.
+func ToLower[T ~string](str T) T {
+	return T(strings.ToLower((string(str))))
+}
+
+// ToUpper returns s with all Unicode letters mapped to their upper case.
+func ToUpper[T ~string](str T) T {
+	return T(strings.ToUpper((string(str))))
 }
 
 type runes []rune
