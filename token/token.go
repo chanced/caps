@@ -1,7 +1,6 @@
 package token
 
 import (
-	"strings"
 	"unicode"
 )
 
@@ -10,6 +9,7 @@ func Append(t Token, o Token) Token {
 	return Token{
 		value: append(t.value, o.value...),
 		lower: append(t.lower, o.lower...),
+		upper: append(t.upper, o.upper...),
 		len:   t.len + o.len,
 	}
 }
@@ -19,6 +19,7 @@ func AppendRune(t Token, r rune) Token {
 	return Token{
 		value: append(t.value, r),
 		lower: append(t.lower, unicode.ToLower(r)),
+		upper: append(t.upper, unicode.ToUpper(r)),
 		len:   t.len + 1,
 	}
 }
@@ -30,23 +31,31 @@ func AppendRune(t Token, r rune) Token {
 type Token struct {
 	value []rune
 	lower []rune
+	upper []rune
 	len   int
 }
 
-func NewFromString(value string) Token {
-	return New([]rune(value))
+func FromString[T ~string](value T) Token {
+	return FromRunes([]rune(value))
 }
 
-func New(value []rune) Token {
+func FromRunes(value []rune) Token {
+	upper := make([]rune, len(value))
+	lower := make([]rune, len(value))
+	for i, r := range value {
+		upper[i] = unicode.ToUpper(r)
+		lower[i] = unicode.ToLower(r)
+	}
 	return Token{
 		value: value,
-		lower: []rune(strings.ToLower(string(value))),
+		lower: lower,
+		upper: upper,
 		len:   len(value),
 	}
 }
 
 func (t Token) String() string {
-	return string(t.value)
+	return t.Value()
 }
 
 // Len returns the number of runes in the Part.
@@ -54,12 +63,49 @@ func (t Token) Len() int {
 	return t.len
 }
 
-func (t Token) Value() []rune {
-	return t.value
+func (t Token) Value() string {
+	return string(t.value)
 }
 
-func (t Token) Lower() []rune {
-	return t.lower
+func (t Token) Lower() string {
+	return string(t.lower)
+}
+
+func (t Token) Upper() string {
+	return string(t.upper)
+}
+
+func (t Token) UpperFirstLowerRest() string {
+	switch len(t.value) {
+	case 0:
+		return ""
+	case 1:
+		return string(t.upper)
+	default:
+		return string(append([]rune{t.upper[0]}, t.lower[1:]...))
+	}
+}
+
+func (t Token) UpperFirst() string {
+	switch len(t.value) {
+	case 0:
+		return ""
+	case 1:
+		return string(t.upper)
+	default:
+		return string(append([]rune{t.upper[0]}, t.value[1:]...))
+	}
+}
+
+func (t Token) LowerFirst() string {
+	switch len(t.value) {
+	case 0:
+		return ""
+	case 1:
+		return string(t.lower)
+	default:
+		return string(append([]rune{t.lower[0]}, t.value[1:]...))
+	}
 }
 
 // IsNumber reports true if the Token is considered a valid number based on the
@@ -160,13 +206,14 @@ func (t Token) IsNumber(additionalRules ...map[rune]func(index int, r rune, val 
 // Split returns the current token split into a slice of Tokens for each rune in
 // the list.
 func (t Token) Split() []Token {
-	result := make([]Token, 0, t.Len())
+	result := make([]Token, t.Len())
 	for i, r := range t.value {
-		result = append(result, Token{
+		result[i] = Token{
 			value: []rune{r},
 			lower: []rune{t.lower[i]},
+			upper: []rune{t.upper[i]},
 			len:   1,
-		})
+		}
 	}
 	return result
 }

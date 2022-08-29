@@ -49,7 +49,7 @@ func TestIsNumber(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.value, func(t *testing.T) {
-			if token.NewFromString(test.value).IsNumber(test.rules) != test.expected {
+			if token.FromString(test.value).IsNumber(test.rules) != test.expected {
 				if test.expected {
 					t.Errorf("expected \"%s\" to be a number", test.value)
 				} else {

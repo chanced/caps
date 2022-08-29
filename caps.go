@@ -9,12 +9,26 @@ import (
 )
 
 const (
+	// DEFAULT_DELIMITERS is the default set of delimiters in string format.
 	DEFAULT_DELIMITERS string = " _.!?:;$-(){}[]#@&+~"
 )
 
 var (
-	DefaultTokenizer Tokenizer = NewTokenizer(DEFAULT_DELIMITERS)
-
+	// DefaultTokenizer is the default Tokenizer.
+	DefaultTokenizer TokenizerImpl = NewTokenizer(DEFAULT_DELIMITERS)
+	// DefaultReplacements is the list of Replacements passed to DefaultFormatter.
+	//
+	//  {"Http", "HTTP"},
+	//  {"Https", "HTTPS"},
+	//  {"Id", "ID"},
+	//  {"Ip", "IP"},
+	//  {"Html", "HTML"},
+	//  {"Xml", "XML"},
+	//  {"Json", "JSON"},
+	//  {"Csv", "CSV"},
+	//  {"Aws", "AWS"},
+	//  {"Gcp", "GCP"},
+	//  {"Sql", "SQL"},
 	DefaultReplacements []Replacement = []Replacement{
 		{"Http", "HTTP"},
 		{"Https", "HTTPS"},
@@ -29,14 +43,14 @@ var (
 		{"Sql", "SQL"},
 	}
 
-	// Formatter is the default FormatterInterface.
+	// DefaultFormatter is the default Formatter instance.
 	//
 	// # Default parameters:
 	//
-	// delimiters:
-	//   - " _.!?:;$-(){}[]#@&+~"
+
 	//
 	// replacements:
+	//  DefaultReplacements:
 	//  { UpperCamel: "Http",  Screaming: "HTTP"  },
 	//  { UpperCamel: "Https", Screaming: "HTTPS" },
 	//  { UpperCamel: "Html",  Screaming: "HTML"  },
@@ -52,38 +66,65 @@ var (
 	DefaultFormatter = NewFormatter(DefaultReplacements, DefaultTokenizer)
 )
 
-type (
-	TokenizerInterface interface {
-		Tokenize(value string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) []token.Token
-	}
+// Tokenizer is an interface satisfied by tyeps which can
+type Tokenizer interface {
+	Tokenize(value string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) []token.Token
+}
 
-	// FormatterInterface is an interface satisfied by types which can finalize the case formatting of a string.
-	//
-	// # Parameters
-	//
-	//	style:    Expected output caps.Style of the string.
-	//	repStyle: The caps.ReplaceStyle to use if a word needs to be replaced.
-	//	words:    A list parsed caps.Word.
-	//	join:     The delimiter to use when joining the words. For CamelCase, this is an empty string.
-	FormatterInterface interface {
-		Format(style Style, repStyle ReplaceStyle, input string, join string) string
-	}
-)
+// Formatter is an interface satisfied by types which can format the case of a
+// string.
+//
+// FormatterImpl is provided as a default implementation. If you have edge cases which require custom formatting,
+// you can implement your own Formatter by wrapping FormatterImpl:
+//
+//	type MyFormatter struct {}
+//	func(MyFormatter) Format(style Style, repStyle ReplaceStyle, input string, join string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) string{
+//		formatted := caps.DefaultFormatter.Format(style, repStyle, input, join, allowedSymbols, numberRules)
+//		if formatted == "something_unusual" {
+//		  	return "replaced"
+//	 	}
+//	 	return formatted
+//	}
+//
+// # Parameters
+//
+//	style:          Expected output caps.Style of the string.
+//	repStyle:       The caps.ReplaceStyle to use if a word needs to be replaced.
+//	join:           The delimiter to use when joining the words. For CamelCase, this is an empty string.
+//	allowedSymbols: The set of allowed symbols. If set, these should take precedence over any delimiters
+//	numberRules:    Any custom rules dictating how to handle special characters in numbers.
+type Formatter interface {
+	Format(style Style, repStyle ReplaceStyle, input string, join string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) string
+}
 
-func NewTokenizer(delimiters string) Tokenizer {
+// NewTokenizer creates and returns a new TokenizerImpl which implements the
+// Tokenizer interface.
+//
+// Tokenizers are used by FormatterImpl to tokenize the input text into
+// token.Tokens that are then formatted.
+func NewTokenizer(delimiters string) TokenizerImpl {
 	d := runes(delimiters)
 	sort.Sort(d)
-	return Tokenizer{
+	return TokenizerImpl{
 		delimiters: d,
 	}
 }
 
-type Tokenizer struct {
+// TokenizerImpl is the provided implementation of the Tokenizer interface.
+//
+// TokenizerImpl tokenizes the input text into token.Tokens based on a set of
+// delimiters (runes).
+//
+// If you need custom logic, consider wrapping the logic by implementing
+// Tokenizer and then calling a TokenizerImpl's Tokenize method.
+//
+// # Example:
+type TokenizerImpl struct {
 	delimiters runes
 }
 
-// Tokenize splits a string into a list of tokens based on the case of each
-// rune, its delimiters, and the specified allowedSymbols.
+// Tokenize splits a string into a list of token.Tokens based on the case of each
+// rune, it's delimiters, and the specified allowedSymbols.
 //
 // For example:
 //
@@ -103,7 +144,7 @@ type Tokenizer struct {
 //
 //	t := caps.token.Newizer("_")
 //	t.Tokenize("A_SCREAMING_SNAKECASE_VARIABLE", []rune{'_'}) -> ["A_SCREAMING_SNAKECASE_VARIABLE"]
-func (t Tokenizer) Tokenize(str string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) []token.Token {
+func (t TokenizerImpl) Tokenize(str string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) []token.Token {
 	tokens := []token.Token{}
 	pending := []token.Token{}
 	foundLower := false
@@ -176,31 +217,30 @@ func (t Tokenizer) Tokenize(str string, allowedSymbols []rune, numberRules map[r
 						// a number or a 'e' and a number. as such, we have to check if
 						// both this and the next rune (and possibly the rune after
 						// that) make it a number.
-
 						n := token.AppendRune(current, r)
 						runes := []rune(str)
 						if n.IsNumber(numberRules) {
 							current = n
-						} else if i <= len(runes)-2 {
+						} else if i <= len(runes)-2 && (unicode.IsNumber(runes[i+1]) || unicode.IsLetter(runes[i+1])) || allowed.Contains(runes[i+1]) {
 							next := token.AppendRune(n, runes[i+1])
 							if next.IsNumber(numberRules) {
 								current = n
 							} else {
 								if foundLower {
 									tokens = append(tokens, current)
-									current = token.New([]rune{r})
+									current = token.FromRunes([]rune{r})
 								} else {
 									pending = append(pending, current)
-									current = token.New([]rune{r})
+									current = token.FromRunes([]rune{r})
 								}
 							}
 						} else {
 							if foundLower {
 								tokens = append(tokens, current)
-								current = token.New([]rune{r})
+								current = token.FromRunes([]rune{r})
 							} else {
 								pending = append(pending, current)
-								current = token.New([]rune{r})
+								current = token.FromRunes([]rune{r})
 							}
 						}
 					} else {
@@ -249,21 +289,20 @@ func (t Tokenizer) Tokenize(str string, allowedSymbols []rune, numberRules map[r
 	}
 }
 
-var _ TokenizerInterface = Tokenizer{}
+var _ Tokenizer = TokenizerImpl{}
 
 // ReplaceStyle is used to indicate the case style the text should be transformed to
-// when seeking replacement text in a Replacer.
+// when seeking replacement text in a Formatter.
 //
 // When a Replacer is configured, the expected input is:
 //
-//	caps.R{ Camel: "Json", Screaming: "JSON" }
+//	caps.Replacement{ Camel: "Json", Screaming: "JSON" }
 //
 // If the ReplaceStyle equals ReplaceStyleScreaming then an input of "MarshalJson" will return
-// "MarshaalJSON".
+// "MarshaalJSON" with the above caps.Replacement.
 type ReplaceStyle uint8
 
 type (
-	R           = Replacement
 	Replacement struct {
 		// Camelcase variant of the word which should be replaced.
 		// e.g. "Http"
@@ -296,11 +335,12 @@ const (
 // formatting (e.g. { "Json", "JSON"}).
 //
 // tokenizer is used to tokenize the input text.
-func NewFormatter(replacements []Replacement, tokenizer TokenizerInterface) Formatter {
-	r := Formatter{
-		from:   make(map[string]string, len(replacements)),
-		to:     make(map[string]string, len(replacements)),
-		lookup: make(map[string]lookupResult, len(replacements)*2),
+func NewFormatter(replacements []Replacement, tokenizer Tokenizer) FormatterImpl {
+	r := FormatterImpl{
+		from:      make(map[string]token.Token, len(replacements)),
+		to:        make(map[string]token.Token, len(replacements)),
+		lookup:    make(map[string]lookupResult, len(replacements)*2),
+		tokenizer: tokenizer,
 	}
 	for _, v := range replacements {
 		r.set(v.Camel, v.Screaming)
@@ -308,17 +348,14 @@ func NewFormatter(replacements []Replacement, tokenizer TokenizerInterface) Form
 	return r
 }
 
-// Formatter contains a table of words to their desired replacement. Words,
-// without neighboring numbers, will be compared against the keys of this
-// table to determine if the string should be replaced with the value of the
-// table.
+// FormatterImpl contains a table of words to their desired replacement. Tokens
+// will be compared against the keys of this table to determine if the string
+// should be replaced with the value of the table.
 //
 // This is primarily designed for acronyms but it could be used for other
 // purposes.
 //
-// If Fn is set, it will be called to determine the replacement for each word
-// rather than relying on the internal table to perform lookups.
-// Defaults:
+// The default Replacements:
 //
 //	{ "Http",  "HTTP" },
 //	{ "Https", "HTTPS" },
@@ -329,160 +366,217 @@ func NewFormatter(replacements []Replacement, tokenizer TokenizerInterface) Form
 //	{ "Aws",   "AWS" },
 //	{ "Gcp",   "GCP" },
 //	{ "Sql",   "SQL" },
-type Formatter struct {
-	delimiters string
-	from       map[string]string
-	to         map[string]string
-	lookup     map[string]lookupResult
-	tokenizer  Tokenizer
+type FormatterImpl struct {
+	from      map[string]token.Token
+	to        map[string]token.Token
+	lookup    map[string]lookupResult
+	tokenizer Tokenizer
 }
 
 type lookupResult struct {
-	from string
-	to   string
+	from token.Token
+	to   token.Token
 }
 
-func (f Formatter) Contains(key string) bool {
+// Contains reports whether a key is in the Formatter's replacement table.
+func (f FormatterImpl) Contains(key string) bool {
 	_, ok := f.lookup[strings.ToLower(key)]
 	return ok
 }
 
 // Lookup returns the Replacement for the given key, returning nil if it does
 // not exist.
-func (r Formatter) Lookup(key string) *Replacement {
+func (r FormatterImpl) Lookup(key string) *Replacement {
 	res, ok := r.lookup[key]
 	if ok {
-		return &Replacement{Camel: res.from, Screaming: res.to}
+		return &Replacement{Camel: res.from.String(), Screaming: res.to.String()}
 	}
 	if res, ok = r.lookup[strings.ToLower(key)]; ok {
-		return &Replacement{Camel: res.from, Screaming: res.to}
+		return &Replacement{Camel: res.from.String(), Screaming: res.to.String()}
 	} else {
 		return nil
 	}
 }
 
 // Table returns a representation of the internal table.
-func (r Formatter) Table(key string) map[string]string {
-	m := make(map[string]string, len(r.from))
+func (r FormatterImpl) Table(key string) map[string]token.Token {
+	m := make(map[string]token.Token, len(r.from))
 	for k, v := range r.from {
 		m[k] = v
 	}
 	return m
 }
 
-func (r Formatter) Replacements() []Replacement {
+// Replacements returns a slice of Replacement in the lookup table.
+func (r FormatterImpl) Replacements() []Replacement {
 	res := make([]Replacement, 0, len(r.from))
 	for upper, screaming := range r.from {
 		res = append(res, Replacement{
 			Camel:     upper,
-			Screaming: screaming,
+			Screaming: string(screaming.Value()),
 		})
 	}
 	return res
 }
 
-func (r *Formatter) set(key, value string) {
-	r.lookup[strings.ToLower(key)] = lookupResult{
-		from: key,
-		to:   value,
+func (r *FormatterImpl) set(key, value string) {
+	from := token.FromString(key)
+	to := token.FromString(value)
+	r.lookup[string(from.Lower())] = lookupResult{
+		from: from,
+		to:   to,
 	}
-	r.lookup[strings.ToLower(value)] = lookupResult{
-		from: key,
-		to:   value,
+	r.lookup[string(to.Lower())] = lookupResult{
+		from: from,
+		to:   to,
 	}
-	r.from[key] = value
-	r.to[value] = key
+	r.from[key] = from
+	r.to[value] = to
 }
 
 // Set adds the key/value pair to the table.
-func (r *Formatter) Set(key, value string) {
+func (r *FormatterImpl) Set(key, value string) {
 	l := strings.ToLower(key)
 	if v, ok := r.lookup[l]; ok {
-		delete(r.from, v.from)
-		delete(r.to, v.to)
+		delete(r.from, v.from.String())
+		delete(r.to, v.to.String())
 		delete(r.lookup, l)
 		return
 	}
 	l = strings.ToLower(value)
 	if v, ok := r.lookup[l]; ok {
-		delete(r.from, v.from)
-		delete(r.to, v.to)
+		delete(r.from, v.from.String())
+		delete(r.to, v.to.String())
 		delete(r.lookup, l)
 	}
 	r.set(key, value)
 }
 
 // Remove deletes the key from the map. Either variant is sufficient.
-func (r *Formatter) Delete(key string) {
+func (r *FormatterImpl) Delete(key string) {
 	l := strings.ToLower(key)
 	if v, ok := r.lookup[l]; ok {
-		delete(r.from, v.from)
-		delete(r.to, v.to)
+		delete(r.from, v.from.String())
+		delete(r.to, v.to.String())
 		delete(r.lookup, l)
 	}
 }
 
-func (r *Formatter) resolve(str string, style ReplaceStyle) (string, bool) {
-	if lookup, ok := r.lookup[str]; ok {
+func (r *FormatterImpl) resolve(tok token.Token, style ReplaceStyle) (token.Token, bool) {
+	l := string(tok.Lower())
+	if lookup, ok := r.lookup[l]; ok {
 		switch style {
 		case ReplaceStyleCamel:
 			return lookup.from, true
 		case ReplaceStyleScreaming:
 			return lookup.to, true
+		case ReplaceStyleLower:
+			return token.FromString(lookup.to.Lower()), true
+
 		}
 	}
-	return str, false
+	return token.Token{}, false
 }
 
-func FormatToken(style Style, tok token.Token) string {
+// FormatToken formats the token with the desired style.
+func FormatToken(style Style, index int, tok token.Token) string {
 	switch style {
 	case StyleCamel:
-
+		return string(tok.UpperFirstLowerRest())
 	case StyleLowerCamel:
-		return "LowerCamel"
+		if index == 0 {
+			return string(tok.Lower())
+		}
+		return string(tok.UpperFirstLowerRest())
 	case StyleScreaming:
-		return "Screaming"
+		return tok.Upper()
 	case StyleLower:
-		return "Lower"
+		return tok.Lower()
 	}
-	return "NotSpecified"
+	return tok.String()
 }
 
-func (r Formatter) Format(style Style, repStyle ReplaceStyle, input string, join string) string {
-	// chain :=token.Token{}
-	// parts := []string{}
-	// var lookup string
+// Format formats the string with the desired style.
+func (r FormatterImpl) Format(style Style, repStyle ReplaceStyle, input string, join string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) string {
+	tokens := r.tokenizer.Tokenize(input, allowedSymbols, numberRules)
+	var chain token.Token
+	var parts []string
+	var lookup token.Token
+	brokeChain := false
+	var ok bool
+	for i := len(tokens) - 1; i >= 0; i-- {
+		tok := tokens[i]
+		switch tok.Len() {
+		case 0:
+			continue
+		case 1:
+			chain = token.Append(tok, chain)
+			if lookup, ok = r.resolve(chain, repStyle); ok {
+				parts = append(parts, lookup.Value())
+				chain = token.Token{}
+			}
+		default:
+			brokeChain = true
+			if chain.Len() > 0 {
+				split := chain.Split()
+				for z := len(split) - 1; z >= 0; z-- {
+					letter := split[z]
+					if i == 0 && z == 0 {
+						parts = append(parts, FormatToken(style, 0, letter))
+					} else {
+						parts = append(parts, FormatToken(style, z, letter))
+					}
+				}
+				chain = token.Token{}
+			}
+			if lookup, ok = r.resolve(tok, repStyle); ok {
+				parts = append(parts, lookup.Value())
+			} else {
+				parts = append(parts, FormatToken(style, i, tok))
+			}
+		}
+	}
+	result := strings.Builder{}
+	result.Grow(len(input))
 
-	// for _, tok := range tokens {
+	var part string
+	shouldWriteDelimiter := false
+	if brokeChain && chain.Len() > 0 {
+		for i, letter := range chain.Split() {
+			if shouldWriteDelimiter {
+				result.WriteString(join)
+			}
+			result.WriteString(FormatToken(style, i, letter))
+			if !shouldWriteDelimiter {
+				shouldWriteDelimiter = len(part) > 0 && len(join) > 0
+			}
+		}
+	}
+	for i := len(parts) - 1; i >= 0; i-- {
+		part = parts[i]
+		if shouldWriteDelimiter {
+			result.WriteString(join)
+		}
+		result.WriteString(part)
+		if !shouldWriteDelimiter {
+			shouldWriteDelimiter = len(part) > 0 && len(join) > 0
+		}
+	}
 
-	// for i := len(tokens) - 1; i >= 0; i-- {
-	// 	token := tokens[i]
-	// 	switch token.Len() {
-	// 	case 0:
-	// 		continue
-	// 	case 1:
-	// 		switch chain.Len() {
-	// 		case 0:
-	// 			chain = token
-	// 		case 1: // found another possible link in a chain
-	// 			chain = chain.Append(token)
-	// 		default:
-	// 			if lookup, ok = r.resolve(string(chain.lower), repStyle); ok {
-	// 				parts = append(parts, lookup)
-	// 				chain = token
-	// 			} else {
-	// 			}
-	// 		}
-	// 	default:
-	// 		if chain.Len() > 0 {
-	// 		}
-	// 	}
-	// }
-	// if chain.Len() > 0 {
-	// 	parts = append(parts, string(chain.value))
-	// }
-	// return strings.Join(parts, join)
-	panic("not impl")
+	if !brokeChain && chain.Len() > 0 {
+		for i, letter := range chain.Split() {
+			if shouldWriteDelimiter {
+				result.WriteString(join)
+			}
+			// if unicode.IsLetter(letter.Value()[0]) || unicode.IsDigit(letter.Value()[0]) || allow {
+			result.WriteString(FormatToken(style, len(parts)+i, letter))
+			if !shouldWriteDelimiter {
+				shouldWriteDelimiter = len(part) > 0 && len(join) > 0
+			}
+		}
+	}
+
+	return result.String()
 }
 
 // Opts include configurable options for case conversion.
@@ -498,7 +592,7 @@ type Opts struct {
 	//
 	// Default:
 	// 	DefaultFormatter
-	Formatter FormatterInterface
+	Formatter Formatter
 
 	// Styles overwrites the way words are replaced.
 	//
@@ -510,85 +604,43 @@ type Opts struct {
 	//
 	// The default replacement style is dependent upon the target casing.
 	ReplaceStyle ReplaceStyle
+	// NumberRules are used by the DefaultTokenizer to augment the standard
+	// rules for determining if a rune is part of a number.
+	//
+	// Note, if you add special characters here, they must be present in the
+	// AllowedSymbols string for them to be part of the output.
+	NumberRules map[rune]func(index int, r rune, val []rune) bool
 }
 
 func loadOpts(opts []Opts) Opts {
-	// result := Opts{
-	// 	AllowedSymbols: "",
-	// 	Formatter:      DefaultFormatter,
-	// 	ReplaceStyle:   ReplaceStyleNotSpecified,
-	// }
-	// if len(opts) == 0 {
-	// 	return result
-	// }
+	result := Opts{
+		AllowedSymbols: "",
+		Formatter:      DefaultFormatter,
+		ReplaceStyle:   ReplaceStyleNotSpecified,
+	}
+	if len(opts) == 0 {
+		return result
+	}
 
-	// if opts[0].AllowedSymbols != "" {
-	// 	result.AllowedSymbols = opts[0].AllowedSymbols
-	// }
-	// if opts[0].Delimiters != "" {
-	// 	result.Delimiters = opts[0].Delimiters
-	// }
-	// if opts[0].Formatter != nil {
-	// 	result.Formatter = opts[0].Formatter
-	// }
-	// return result
-	panic("not implemented")
+	if opts[0].AllowedSymbols != "" {
+		result.AllowedSymbols = opts[0].AllowedSymbols
+	}
+	if opts[0].Formatter != nil {
+		result.Formatter = opts[0].Formatter
+	}
+	return result
 }
-
-// func tryReplacements[T ~string](replace bool, str T, replacements map[string]string) T {
-// 	if !replace {
-// 		return str
-// 	}
-
-// 	key := strings.Builder{}
-
-// 	for _, r := range str {
-// 		if unicode.IsNumber(r) {
-// 			if key.Len() > 0 {
-// 				key.Reset()
-// 			} else {
-// 				if v, ok := replacements[key.String()]; ok {
-// 					return T(v)
-// 				}
-// 				return str
-
-// 			}
-// 		} else {
-// 			key.WriteRune(r)
-// 		}
-// 	}
-
-// 	if v, ok := replacements[key.String()]; ok {
-// 		return T(v)
-// 	}
-// 	return str
-// }
-
-// // MakeReplacements checks to see if the str, without numbers, equals any of the
-// // keys in the Replacements map. If there is a match then the replacement value,
-// // along with any numbers in str, is used instead.
-// func PerformReplace[T ~string](str T, replacements map[string]string) T {
-// 	return tryReplacements(true, str, replacements)
-// }
 
 // UpperFirst converts the first rune of str to uppercase.
 func UpperFirst[T ~string](str T) T {
-	if str == "" {
-		return ""
-	}
-	runes := []rune(str)
-	runes[0] = unicode.ToUpper(runes[0])
-	return T(runes)
+	t := token.FromString(str)
+	return T(t.UpperFirst())
 }
 
 // LowerFirst converts the first rune of str to lowercase.
 func LowerFirst[T ~string](str T) T {
-	if str == "" {
-		return ""
-	}
-	runes := []rune(str)
-	runes[0] = unicode.ToLower(runes[0])
-	return T(runes)
+	t := token.FromString(str)
+	return T(t.LowerFirst())
 }
 
 // Without numbers returns the string with numbers removed.
@@ -601,60 +653,97 @@ func WithoutNumbers[T ~string](s T) T {
 	}, string(s)))
 }
 
-// ToCamel transforms the case of str into (lower) camelCase using delimiters to
-// determine word breaks.
+// ToCamel transforms the case of str into Camelcase (e.g. AnExampleString) using
+// either the provided Formatter or the DefaultFormatter otherwise.
 //
-// If useReplacements is true then any entries in Replacements will be made
-// for single words.
-// If allowed is not empty, then those non-alphanumeric characters will be
-// allowed in the output.
+// The default Formatter detects case so that "AN_EXAMPLE_STRING" becomes "AnExampleString".
+// It also has a configurable set of replacements, such that "some_json" becomes "SomeJSON"
+// so long as opts.ReplacementStyle is set to ReplaceStyleScreaming. A ReplaceStyle of
+// ReplaceStyleCamel would result in "SomeJson".
 //
-// If delimiters is empty, the DefaultDelimiters will be used, which are "-#@!$&=.+:;_~ (){}[]"
-//
-//	text.ToCamel("This is [an] {example}${id32}.") // thisIsAnExampleID32
-//	text.ToCamel("This is [an] {example}${id32}.", text.Options{ AllowedSymbols: "$" }) // thisIsAnExample$ID32
+//	caps.ToCamel("This is [an] {example}${id32}.") // thisIsAnExampleID32
+//	caps.ToCamel("AN_EXAMPLE_STRING", ) // anExampleString
 func ToCamel[T ~string](str T, options ...Opts) T {
-	panic("")
-	// return T(opts.Replacer.(style, parts, ""))
+	opts := loadOpts(options)
+	return T(opts.Formatter.Format(StyleCamel, opts.ReplaceStyle, string(str), "", []rune(opts.AllowedSymbols), opts.NumberRules))
 }
 
-// ToPascal transforms the case of str into PascalCase (also known as upper
-// camelcase or, in some cases, simply camelcase) using delimiters to determine
-// word breaks.
+// ToLowerCamel transforms the case of str into Lower Camelcase (e.g. anExampleString) using
+// either the provided Formatter or the DefaultFormatter otherwise.
 //
-// If useReplacements is true then any entries in Replacements will be made for
-// single words. If allowed is not empty, then those non-alphanumeric characters
-// will be allowed in the output.
+// The default Formatter detects case so that "AN_EXAMPLE_STRING" becomes "anExampleString".
+// It also has a configurable set of replacements, such that "some_json" becomes "someJSON"
+// so long as opts.ReplacementStyle is set to ReplaceStyleScreaming. A ReplaceStyle of
+// ReplaceStyleCamel would result in "someJson".
 //
-// If delimiters is empty, the DefaultDelimiters will be used, which are
-// "-#@!$&=.+:;_~ (){}[]"
-//
-//	text.ToPascal("This is [an] {example}${id32}.", true, "") // ThisIsAnExampleID32
-//	text.ToPascal("This is [an] {example}${id32}.", true, "$") // ThisIsAnExample$ID32
-func ToPascal[T ~string](str T, opts ...Opts) T {
-	camel := ToCamel(str, opts...)
-	return UpperFirst(camel)
+//	caps.ToLowerCamel("This is [an] {example}${id32}.") // thisIsAnExampleID32
+func ToLowerCamel[T ~string](str T, options ...Opts) T {
+	opts := loadOpts(options)
+	return T(opts.Formatter.Format(StyleLowerCamel, opts.ReplaceStyle, string(str), "", []rune(opts.AllowedSymbols), opts.NumberRules))
 }
 
-// ToSnake transforms the case of str into lowercase string seperated by
-// delimiter, using delimiters to determine word breaks.
+// ToSnake transforms the case of str into Lower Snakecase (e.g. an_example_string) using
+// either the provided Formatter or the DefaultFormatter otherwise.
 //
-// If lowercase is false, the output will be all uppercase.
-//
-// # See Options for more information on available configuration
-//
-// # Example
-//
-//	text.ToDelimited("This is [an] {example}${id}.#32", '.', true) // this.is.an.example.id.#32
-//	text.ToDelimited("This is [an] {example}${id32}.break32", '.', false, text.Opts{AllowedSymbols: "$"}) // THIS.IS.AN.EXAMPLE.ID.BREAK.32
-//	text.ToDelimited("This is [an] {example}${id32}.v32", '.', true, text.Opts{AllowedSymbols: "$" }) // this.is.an.example.id.$.v32
+//	caps.ToSnake("This is [an] {example}${id32}.") // this_is_an_example_id_32
 func ToSnake[T ~string](str T, options ...Opts) T {
 	return ToDelimited(str, '_', true, options...)
 }
 
+// ToScreamingSnake transforms the case of str into Screaming Snakecase (e.g.
+// AN_EXAMPLE_STRING) using either the provided Formatter or the
+// DefaultFormatter otherwise.
+//
+//	caps.ToScreamingSnake("This is [an] {example}${id32}.") // THIS_IS_AN_EXAMPLE_ID_32
+func ToScreamingSnake[T ~string](str T, options ...Opts) T {
+	return ToDelimited(str, '_', false, options...)
+}
+
+// ToKebab transforms the case of str into Lower Kebabcase (e.g. an-example-string) using
+// either the provided Formatter or the DefaultFormatter otherwise.
+//
+//	caps.ToKebab("This is [an] {example}${id32}.") // this-is-an-example-id-32
+func ToKebab[T ~string](str T, options ...Opts) T {
+	return ToDelimited(str, '_', true, options...)
+}
+
+// ToScreamingKebab transforms the case of str into Screaming Kebab (e.g.
+// AN-EXAMPLE-STRING) using either the provided Formatter or the
+// DefaultFormatter otherwise.
+//
+//	caps.ToScreamingSnake("This is [an] {example}${id32}.") // THIS-IS-AN-EXAMPLE-ID-32
+func ToScreamingKebab[T ~string](str T, options ...Opts) T {
+	return ToDelimited(str, '_', false, options...)
+}
+
+// ToDot transforms the case of str into Lower Dot notation case (e.g. an.example.string) using
+// either the provided Formatter or the DefaultFormatter otherwise.
+//
+//	caps.ToDot("This is [an] {example}${id32}.") // this.is.an.example.id.32
+func ToDot[T ~string](str T, options ...Opts) T {
+	return ToDelimited(str, '_', true, options...)
+}
+
+// ToScreamingKebab transforms the case of str into Screaming Kebab (e.g.
+// AN-EXAMPLE-STRING) using either the provided Formatter or the
+// DefaultFormatter otherwise.
+//
+//	caps.ToScreamingDot("This is [an] {example}${id32}.") // THIS.IS.AN.EXAMPLE.ID.32
+func ToScreamingDot[T ~string](str T, options ...Opts) T {
+	return ToDelimited(str, '_', false, options...)
+}
+
+// ToTitle transforms the case of str into Lower Dot notation case (e.g. An Example String) using
+// either the provided Formatter or the DefaultFormatter otherwise.
+//
+//	caps.ToTitle("This is [an] {example}${id32}.") // This Is An Example ID 32
+func ToTitle[T ~string](str T, options ...Opts) T {
+	opts := loadOpts(options)
+	return T(opts.Formatter.Format(StyleCamel, opts.ReplaceStyle, string(str), " ", []rune(opts.AllowedSymbols), opts.NumberRules))
+}
+
 // ToDelimited transforms the case of str into a string seperated by delimiter,
-// using either the specified Opts.Delimiters or DefaultDelimiters to determine
-// word breaks.
+// using either the provided Formatter or the DefaultFormatter otherwise.
 //
 // If lowercase is false, the output will be all uppercase.
 //
@@ -662,11 +751,21 @@ func ToSnake[T ~string](str T, options ...Opts) T {
 //
 // # Example
 //
-//	text.ToDelimited("This is [an] {example}${id}.#32", '.', true) // this.is.an.example.id.#32
-//	text.ToDelimited("This is [an] {example}${id32}.break32", '.', false, text.Opts{AllowedSymbols: "$"}) // THIS.IS.AN.EXAMPLE.ID.BREAK.32
-//	text.ToDelimited("This is [an] {example}${id32}.v32", '.', true, text.Opts{AllowedSymbols: "$" }) // this.is.an.example.id.$.v32
-func ToDelimited[T ~string](value T, delimiter rune, lowercase bool, options ...Opts) T {
-	panic("not impl")
+//	caps.ToDelimited("This is [an] {example}${id}.#32", '.', true) // this.is.an.example.id.32
+//	caps.ToDelimited("This is [an] {example}${id32}.break32", '.', false) // THIS.IS.AN.EXAMPLE.ID.BREAK.32
+//	caps.ToDelimited("This is [an] {example}${id32}.v32", '.', true, caps.Opts{AllowedSymbols: "$" }) // this.is.an.example.id.$.v32
+func ToDelimited[T ~string](str T, delimiter rune, lowercase bool, options ...Opts) T {
+	opts := loadOpts(options)
+	var style Style
+	var replacementStyle ReplaceStyle
+	if lowercase {
+		style = StyleLower
+		replacementStyle = ReplaceStyleLower
+	} else {
+		style = StyleScreaming
+		replacementStyle = ReplaceStyleScreaming
+	}
+	return T(opts.Formatter.Format(style, replacementStyle, string(str), string(delimiter), []rune(opts.AllowedSymbols), opts.NumberRules))
 }
 
 type runes []rune
@@ -693,7 +792,7 @@ func (r runes) Contains(c rune) bool {
 	res := sort.Search(len(r), func(i int) bool {
 		return r[i] >= c
 	})
-	return res > -1 && res < len(r)
+	return res > -1 && res < len(r) && r[res] == c
 }
 
 func newRunes(val []rune) runes {

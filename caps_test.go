@@ -1,50 +1,39 @@
 package caps_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/chanced/caps"
 )
 
 func TestTokenizer(t *testing.T) {
-	// tokenizer := caps.NewTokenizer(caps.DEFAULT_DELIMITERS)
-	// tokens := tokenizer.Tokenize("a_scientific_number_-123.456e7", []rune{'-', '.'}, nil)
-	// expected := []string{"a", "scientific", "number", "-123.456e7"}
-	// if len(tokens) != len(expected) {
-	// 	t.Logf("expected: %+v, got: %+v", expected, tokens)
-	// 	t.Errorf("expected %d tokens, got %d", len(expected), len(tokens))
-	// } else {
-	// 	for i, token := range tokens {
-	// 		if token.String() != expected[i] {
-	// 			t.Errorf("expected token %d to be \"%s\", got \"%s\"", i, expected[i], token.String())
-	// 		}
-	// 	}
-	// }
-
 	tests := []struct {
 		value          string
 		expected       []string
 		allowedSymbols []rune
 		numberRules    map[rune]func(index int, r rune, val []rune) bool
 	}{
-		{"123", []string{"123"}, nil, nil},
-		{"aLowerCamelcaseString", []string{"a", "Lower", "Camelcase", "String"}, nil, nil},
-		{"A_SCREAMING_SNAKE_STRING", []string{"A", "SCREAMING", "SNAKE", "STRING"}, nil, nil},
-		{"A_SCREAMING_SNAKE_STRING", []string{"A_SCREAMING_SNAKE_STRING"}, []rune{'_'}, nil},
-		{"ACamelCaseString", []string{"A", "Camel", "Case", "String"}, nil, nil},
-		{"A_CamelCaseString", []string{"A", "Camel", "Case", "String"}, nil, nil},
-		{"123.456", []string{"123", "456"}, nil, nil},
-		{"123.456", []string{"123.456"}, []rune{'.'}, nil},
-		{"MarshalJSON", []string{"Marshal", "J", "S", "O", "N"}, nil, nil},
-		{"a-kebab-string", []string{"a", "kebab", "string"}, nil, nil},
-		{"a_snake_string", []string{"a", "snake", "string"}, nil, nil},
-		{"a_scientific_number_-123.456e7", []string{"a", "scientific", "number", "-123.456e7"}, []rune{'-', '.'}, nil},
-		{"my_software_v1.3.3", []string{"my", "software", "v1", "3", "3"}, nil, nil},
-		{"my_software_v1.3.3", []string{"my", "software", "v1.3.3"}, []rune{'.'}, nil},
+		{"123", []string{"123"}, nil, nil},                                                                   // 0
+		{"aLowerCamelcaseString", []string{"a", "Lower", "Camelcase", "String"}, nil, nil},                   // 1
+		{"A_SCREAMING_SNAKE_STRING", []string{"A", "SCREAMING", "SNAKE", "STRING"}, nil, nil},                // 2
+		{"A_SCREAMING_SNAKE_STRING", []string{"A_SCREAMING_SNAKE_STRING"}, []rune{'_'}, nil},                 // 3
+		{"ACamelCaseString", []string{"A", "Camel", "Case", "String"}, nil, nil},                             // 4
+		{"A_CamelCaseString", []string{"A", "Camel", "Case", "String"}, nil, nil},                            // 5
+		{"123.456", []string{"123", "456"}, nil, nil},                                                        // 6
+		{"123.456", []string{"123.456"}, []rune{'.'}, nil},                                                   // 7
+		{"MarshalJSON", []string{"Marshal", "J", "S", "O", "N"}, nil, nil},                                   // 8
+		{"a-kebab-string", []string{"a", "kebab", "string"}, nil, nil},                                       // 9
+		{"a_snake_string", []string{"a", "snake", "string"}, nil, nil},                                       // 10
+		{"a_scientific_n_-123.456e7", []string{"a", "scientific", "n", "-123.456e7"}, []rune{'-', '.'}, nil}, // 11
+		{"my_software_v1.3.3", []string{"my", "software", "v1", "3", "3"}, nil, nil},                         // 12
+		{"my_software_v1.3.3", []string{"my", "software", "v1.3.3"}, []rune{'.'}, nil},                       // 13
+		{"#123", []string{"123"}, nil, nil},                                                                  // 14
+		{"#123.456", []string{"123.456"}, []rune{'.'}, nil},                                                  // 15
 	}
 
-	for _, test := range tests {
-		t.Run(test.value, func(t *testing.T) {
+	for i, test := range tests {
+		t.Run(fmt.Sprintf("#%d___%s", i, test.value), func(t *testing.T) {
 			tokenizer := caps.NewTokenizer(caps.DEFAULT_DELIMITERS)
 			tokens := tokenizer.Tokenize(test.value, test.allowedSymbols, test.numberRules)
 			if len(tokens) != len(test.expected) {
@@ -56,6 +45,44 @@ func TestTokenizer(t *testing.T) {
 						t.Errorf("expected token %d to be \"%s\", got \"%s\"", i, test.expected[i], token.String())
 					}
 				}
+			}
+		})
+	}
+}
+
+func TestFormatter(t *testing.T) {
+	formatter := caps.NewFormatter(caps.DefaultReplacements, caps.DefaultTokenizer)
+
+	tests := []struct {
+		input          string
+		expected       string
+		join           string
+		style          caps.Style
+		repStyle       caps.ReplaceStyle
+		allowedSymbols []rune
+		formatter      caps.Formatter
+		numberRules    map[rune]func(index int, r rune, val []rune) bool
+	}{
+		// {"An example string", "AnExampleString", "", caps.StyleCamel, caps.ReplaceStyleScreaming, nil, nil, nil},
+		// {"An example string", "anExampleString", "", caps.StyleLowerCamel, caps.ReplaceStyleScreaming, nil, nil, nil},
+		{"aCamelCaseExample", "ACamelCaseExample", "", caps.StyleCamel, caps.ReplaceStyleScreaming, nil, nil, nil},
+		{"serveHttp", "ServeHTTP", "", caps.StyleCamel, caps.ReplaceStyleScreaming, nil, nil, nil},
+		{"A_SCREAMING_SNAKECASE_STRING", "aScreamingSnakecaseString", "", caps.StyleLowerCamel, caps.ReplaceStyleScreaming, nil, nil, nil},
+		{"#12.34", "12.34", "", caps.StyleLowerCamel, caps.ReplaceStyleScreaming, []rune{'.'}, nil, nil},
+		{"MarshalJSON", "marshalJSON", "", caps.StyleLowerCamel, caps.ReplaceStyleScreaming, nil, nil, nil},
+		{"MarshalJSON", "marshalJson", "", caps.StyleLowerCamel, caps.ReplaceStyleCamel, nil, nil, nil},
+		{"marshal_json", "marshalJSON", "", caps.StyleLowerCamel, caps.ReplaceStyleScreaming, nil, nil, nil},
+		{"MarshalJSON", "marshal_json", "_", caps.StyleLower, caps.ReplaceStyleLower, nil, nil, nil},
+		{"aABC", "aABC", "", caps.StyleLowerCamel, caps.ReplaceStyleScreaming, nil, nil, nil},
+		{"MarshalJS", "marshal_j_s", "_", caps.StyleLower, caps.ReplaceStyleLower, nil, nil, nil},
+		{"An[example]_split#with(other).symbols", "anExampleSplitWithOtherSymbols", "", caps.StyleLowerCamel, caps.ReplaceStyleScreaming, nil, nil, nil},
+	}
+
+	for _, test := range tests {
+		t.Run(test.input, func(t *testing.T) {
+			output := formatter.Format(test.style, test.repStyle, test.input, test.join, test.allowedSymbols, test.numberRules)
+			if output != test.expected {
+				t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
 			}
 		})
 	}
