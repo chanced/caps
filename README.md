@@ -2,7 +2,7 @@
 
 caps is a case conversion library for Go. It was built with the following
 priorites in mind: configurability, consistency, correctness, ergonomic, and
-performance; in that order.
+reasonable performance; in that order.
 
 Out of the box, the following case conversion are supported:
 
