@@ -1,8 +1,8 @@
 # caps
 
 caps is a case conversion library for Go. It was built with the following
-priorites: configurability, consistency, correctness, ergonomic, and performant
-in mind, in that order.
+priorites in mind: configurability, consistency, correctness, ergonomic, and
+performance; in that order.
 
 Out of the box, the following case conversion are supported:
 
