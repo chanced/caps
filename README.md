@@ -43,6 +43,8 @@ func main() {
 
 [playground link](https://go.dev/play/p/f5JoVlp4Kv2)
 
+## Word boundaries
+
 Word boundaries are determined by the `caps.Converter`. The provided implementation, `caps.ConverterImpl`,
 delegates the boundary detection to `caps.Tokenizer`. The provided implementation, `caps.TokenizerImpl`,
 uses the following runes as delimiters: `" _.!?:;$-(){}[]#@&+~"`.
