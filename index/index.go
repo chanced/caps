@@ -1,8 +1,6 @@
 package index
 
 import (
-	"unicode"
-
 	"github.com/chanced/caps/token"
 )
 
@@ -63,18 +61,32 @@ func (idx Index) ContainsForward(tok token.Token) bool {
 	return ok
 }
 
+func (idx Index) ReverseValue() IndexedReplacement {
+	return idx.value.ReversedPath
+}
+
+func (idx Index) ReverseIsEmpty() bool {
+	return idx.value.ReversedPath.IsEmpty() && len(idx.nodes) == 0
+}
+
 func (idx Index) ContainsReverse(tok token.Token) bool {
 	_, ok := idx.GetReverse(tok)
 	return ok
 }
 
-func (idx Index) ContainsRune(r rune) bool {
-	if _, ok := idx.nodes[r]; ok {
-		return true
+func (idx Index) HasNode(tok token.Token) bool {
+	if tok.Len() == 0 {
+		return false
 	}
-	r = unicode.ToLower(r)
-	_, ok := idx.nodes[r]
-	return ok
+	node := &idx
+	for _, r := range tok.Lower() {
+		if n, ok := node.nodes[r]; ok {
+			node = n
+		} else {
+			return false
+		}
+	}
+	return true
 }
 
 func (idx Index) PartialMatches() []token.Token {
@@ -108,10 +120,10 @@ func (idx Index) HasForwardValue() bool {
 // # If the Index does not contain the node, an empty Index is returned
 //
 // Note: Use MatchReverse if seeking a reversed value
-func (idx Index) MatchForward(t token.Token) Index {
+func (idx Index) MatchForward(t token.Token) (Index, bool) {
 	var ok bool
 	if t.IsEmpty() {
-		return idx
+		return idx, false
 	}
 
 	next := &idx
@@ -120,7 +132,7 @@ func (idx Index) MatchForward(t token.Token) Index {
 			return Index{
 				partialMatches: idx.partialMatches,
 				lastMatch:      idx.lastMatch,
-			}
+			}, false
 		}
 		idx = Index{
 			nodes:          next.nodes,
@@ -132,10 +144,10 @@ func (idx Index) MatchForward(t token.Token) Index {
 			idx.lastMatch = next.value.ForwardPath
 			idx.partialMatches = nil
 		} else {
-			idx.partialMatches = append(idx.partialMatches, t)
+			idx.partialMatches = append(idx.partialMatches, token.FromRune(r))
 		}
 	}
-	return idx
+	return idx, true
 }
 
 // MatchReverse attempts to find the Index at the reversed path of t, returning
@@ -144,10 +156,10 @@ func (idx Index) MatchForward(t token.Token) Index {
 // Note: the value itself is not reversed, but the path is. For example, a
 // search for "nsoj" would return an Index with the LastReverseMatch of
 // "JSON"/"Json" (assuming it exists)
-func (idx Index) MatchReverse(t token.Token) Index {
+func (idx Index) MatchReverse(t token.Token) (Index, bool) {
 	var ok bool
 	if t.IsEmpty() {
-		return idx
+		return idx, false
 	}
 
 	next := &idx
@@ -156,7 +168,7 @@ func (idx Index) MatchReverse(t token.Token) Index {
 			return Index{
 				partialMatches: idx.partialMatches,
 				lastMatch:      idx.lastMatch,
-			}
+			}, false
 		}
 		idx = Index{
 			nodes:          next.nodes,
@@ -168,10 +180,10 @@ func (idx Index) MatchReverse(t token.Token) Index {
 			idx.lastMatch = next.value.ReversedPath
 			idx.partialMatches = nil
 		} else {
-			idx.partialMatches = append([]token.Token{t}, idx.partialMatches...)
+			idx.partialMatches = append([]token.Token{token.FromRune(r)}, idx.partialMatches...)
 		}
 	}
-	return idx
+	return idx, true
 }
 
 // GetReverse seeks the value at the reversed path of t, returning the
@@ -260,12 +272,12 @@ func (idx *Index) Add(camel token.Token, screaming token.Token) bool {
 		idx.Delete(er.Screaming)
 		idx.Delete(er.Camel)
 	}
-	if er, ok = idx.GetReverse(ir.Screaming); ok {
+	if er, ok = idx.GetReverse(ir.Screaming.Reverse()); ok {
 		exists = true
 		idx.Delete(er.Camel)
 		idx.Delete(er.Screaming)
 	}
-	if er, ok = idx.GetReverse(ir.Camel); ok {
+	if er, ok = idx.GetReverse(ir.Camel.Reverse()); ok {
 		exists = true
 		idx.Delete(er.Screaming)
 		idx.Delete(er.Camel)
@@ -298,21 +310,16 @@ func (idx *Index) Add(camel token.Token, screaming token.Token) bool {
 	return exists
 }
 
-func (idx *Index) Delete(key token.Token) bool {
-	if key.IsEmpty() {
-		return false
-	}
-
+func (idx *Index) deleteForward(k []rune) bool {
 	node := idx
-	nodes := make([]*Index, key.Len())
+	nodes := make([]*Index, len(k))
 	var ok bool
 	var i int
 	var r rune
 
-	// delete the forward path first
-
-	k := key.LowerRunes()
 	for i, r = range k {
+		rstr := string(r)
+		_ = rstr
 		nodes[i] = node
 		if node, ok = node.nodes[r]; !ok || node == nil {
 			return false
@@ -321,8 +328,10 @@ func (idx *Index) Delete(key token.Token) bool {
 	node.value.ForwardPath = IndexedReplacement{}
 
 	child := node
-	for i := key.Len() - 1; i >= 0; i-- {
+	for i := len(k) - 1; i >= 0; i-- {
 		r = k[i]
+		rstr := string(r)
+		_ = rstr
 		child = node
 		node = nodes[i]
 		if child.value.isEmpty() && len(child.nodes) == 0 {
@@ -332,11 +341,19 @@ func (idx *Index) Delete(key token.Token) bool {
 			break
 		}
 	}
+	return true
+}
 
-	// now delete the reverse path first
+func (idx *Index) deleteReverse(k []rune) bool {
+	node := idx
+	nodes := make([]*Index, len(k))
+	var ok bool
+	var i int
+	var r rune
 
-	k = key.Reverse().LowerRunes()
 	for i, r = range k {
+		rstr := string(r)
+		_ = rstr
 		nodes[i] = node
 		if node, ok = node.nodes[r]; !ok || node == nil {
 			return false
@@ -344,9 +361,11 @@ func (idx *Index) Delete(key token.Token) bool {
 	}
 	node.value.ReversedPath = IndexedReplacement{}
 
-	child = node
-	for i := key.Len() - 1; i >= 0; i-- {
+	child := node
+	for i := len(k) - 1; i >= 0; i-- {
 		r = k[i]
+		rstr := string(r)
+		_ = rstr
 		child = node
 		node = nodes[i]
 		if child.value.isEmpty() && len(child.nodes) == 0 {
@@ -356,6 +375,16 @@ func (idx *Index) Delete(key token.Token) bool {
 			break
 		}
 	}
-
 	return true
+}
+
+func (idx *Index) Delete(key token.Token) bool {
+	tokstr := key.String()
+	_ = tokstr
+	if key.IsEmpty() {
+		return false
+	}
+	rev := idx.deleteReverse(key.Reverse().LowerRunes())
+	fwd := idx.deleteForward(key.LowerRunes())
+	return rev || fwd
 }

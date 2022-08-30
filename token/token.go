@@ -16,13 +16,16 @@ type Token struct {
 }
 
 // Append appends all of o to t
-func Append(t Token, o Token) Token {
-	return Token{
-		value: append(t.value, o.value...),
-		lower: append(t.lower, o.lower...),
-		upper: append(t.upper, o.upper...),
-		len:   t.len + o.len,
+func Append(t Token, elems ...Token) Token {
+	for _, e := range elems {
+		t = Token{
+			value: append(t.value, e.value...),
+			lower: append(t.lower, e.lower...),
+			upper: append(t.upper, e.upper...),
+			len:   t.len + e.len,
+		}
 	}
+	return t
 }
 
 // AppendRune append the rune to the current token.
@@ -221,6 +224,7 @@ func (t Token) Reverse() Token {
 		value: make([]rune, len(t.value)),
 		lower: make([]rune, len(t.lower)),
 		upper: make([]rune, len(t.upper)),
+		len:   t.len,
 	}
 	x := 0
 	for i := t.len - 1; i >= 0; i-- {
@@ -228,6 +232,7 @@ func (t Token) Reverse() Token {
 		r.value[x] = t.value[i]
 		r.lower[x] = t.lower[i]
 		r.upper[x] = t.upper[i]
+
 	}
 	return r
 }

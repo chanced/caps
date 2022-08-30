@@ -8,7 +8,7 @@ import (
 )
 
 func TestAddMatchGet(t *testing.T) {
-	index := index.New()
+	idx := index.New()
 
 	tests := []struct {
 		camel     string
@@ -21,24 +21,30 @@ func TestAddMatchGet(t *testing.T) {
 	for _, test := range tests {
 		tok := token.FromString(test.camel)
 		str := tok.Lower()
-		index.Add(token.FromString(test.camel), token.FromString(test.screaming))
+		idx.Add(token.FromString(test.camel), token.FromString(test.screaming))
 		for i := range str {
 			if i == 0 {
 				break
 			}
 			ts := token.FromString(str[:i])
 			if i == len(str)-1 {
-				idx := index.MatchForward(ts)
+				idx, hasMatch := idx.MatchForward(ts)
+				if !hasMatch {
+					t.Error("expected match for", ts)
+				}
 				if !idx.HasMatch() {
 					t.Error("expected match for", ts)
 				}
-				_, ok := index.GetForward(ts)
+				_, ok := idx.GetForward(ts)
 				if !ok {
 					t.Error("expected get result for for", ts)
 				}
 				break
 			}
-			idx := index.MatchForward(ts)
+			idx, hasMatch := idx.MatchForward(ts)
+			if !hasMatch {
+				t.Error("expected match for", ts)
+			}
 			if !idx.HasPartialMatches() {
 				t.Error("expected", ts, "to be in index")
 			}
@@ -54,17 +60,23 @@ func TestAddMatchGet(t *testing.T) {
 			}
 			ts := token.FromString(str[:i])
 			if i == len(str)-1 {
-				idx := index.MatchReverse(ts)
+				idx, hasMatch := idx.MatchReverse(ts)
+				if !hasMatch {
+					t.Error("expected match for", ts)
+				}
 				if !idx.HasMatch() {
 					t.Error("expected match for", ts)
 				}
-				_, ok := index.GetForward(ts)
+				_, ok := idx.GetForward(ts)
 				if !ok {
 					t.Error("expected get result for for", ts)
 				}
 				break
 			}
-			idx := index.MatchReverse(ts)
+			idx, hasMatch := idx.MatchReverse(ts)
+			if !hasMatch {
+				t.Error("expected", ts, "to be in index")
+			}
 			if !idx.HasPartialMatches() {
 				t.Error("expected", ts, "to be in index")
 			}
@@ -74,7 +86,7 @@ func TestAddMatchGet(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	index := index.New()
+	idx := index.New()
 
 	tests := []struct {
 		camel     string
@@ -85,24 +97,58 @@ func TestDelete(t *testing.T) {
 		{"Js", "JS"},
 	}
 	for _, test := range tests {
-		index.Add(token.FromString(test.camel), token.FromString(test.screaming))
+		idx.Add(token.FromString(test.camel), token.FromString(test.screaming))
 	}
 
 	for i := len(tests) - 1; i >= 0; i-- {
 		test := tests[i]
 		tok := token.FromString(test.camel)
 
-		ok := index.ContainsForward(tok)
-		if !ok {
+		if ok := idx.ContainsForward(tok); !ok {
 			t.Error("expected", tok.Lower(), "to be in index")
 		}
-		ok = index.ContainsReverse(tok.Reverse())
-		if !ok {
-			t.Error("expected", tok.Reverse().Lower(), "to be in index")
+		tok = tok.Reverse()
+		if ok := idx.ContainsReverse(tok); !ok {
+			t.Error("expected", tok.Lower(), "to be in index")
 		}
-		// if !index.Delete(tok) {
-		// 	t.Error("expected", tok, "to be deleted")
-		// }
+		tok = tok.Reverse()
+		idx.Delete(tok)
+	}
+	for i := len(tests) - 1; i >= 0; i-- {
+		test := tests[i]
+		tok := token.FromString(test.camel)
 
+		if ok := idx.ContainsForward(tok); ok {
+			t.Error("expected", tok.Lower(), "to have been deleted")
+		}
+		tok = tok.Reverse()
+		if ok := idx.ContainsReverse(tok); ok {
+			t.Error("expected", tok.Lower(), "to have been deleted")
+		}
+	}
+}
+
+func TestPartialMatches(t *testing.T) {
+	idx := index.New()
+	idx.Add(token.FromString("Abcd"), token.FromString("ABCD"))
+
+	m, ok := idx.MatchForward(token.FromString("abc"))
+	if !ok {
+		t.Error("expected match for abc")
+	}
+
+	merged := token.Merge(m.PartialMatches()...)
+	if merged.Lower() != "abc" {
+		t.Error("expected abc, got", merged.Lower())
+	}
+
+	rm, ok := idx.MatchReverse(token.FromString("dcb"))
+	if !ok {
+		t.Error("expected match for abc")
+	}
+
+	merged = token.Merge(rm.PartialMatches()...)
+	if merged.Lower() != "bcd" {
+		t.Error("expected bcd, got", merged.Lower())
 	}
 }

@@ -145,7 +145,7 @@ type TokenizerImpl struct {
 //
 //	t := caps.token.Newizer("_")
 //	t.Tokenize("A_SCREAMING_SNAKECASE_VARIABLE", []rune{'_'}) -> ["A_SCREAMING_SNAKECASE_VARIABLE"]
-func (t TokenizerImpl) Tokenize(str string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) []token.Token {
+func (ti TokenizerImpl) Tokenize(str string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) []token.Token {
 	tokens := []token.Token{}
 	pending := []token.Token{}
 	foundLower := false
@@ -248,7 +248,7 @@ func (t TokenizerImpl) Tokenize(str string, allowedSymbols []rune, numberRules m
 				} else {
 					current = token.AppendRune(current, r)
 				}
-			} else if t.delimiters.Contains(r) {
+			} else if ti.delimiters.Contains(r) {
 				if current.Len() > 0 {
 					if foundLower {
 						tokens = append(tokens, current)
@@ -335,14 +335,14 @@ const (
 //
 // tokenizer is used to tokenize the input text.
 func NewConverter(replacements []Replacement, tokenizer Tokenizer) ConverterImpl {
-	r := ConverterImpl{
-		index:     index.New(true),
+	ci := ConverterImpl{
+		index:     index.New(),
 		tokenizer: tokenizer,
 	}
 	for _, v := range replacements {
-		r.set(v.Camel, v.Screaming)
+		ci.set(v.Camel, v.Screaming)
 	}
-	return r
+	return ci
 }
 
 // ConverterImpl contains a table of words to their desired replacement. Tokens
@@ -368,22 +368,18 @@ type ConverterImpl struct {
 	tokenizer Tokenizer
 }
 
-// Contains reports whether a key is in the Converter's replacement table.
-func (c ConverterImpl) Contains(key string) bool {
-	return c.index.Contains(token.FromString(key))
+func (ci ConverterImpl) Index() index.Index {
+	return *ci.index
 }
 
-// Match returns an index.Index containing all of the Replacements that match
-// the input token.
-//
-// Note: the input is expected to be reversed. (e.g. "json" should be "nsoj")
-func (c ConverterImpl) Match(input rune) index.Index {
-	return c.index.Match(token.FromRune(input))
+// Contains reports whether a key is in the Converter's replacement table.
+func (ci ConverterImpl) Contains(key string) bool {
+	return ci.index.ContainsForward(token.FromString(key))
 }
 
 // Replacements returns a slice of Replacement in the lookup trie.
-func (c ConverterImpl) Replacements() []Replacement {
-	indexedVals := c.index.Values()
+func (ci ConverterImpl) Replacements() []Replacement {
+	indexedVals := ci.index.Values()
 	res := make([]Replacement, len(indexedVals))
 	for i, v := range indexedVals {
 		res[i] = Replacement{
@@ -394,8 +390,8 @@ func (c ConverterImpl) Replacements() []Replacement {
 	return res
 }
 
-func (c *ConverterImpl) set(key, value string) {
-	c.index.Add(token.FromString(key), token.FromString(value))
+func (ci *ConverterImpl) set(key, value string) {
+	ci.index.Add(token.FromString(key), token.FromString(value))
 }
 
 func lowerAndCheck(input string) (string, bool) {
@@ -412,36 +408,27 @@ func lowerAndCheck(input string) (string, bool) {
 }
 
 // Set adds the key/value pair to the table.
-func (c *ConverterImpl) Set(key, value string) {
+func (ci *ConverterImpl) Set(key, value string) {
 	kstr, keyHasLower := lowerAndCheck(key)
 	vstr, valueHasLower := lowerAndCheck(value)
-	c.Delete(kstr)
-	c.Delete(vstr)
+	ci.Delete(kstr)
+	ci.Delete(vstr)
 
 	// checking to see if we need to swap these.
 	if !keyHasLower && valueHasLower {
-		c.set(value, key)
+		ci.set(value, key)
 	} else {
-		c.set(key, value)
+		ci.set(key, value)
 	}
 }
 
 // Remove deletes the key from the map. Either variant is sufficient.
-func (c *ConverterImpl) Delete(key string) {
+func (ci *ConverterImpl) Delete(key string) {
 	tok := token.FromString(key)
-	if val, ok := c.index.Get(tok); ok {
-		c.index.Delete(token.FromString(val.Camel.Lower()))
-		c.index.Delete(token.FromString(val.Screaming.Lower()))
-	}
-	c.index.Delete(tok)
+	ci.index.Delete(tok)
 }
 
-type resolvedReplacement struct {
-	resolved       token.Token
-	partialMatches []token.Token
-}
-
-func (c *ConverterImpl) resolve(idx index.Index, style ReplaceStyle) resolvedReplacement {
+func (ci *ConverterImpl) resolve(idx index.Index, style ReplaceStyle) resolvedReplacement {
 	var res resolvedReplacement
 	if idx.LastMatch().HasValue() {
 		switch style {
@@ -475,41 +462,63 @@ func FormatToken(style Style, index int, tok token.Token) string {
 	return tok.String()
 }
 
+func FormatIndexedReplacement(style Style, replaceStyle ReplaceStyle, index int, rep index.IndexedReplacement) string {
+	switch replaceStyle {
+	case ReplaceStyleCamel:
+		if index == 0 && style == StyleLowerCamel {
+			return rep.Camel.Lower()
+		}
+		return rep.Camel.String()
+	case ReplaceStyleScreaming:
+		return rep.Screaming.String()
+	case ReplaceStyleLower:
+		return rep.Lower.String()
+	default:
+		return rep.Screaming.String()
+	}
+}
+
 // Convert formats the string with the desired style.
-func (r ConverterImpl) Convert(style Style, repStyle ReplaceStyle, input string, join string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) string {
-	tokens := r.tokenizer.Tokenize(input, allowedSymbols, numberRules)
-	var chain token.Token
+func (ci ConverterImpl) Convert(style Style, repStyle ReplaceStyle, input string, join string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) string {
+	tokens := ci.tokenizer.Tokenize(input, allowedSymbols, numberRules)
 	var parts []string
-	var lookup token.Token
-	brokeChain := false
 	var ok bool
+	idx := ci.Index()
 	for i := len(tokens) - 1; i >= 0; i-- {
 		tok := tokens[i]
 		switch tok.Len() {
 		case 0:
 			continue
 		case 1:
-			chain = token.Append(tok, chain)
-			if lookup, ok = r.resolve(chain, repStyle); ok {
-				parts = append(parts, lookup.Value())
-				chain = token.Token{}
-			}
-		default:
-			brokeChain = true
-			if chain.Len() > 0 {
-				split := chain.Split()
-				for z := len(split) - 1; z >= 0; z-- {
-					letter := split[z]
-					if i == 0 && z == 0 {
-						parts = append(parts, FormatToken(style, 0, letter))
-					} else {
-						parts = append(parts, FormatToken(style, z, letter))
+			if idx, ok = idx.MatchReverse(tok); !ok {
+				if idx.LastMatch().HasValue() {
+					parts = append(parts, FormatIndexedReplacement(style, repStyle, i+1, idx.LastMatch()))
+					if idx.HasPartialMatches() {
+						for _, partok := range idx.PartialMatches() {
+							parts = append(parts, FormatToken(style, i+1, partok))
+						}
 					}
 				}
-				chain = token.Token{}
+				parts = append(parts, FormatToken(style, i, tok))
+
+				// resetting the index
+				idx = ci.Index()
 			}
-			if lookup, ok = r.resolve(tok, repStyle); ok {
-				parts = append(parts, lookup.Value())
+		default:
+			if idx.HasMatch() {
+				parts = append(parts, FormatIndexedReplacement(style, repStyle, i+1, idx.LastMatch()))
+			}
+			if idx.HasPartialMatches() {
+				for _, partok := range idx.PartialMatches() {
+					parts = append(parts, FormatToken(style, i+1, partok))
+				}
+			}
+			if idx.HasMatch() || idx.HasPartialMatches() {
+				// resetting index
+				idx = ci.Index()
+			}
+			if rep, ok := idx.GetForward(tok); ok {
+				parts = append(parts, FormatIndexedReplacement(style, repStyle, i, rep))
 			} else {
 				parts = append(parts, FormatToken(style, i, tok))
 			}
@@ -520,16 +529,17 @@ func (r ConverterImpl) Convert(style Style, repStyle ReplaceStyle, input string,
 
 	var part string
 	shouldWriteDelimiter := false
-	if brokeChain && chain.Len() > 0 {
-		for i, letter := range chain.Split() {
-			if shouldWriteDelimiter {
-				result.WriteString(join)
-			}
-			result.WriteString(FormatToken(style, i, letter))
-			if !shouldWriteDelimiter {
-				shouldWriteDelimiter = len(part) > 0 && len(join) > 0
-			}
+	if idx.HasPartialMatches() {
+		i := 0
+		if idx.HasMatch() {
+			i = 1
 		}
+		for y, partok := range idx.PartialMatches() {
+			parts = append(parts, FormatToken(style, i+y, partok))
+		}
+	}
+	if idx.HasMatch() {
+		parts = append(parts, FormatIndexedReplacement(style, repStyle, 0, idx.LastMatch()))
 	}
 	for i := len(parts) - 1; i >= 0; i-- {
 		part = parts[i]
@@ -539,19 +549,6 @@ func (r ConverterImpl) Convert(style Style, repStyle ReplaceStyle, input string,
 		result.WriteString(part)
 		if !shouldWriteDelimiter {
 			shouldWriteDelimiter = len(part) > 0 && len(join) > 0
-		}
-	}
-
-	if !brokeChain && chain.Len() > 0 {
-		for i, letter := range chain.Split() {
-			if shouldWriteDelimiter {
-				result.WriteString(join)
-			}
-			// if unicode.IsLetter(letter.Value()[0]) || unicode.IsDigit(letter.Value()[0]) || allow {
-			result.WriteString(FormatToken(style, len(parts)+i, letter))
-			if !shouldWriteDelimiter {
-				shouldWriteDelimiter = len(part) > 0 && len(join) > 0
-			}
 		}
 	}
 
@@ -817,6 +814,11 @@ func newRunes(val []rune) runes {
 	r := runes(val)
 	sort.Sort(r)
 	return r
+}
+
+type resolvedReplacement struct {
+	resolved       token.Token
+	partialMatches []token.Token
 }
 
 var _ sort.Interface = (*runes)(nil)
