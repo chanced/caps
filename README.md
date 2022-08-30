@@ -21,6 +21,18 @@ Out of the box, the following case conversion are supported:
 -   Title Case (e.g. Title Case)
 -   Other deliminations
 
+```go
+package main
+import (
+    "fmt"
+    "github.com/chanced/caps"
+)
+
+func main() {
+    fmt.println(caps.ToCamel("an example"))
+}
+```
+
 Word boundaries are determined by the `caps.Converter`. The provided implementation, `caps.ConverterImpl`,
 delegates the boundary detection to `caps.Tokenizer`. The provided implementation, `caps.TokenizerImpl`,
 uses the following runes as delimiters: `" _.!?:;$-(){}[]#@&+~"`.
@@ -74,17 +86,56 @@ options.
 You can pass a new instance of `caps.StdConverter` with a new set of
 `caps.Replacement` (likely preferred).
 
-You can create your own `caps.Converter`. This could be as simple as
-implementing the single `Convert` method, calling `caps.DefaultConverter.Convert`,
-and then modifying the result.
+```go
+    package main
+    import (
+        "fmt"
+        "github.com/chanced/caps"
+        "github.com/chanced/caps/token"
+    )
+    func main() {
+        replacements := []caps.Replacement{
+            {"Ex", "EX" },
+            // ... your replacements
+        }
+        converter := caps.NewConverter(replacements, caps.DefaultTokenizer, token.DefaultCaser)
+        fmt.Println(caps.ToCamel("ex id", caps.Opts{ Converter: converter }))
+        // Output:
+        // "EXId" // note: ID was not in the replacement list above
+       fmt.Println(caps.ToCamel("ex id"))
+        // Output:
+        // ExID
+    }
+```
 
-Finally, if you are so inclined, you can update `caps.DefaultConverter`. Just be aware that the
+You can update `caps.DefaultConverter`. Just be aware that the
 module was not built with thread-safety in mind so you should set it once.
 Otherwise, you'll need guard your usage of the library accordingly.
 
+```go
+package main
+import (
+    "fmt"
+    "github.com/chanced/caps"
+)
+func main() {
+    caps.DefaultConverter.Set("Gcp", "GCP")
+    fmt.Println(caps.ToCamel("some_gcp_var"))
+    // Output:
+    // SomeGCPVar
+}
+```
+
+Finally, if you are so inclined, you can create your own `caps.Converter`. This
+could be as simple as implementing the single `Convert` method, calling
+`caps.DefaultConverter.Convert`, and then modifying the result.
+
 ### Support for special case unicode (Turkish, Azeri)
 
-caps supports Turkish and Azeri through the use of special casers.
+caps supports Turkish and Azeri through the `token.Caser` interface. It is
+satisfied by `unicode.TurkishCase` and `unicode.AzeriCase`. `token.TurkishCaser`
+and `token.AzeriCaser` are available as pointers to those variables (although
+you can use the unicode variables directly).
 
 For example, to use Turkish, you would need to instantiate a few variables:
 
@@ -105,12 +156,14 @@ func main() {
     turkish := caps.NewConverter(replacements, tokenizer, token.TurkishCaser)
 
     // to use this as your default throughout your application
-    // you can set it **BEFORE YOU USE IT** (caps.ConverterImpl is not guarded for thread-safety)
+    // you can overwrite caps.DefaultConverter
+    // **BEFORE YOU USE IT** (caps.ConverterImpl is not guarded for thread-safety)
     //
     // caps.DefaultConverter = turkish
     //
     // otherwise, you can pass in the converter to the config for each call:
-    caps.ToCamel("An example", caps.Opts{Converter: turkish})
+
+    fmt.Println(caps.ToCamel("An example", caps.Opts{Converter: turkish}))
 }
 
 ```
