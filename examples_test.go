@@ -47,13 +47,13 @@ func ExampleToScreamingKebab() {
 }
 
 func ExampleToDot() {
-	fmt.Println(caps.ToDot("This is [an] {example}${id32}."))
+	fmt.Println(caps.ToDotNotation("This is [an] {example}${id32}."))
 	// Output:
 	// this.is.an.example.id.32
 }
 
 func ExampleToScreamingDot() {
-	fmt.Println(caps.ToScreamingDot("This is [an] {example}${id32}."))
+	fmt.Println(caps.ToScreamingDotNotation("This is [an] {example}${id32}."))
 	// Output:
 	// THIS.IS.AN.EXAMPLE.ID.32
 }

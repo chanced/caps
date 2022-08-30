@@ -302,7 +302,7 @@ func (ti TokenizerImpl) Tokenize(str string, allowedSymbols []rune, numberRules 
 				} else {
 					current = token.AppendRune(ti.caser, current, r)
 				}
-			} else if ti.delimiters.Contains(r) {
+			} else if ti.delimiters.Contains(r) || unicode.IsSpace(r) {
 				if current.Len() > 0 {
 					if foundLower {
 						tokens = append(tokens, current)
@@ -746,20 +746,20 @@ func ToScreamingKebab[T ~string](str T, options ...Opts) T {
 	return ToDelimited(str, '-', false, options...)
 }
 
-// ToDot transforms the case of str into Lower Dot Notation Case (e.g. an.example.string) using
+// ToDotNotation transforms the case of str into Lower Dot Notation Case (e.g. an.example.string) using
 // either the provided Converter or the DefaultConverter otherwise.
 //
-//	caps.ToDot("This is [an] {example}${id32}.") // this.is.an.example.id.32
-func ToDot[T ~string](str T, options ...Opts) T {
+//	caps.ToDotNotation("This is [an] {example}${id32}.") // this.is.an.example.id.32
+func ToDotNotation[T ~string](str T, options ...Opts) T {
 	return ToDelimited(str, '.', true, options...)
 }
 
-// ToScreamingKebab transforms the case of str into Screaming Kebab Case (e.g.
-// AN-EXAMPLE-STRING) using either the provided Converter or the
+// ToScreamingDotNotation transforms the case of str into Screaming Kebab Case (e.g.
+// AN.EXAMPLE.STRING) using either the provided Converter or the
 // DefaultConverter otherwise.
 //
-//	caps.ToScreamingDot("This is [an] {example}${id32}.") // THIS.IS.AN.EXAMPLE.ID.32
-func ToScreamingDot[T ~string](str T, options ...Opts) T {
+//	caps.ToScreamingDotNotation("This is [an] {example}${id32}.") // THIS.IS.AN.EXAMPLE.ID.32
+func ToScreamingDotNotation[T ~string](str T, options ...Opts) T {
 	return ToDelimited(str, '.', false, options...)
 }
 
