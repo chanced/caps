@@ -8,7 +8,7 @@ caps is a unicode aware case conversion library
 for Go. It was built with the following priorites in mind: configurability,
 consistency, correctness, ergonomic, and reasonable performance; in that order.
 
-Out of the box, the following case conversion are supported:
+Out of the box, the following case conversions are supported:
 
 -   Camel Case (e.g. CamelCase)
 -   Lower Camel Case (e.g. lowerCamelCase)
