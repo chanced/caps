@@ -5,14 +5,8 @@ import (
 	"testing"
 
 	"github.com/chanced/caps"
+	"github.com/chanced/caps/token"
 )
-
-func TestTurkish(t *testing.T) {
-	// fmt.Println("i -> ", string(unicode.ToUpper('i')), string(unicode.TurkishCase.ToUpper('i')))
-	// fmt.Println("ı ->", string(unicode.ToUpper('ı')), string(unicode.TurkishCase.ToUpper('ı')))
-
-	// fmt.Println(unicode.IsUpper('İ'))
-}
 
 func TestTokenizer(t *testing.T) {
 	tests := []struct {
@@ -41,7 +35,7 @@ func TestTokenizer(t *testing.T) {
 
 	for i, test := range tests {
 		t.Run(fmt.Sprintf("#%d___%s", i, test.value), func(t *testing.T) {
-			tokenizer := caps.NewTokenizer(caps.DEFAULT_DELIMITERS)
+			tokenizer := caps.NewTokenizer(caps.DEFAULT_DELIMITERS, token.DefaultCaser)
 			tokens := tokenizer.Tokenize(test.value, test.allowedSymbols, test.numberRules)
 			if len(tokens) != len(test.expected) {
 				t.Logf("expected: %+v, got: %+v", test.expected, tokens)
@@ -58,7 +52,7 @@ func TestTokenizer(t *testing.T) {
 }
 
 func TestConverterConvert(t *testing.T) {
-	converter := caps.NewConverter(caps.DefaultReplacements, caps.DefaultTokenizer)
+	converter := caps.NewConverter(caps.DefaultReplacements, caps.DefaultTokenizer, nil)
 
 	tests := []struct {
 		input          string
@@ -100,7 +94,7 @@ func TestConverterConvert(t *testing.T) {
 }
 
 func TestConverterTableOps(t *testing.T) {
-	c := caps.NewConverter(caps.DefaultReplacements, caps.DefaultTokenizer)
+	c := caps.NewConverter(caps.DefaultReplacements, caps.DefaultTokenizer, nil)
 
 	hasCamel := false
 	for _, v := range caps.DefaultReplacements {

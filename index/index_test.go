@@ -8,7 +8,7 @@ import (
 )
 
 func TestAddMatchGet(t *testing.T) {
-	idx := index.New()
+	idx := index.New(nil)
 
 	tests := []struct {
 		camel     string
@@ -19,14 +19,14 @@ func TestAddMatchGet(t *testing.T) {
 		{"Js", "JS"},
 	}
 	for _, test := range tests {
-		tok := token.FromString(test.camel)
+		tok := token.FromString(nil, test.camel)
 		str := tok.Lower()
-		idx.Add(token.FromString(test.camel), token.FromString(test.screaming))
+		idx.Add(token.FromString(nil, test.camel), token.FromString(nil, test.screaming))
 		for i := range str {
 			if i == 0 {
 				break
 			}
-			ts := token.FromString(str[:i])
+			ts := token.FromString(nil, str[:i])
 			if i == len(str)-1 {
 				idx, hasMatch := idx.MatchForward(ts)
 				if !hasMatch {
@@ -58,7 +58,7 @@ func TestAddMatchGet(t *testing.T) {
 			if i == 0 {
 				break
 			}
-			ts := token.FromString(str[:i])
+			ts := token.FromString(nil, str[:i])
 			if i == len(str)-1 {
 				idx, hasMatch := idx.MatchReverse(ts)
 				if !hasMatch {
@@ -86,7 +86,7 @@ func TestAddMatchGet(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	idx := index.New()
+	idx := index.New(nil)
 
 	tests := []struct {
 		camel     string
@@ -97,12 +97,12 @@ func TestDelete(t *testing.T) {
 		{"Js", "JS"},
 	}
 	for _, test := range tests {
-		idx.Add(token.FromString(test.camel), token.FromString(test.screaming))
+		idx.Add(token.FromString(nil, test.camel), token.FromString(nil, test.screaming))
 	}
 
 	for i := len(tests) - 1; i >= 0; i-- {
 		test := tests[i]
-		tok := token.FromString(test.camel)
+		tok := token.FromString(nil, test.camel)
 
 		if ok := idx.ContainsForward(tok); !ok {
 			t.Error("expected", tok.Lower(), "to be in index")
@@ -116,7 +116,7 @@ func TestDelete(t *testing.T) {
 	}
 	for i := len(tests) - 1; i >= 0; i-- {
 		test := tests[i]
-		tok := token.FromString(test.camel)
+		tok := token.FromString(nil, test.camel)
 
 		if ok := idx.ContainsForward(tok); ok {
 			t.Error("expected", tok.Lower(), "to have been deleted")
@@ -129,25 +129,25 @@ func TestDelete(t *testing.T) {
 }
 
 func TestPartialMatches(t *testing.T) {
-	idx := index.New()
-	idx.Add(token.FromString("Abcd"), token.FromString("ABCD"))
+	idx := index.New(nil)
+	idx.Add(token.FromString(nil, "Abcd"), token.FromString(nil, "ABCD"))
 
-	m, ok := idx.MatchForward(token.FromString("abc"))
+	m, ok := idx.MatchForward(token.FromString(nil, "abc"))
 	if !ok {
 		t.Error("expected match for abc")
 	}
 
-	merged := token.Append(token.Token{}, m.PartialMatches()...)
+	merged := token.Append(nil, token.Token{}, m.PartialMatches()...)
 	if merged.Lower() != "abc" {
 		t.Error("expected abc, got", merged.Lower())
 	}
 
-	rm, ok := idx.MatchReverse(token.FromString("dcb"))
+	rm, ok := idx.MatchReverse(token.FromString(nil, "dcb"))
 	if !ok {
 		t.Error("expected match for abc")
 	}
 
-	merged = token.Append(token.Token{}, rm.PartialMatches()...)
+	merged = token.Append(nil, token.Token{}, rm.PartialMatches()...)
 	if merged.Lower() != "bcd" {
 		t.Error("expected bcd, got", merged.Lower())
 	}

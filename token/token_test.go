@@ -2,27 +2,54 @@ package token_test
 
 import (
 	"testing"
+	"unicode"
 
 	"github.com/chanced/caps/token"
 )
 
 func TestReversed(t *testing.T) {
-	tok := token.FromString("abc")
+	tok := token.FromString(nil, "abc")
 	rev := tok.LowerReversedRunes()
 	if string(rev) != "cba" {
 		t.Error("expected \"cba\", got", rev)
 	}
 }
 
+func TestTurkish(t *testing.T) {
+	runes := "içğıöşü"
+	for _, r := range runes {
+		tok := token.FromRune(token.TurkishCaser, r)
+		if []rune(tok.Upper())[0] != unicode.TurkishCase.ToUpper(r) {
+			t.Errorf("expected %U, got %U", unicode.TurkishCase.ToTitle(r), []rune(tok.Upper())[0])
+		}
+	}
+}
+
+func TestAppend(t *testing.T) {
+	tok := token.FromString(nil, "abc")
+	res := token.Append(nil, tok, token.FromString(nil, "def"))
+	if res.String() != "abcdef" {
+		t.Error("expected \"abcdef\", got", res)
+	}
+	titleDZ := token.FromRune(nil, unicode.ToTitle('ǳ'))
+	upperDZ := unicode.ToUpper('ǳ')
+
+	res = token.Append(nil, tok, titleDZ, titleDZ)
+
+	if res.Runes()[1] != upperDZ {
+		t.Errorf("expected %U, got %U", upperDZ, res.Runes()[1])
+	}
+}
+
 func TestReverse(t *testing.T) {
-	tok := token.FromString("abc")
+	tok := token.FromString(nil, "abc")
 	if string(tok.Reverse().Value()) != "cba" {
 		t.Error("expected \"cba\", got", tok.Reverse())
 	}
 }
 
 func TestReverseSplit(t *testing.T) {
-	tok := token.FromString("abc")
+	tok := token.FromString(nil, "abc")
 
 	var str string
 	for _, rt := range tok.ReverseSplit() {
@@ -76,7 +103,7 @@ func TestIsNumber(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.value, func(t *testing.T) {
-			if token.FromString(test.value).IsNumber(test.rules) != test.expected {
+			if token.FromString(nil, test.value).IsNumber(test.rules) != test.expected {
 				if test.expected {
 					t.Errorf("expected \"%s\" to be a number", test.value)
 				} else {
