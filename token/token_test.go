@@ -6,6 +6,33 @@ import (
 	"github.com/chanced/caps/token"
 )
 
+func TestReversed(t *testing.T) {
+	tok := token.FromString("abc")
+	rev := tok.LowerReversedRunes()
+	if string(rev) != "cba" {
+		t.Error("expected \"cba\", got", rev)
+	}
+}
+
+func TestReverse(t *testing.T) {
+	tok := token.FromString("abc")
+	if string(tok.Reverse().Value()) != "cba" {
+		t.Error("expected \"cba\", got", tok.Reverse())
+	}
+}
+
+func TestReverseSplit(t *testing.T) {
+	tok := token.FromString("abc")
+
+	var str string
+	for _, rt := range tok.ReverseSplit() {
+		str = str + rt.String()
+	}
+	if str != "cba" {
+		t.Error("expected\"cba\" but got", str)
+	}
+}
+
 func TestIsNumber(t *testing.T) {
 	tests := []struct {
 		value    string
