@@ -29,9 +29,9 @@ import (
 )
 
 func main() {
-	fmt.Println(caps.ToCamel("an example"))
+	fmt.Println(caps.ToCamel("http request"))
 	// Output:
-	// AnExample
+	// HTTPRequest
 	fmt.Println(caps.ToLowerCamel("some_id"))
 	// Output:
 	// someID
@@ -39,9 +39,10 @@ func main() {
 	// Output:
 	// someId
 }
+
 ```
 
-[playground link](https://go.dev/play/p/f5JoVlp4Kv2)
+[playground link](https://go.dev/play/p/DDO-ipHfgoH)
 
 ## Word boundaries
 
