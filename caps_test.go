@@ -3,16 +3,15 @@ package caps_test
 import (
 	"fmt"
 	"testing"
-	"unicode"
 
 	"github.com/chanced/caps"
 )
 
 func TestTurkish(t *testing.T) {
-	fmt.Println("i -> ", string(unicode.ToUpper('i')), string(unicode.TurkishCase.ToUpper('i')))
-	fmt.Println("ı ->", string(unicode.ToUpper('ı')), string(unicode.TurkishCase.ToUpper('ı')))
+	// fmt.Println("i -> ", string(unicode.ToUpper('i')), string(unicode.TurkishCase.ToUpper('i')))
+	// fmt.Println("ı ->", string(unicode.ToUpper('ı')), string(unicode.TurkishCase.ToUpper('ı')))
 
-	fmt.Println(unicode.IsUpper('İ'))
+	// fmt.Println(unicode.IsUpper('İ'))
 }
 
 func TestTokenizer(t *testing.T) {
@@ -71,8 +70,8 @@ func TestConverterConvert(t *testing.T) {
 		converter      caps.Converter
 		numberRules    map[rune]func(index int, r rune, val []rune) bool
 	}{
-		// {"An example string", "AnExampleString", "", caps.StyleCamel, caps.ReplaceStyleScreaming, nil, nil, nil},
-		// {"An example string", "anExampleString", "", caps.StyleLowerCamel, caps.ReplaceStyleScreaming, nil, nil, nil},
+		{"An example string", "AnExampleString", "", caps.StyleCamel, caps.ReplaceStyleScreaming, nil, nil, nil},
+		{"An example string", "anExampleString", "", caps.StyleLowerCamel, caps.ReplaceStyleScreaming, nil, nil, nil},
 		{"aCamelCaseExample", "ACamelCaseExample", "", caps.StyleCamel, caps.ReplaceStyleScreaming, nil, nil, nil},
 		{"serveHttp", "ServeHTTP", "", caps.StyleCamel, caps.ReplaceStyleScreaming, nil, nil, nil},
 		{"A_SCREAMING_SNAKECASE_STRING", "aScreamingSnakecaseString", "", caps.StyleLowerCamel, caps.ReplaceStyleScreaming, nil, nil, nil},
@@ -84,6 +83,10 @@ func TestConverterConvert(t *testing.T) {
 		{"aABC", "aABC", "", caps.StyleLowerCamel, caps.ReplaceStyleScreaming, nil, nil, nil},
 		{"MarshalJS", "marshal_j_s", "_", caps.StyleLower, caps.ReplaceStyleLower, nil, nil, nil},
 		{"An[example]_split#with(other).symbols", "anExampleSplitWithOtherSymbols", "", caps.StyleLowerCamel, caps.ReplaceStyleScreaming, nil, nil, nil},
+		{"SomeUUID", "some_uuid", "_", caps.StyleLower, caps.ReplaceStyleLower, nil, nil, nil},
+		{"SomeUID", "some_uid", "_", caps.StyleLower, caps.ReplaceStyleLower, nil, nil, nil},
+		{"FULLURI", "fulluri", "_", caps.StyleLower, caps.ReplaceStyleLower, nil, nil, nil},
+		{"FullURI", "full_uri", "_", caps.StyleLower, caps.ReplaceStyleLower, nil, nil, nil},
 	}
 
 	for _, test := range tests {

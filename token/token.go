@@ -305,3 +305,14 @@ func (t Token) LowerReversedRunes() []rune {
 	}
 	return res
 }
+
+// HasLower returns true if any rune in
+// the token is a unicode lowercase letter.
+func (t Token) HasLower() bool {
+	for _, r := range t.lower {
+		if unicode.IsLower(r) {
+			return true
+		}
+	}
+	return false
+}

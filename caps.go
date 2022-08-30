@@ -18,30 +18,83 @@ var (
 	// DefaultTokenizer is the default Tokenizer.
 	DefaultTokenizer TokenizerImpl = NewTokenizer(DEFAULT_DELIMITERS)
 	// DefaultReplacements is the list of Replacements passed to DefaultConverter.
-	//
-	//  {"Http", "HTTP"},
-	//  {"Https", "HTTPS"},
-	//  {"Id", "ID"},
-	//  {"Ip", "IP"},
-	//  {"Html", "HTML"},
-	//  {"Xml", "XML"},
-	//  {"Json", "JSON"},
-	//  {"Csv", "CSV"},
-	//  {"Aws", "AWS"},
-	//  {"Gcp", "GCP"},
-	//  {"Sql", "SQL"},
+	// 	{"Acl", "ACL"},
+	// 	{"Api", "API"},
+	// 	{"Ascii", "ASCII"},
+	// 	{"Cpu", "CPU"},
+	// 	{"Css", "CSS"},
+	// 	{"Dns", "DNS"},
+	// 	{"Eof", "EOF"},
+	// 	{"Guid", "GUID"},
+	// 	{"Html", "HTML"},
+	// 	{"Http", "HTTP"},
+	// 	{"Https", "HTTPS"},
+	// 	{"Id", "ID"},
+	// 	{"Ip", "IP"},
+	// 	{"Json", "JSON"},
+	// 	{"Lhs", "LHS"},
+	// 	{"Qps", "QPS"},
+	// 	{"Ram", "RAM"},
+	// 	{"Rhs", "RHS"},
+	// 	{"Rpc", "RPC"},
+	// 	{"Sla", "SLA"},
+	// 	{"Smtp", "SMTP"},
+	// 	{"Sql", "SQL"},
+	// 	{"Ssh", "SSH"},
+	// 	{"Tcp", "TCP"},
+	// 	{"Tls", "TLS"},
+	// 	{"Ttl", "TTL"},
+	// 	{"Udp", "UDP"},
+	// 	{"Ui", "UI"},
+	// 	{"Uid", "UID"},
+	// 	{"Uuid", "UUID"},
+	// 	{"Uri", "URI"},
+	// 	{"Url", "URL"},
+	// 	{"Utf8", "UTF8"},
+	// 	{"Vm", "VM"},
+	// 	{"Xml", "XML"},
+	// 	{"Xmpp", "XMPP"},
+	// 	{"Xsrf", "XSRF"},
+	// 	{"Xss", "XSS"},
 	DefaultReplacements []Replacement = []Replacement{
+		{"Acl", "ACL"},
+		{"Api", "API"},
+		{"Ascii", "ASCII"},
+		{"Cpu", "CPU"},
+		{"Css", "CSS"},
+		{"Dns", "DNS"},
+		{"Eof", "EOF"},
+		{"Guid", "GUID"},
+		{"Html", "HTML"},
 		{"Http", "HTTP"},
 		{"Https", "HTTPS"},
 		{"Id", "ID"},
 		{"Ip", "IP"},
-		{"Html", "HTML"},
-		{"Xml", "XML"},
 		{"Json", "JSON"},
-		{"Csv", "CSV"},
-		{"Aws", "AWS"},
-		{"Gcp", "GCP"},
+		{"Lhs", "LHS"},
+		{"Qps", "QPS"},
+		{"Ram", "RAM"},
+		{"Rhs", "RHS"},
+		{"Rpc", "RPC"},
+		{"Sla", "SLA"},
+		{"Smtp", "SMTP"},
 		{"Sql", "SQL"},
+		{"Ssh", "SSH"},
+		{"Tcp", "TCP"},
+		{"Tls", "TLS"},
+		{"Ttl", "TTL"},
+		{"Udp", "UDP"},
+		{"Ui", "UI"},
+		{"Uid", "UID"},
+		{"Uuid", "UUID"},
+		{"Uri", "URI"},
+		{"Url", "URL"},
+		{"Utf8", "UTF8"},
+		{"Vm", "VM"},
+		{"Xml", "XML"},
+		{"Xmpp", "XMPP"},
+		{"Xsrf", "XSRF"},
+		{"Xss", "XSS"},
 	}
 
 	// DefaultConverter is the default Converter instance.
@@ -51,16 +104,7 @@ var (
 
 	//
 	// replacements:
-	//  DefaultReplacements:
-	//  { UpperCamel: "Http",  Screaming: "HTTP"  },
-	//  { UpperCamel: "Https", Screaming: "HTTPS" },
-	//  { UpperCamel: "Html",  Screaming: "HTML"  },
-	//  { UpperCamel: "Xml",   Screaming: "XML"   },
-	//  { UpperCamel: "Json",  Screaming: "JSON"  },
-	//  { UpperCamel: "Csv",   Screaming: "CSV"   },
-	//  { UpperCamel: "Aws",   Screaming: "AWS"   },
-	//  { UpperCamel: "Gcp",   Screaming: "GCP"   },
-	//  { UpperCamel: "Sql",   Screaming: "SQL"   },
+	//  DefaultReplacements
 	//
 	// tokenizer:
 	//  DefaultTokenizer
@@ -352,17 +396,7 @@ func NewConverter(replacements []Replacement, tokenizer Tokenizer) ConverterImpl
 // This is primarily designed for acronyms but it could be used for other
 // purposes.
 //
-// The default Replacements:
-//
-//	{ "Http",  "HTTP" },
-//	{ "Https", "HTTPS" },
-//	{ "Html",  "HTML" },
-//	{ "Xml",   "XML" },
-//	{ "Json",  "JSON" },
-//	{ "Csv",   "CSV" },
-//	{ "Aws",   "AWS" },
-//	{ "Gcp",   "GCP" },
-//	{ "Sql",   "SQL" },
+// The default Replacements can be found in the DefaultReplacements variable.
 type ConverterImpl struct {
 	index     *index.Index
 	tokenizer Tokenizer
@@ -428,22 +462,6 @@ func (ci *ConverterImpl) Delete(key string) {
 	ci.index.Delete(tok)
 }
 
-func (ci *ConverterImpl) resolve(idx index.Index, style ReplaceStyle) resolvedReplacement {
-	var res resolvedReplacement
-	if idx.LastMatch().HasValue() {
-		switch style {
-		case ReplaceStyleCamel:
-			res.resolved = idx.LastMatch().Camel
-		case ReplaceStyleScreaming:
-			res.resolved = idx.LastMatch().Screaming
-		case ReplaceStyleLower:
-			res.resolved = idx.LastMatch().Lower
-		}
-	}
-	res.partialMatches = idx.PartialMatches()
-	return res
-}
-
 // FormatToken formats the token with the desired style.
 func FormatToken(style Style, index int, tok token.Token) string {
 	switch style {
@@ -493,10 +511,10 @@ func (ci ConverterImpl) Convert(style Style, repStyle ReplaceStyle, input string
 			if idx, ok = idx.MatchReverse(tok); !ok {
 				if idx.LastMatch().HasValue() {
 					parts = append(parts, FormatIndexedReplacement(style, repStyle, i+1, idx.LastMatch()))
-					if idx.HasPartialMatches() {
-						for _, partok := range idx.PartialMatches() {
-							parts = append(parts, FormatToken(style, i+1, partok))
-						}
+				}
+				if idx.HasPartialMatches() {
+					for _, partok := range idx.PartialMatches() {
+						parts = append(parts, FormatToken(style, i+1, partok))
 					}
 				}
 				parts = append(parts, FormatToken(style, i, tok))

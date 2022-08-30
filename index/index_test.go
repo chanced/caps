@@ -137,7 +137,7 @@ func TestPartialMatches(t *testing.T) {
 		t.Error("expected match for abc")
 	}
 
-	merged := token.Merge(m.PartialMatches()...)
+	merged := token.Append(token.Token{}, m.PartialMatches()...)
 	if merged.Lower() != "abc" {
 		t.Error("expected abc, got", merged.Lower())
 	}
@@ -147,7 +147,7 @@ func TestPartialMatches(t *testing.T) {
 		t.Error("expected match for abc")
 	}
 
-	merged = token.Merge(rm.PartialMatches()...)
+	merged = token.Append(token.Token{}, rm.PartialMatches()...)
 	if merged.Lower() != "bcd" {
 		t.Error("expected bcd, got", merged.Lower())
 	}
