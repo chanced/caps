@@ -36,15 +36,17 @@ type Index struct {
 	nodes          map[rune]*Index
 	lastMatch      IndexedReplacement
 	partialMatches []token.Token
+	caser          token.Caser
 }
 
 // NewIndex creates a new Index of Replacements,
 // internally represented as Trie
 //
 // reverseIndexes indicates whether or not
-func New() *Index {
+func New(caser token.Caser) *Index {
 	return &Index{
 		nodes: make(map[rune]*Index),
+		caser: token.CaserOrDefault(caser),
 	}
 }
 
@@ -132,6 +134,7 @@ func (idx Index) MatchForward(t token.Token) (Index, bool) {
 			return Index{
 				partialMatches: idx.partialMatches,
 				lastMatch:      idx.lastMatch,
+				caser:          idx.caser,
 			}, false
 		}
 		idx = Index{
@@ -139,12 +142,13 @@ func (idx Index) MatchForward(t token.Token) (Index, bool) {
 			value:          next.value,
 			lastMatch:      idx.lastMatch,
 			partialMatches: idx.partialMatches,
+			caser:          idx.caser,
 		}
 		if next.HasForwardValue() {
 			idx.lastMatch = next.value.ForwardPath
 			idx.partialMatches = nil
 		} else {
-			idx.partialMatches = append(idx.partialMatches, token.FromRune(r))
+			idx.partialMatches = append(idx.partialMatches, token.FromRune(idx.caser, r))
 		}
 	}
 	return idx, true
@@ -168,6 +172,7 @@ func (idx Index) MatchReverse(t token.Token) (Index, bool) {
 			return Index{
 				partialMatches: idx.partialMatches,
 				lastMatch:      idx.lastMatch,
+				caser:          idx.caser,
 			}, false
 		}
 		idx = Index{
@@ -175,12 +180,13 @@ func (idx Index) MatchReverse(t token.Token) (Index, bool) {
 			value:          next.value,
 			lastMatch:      idx.lastMatch,
 			partialMatches: idx.partialMatches,
+			caser:          idx.caser,
 		}
 		if next.HasReverseValue() {
 			idx.lastMatch = next.value.ReversedPath
 			idx.partialMatches = nil
 		} else {
-			idx.partialMatches = append([]token.Token{token.FromRune(r)}, idx.partialMatches...)
+			idx.partialMatches = append([]token.Token{token.FromRune(idx.caser, r)}, idx.partialMatches...)
 		}
 	}
 	return idx, true
@@ -257,7 +263,7 @@ func (idx *Index) Add(camel token.Token, screaming token.Token) bool {
 	ir := IndexedReplacement{
 		Screaming: screaming,
 		Camel:     camel,
-		Lower:     token.FromString(camel.Lower()),
+		Lower:     token.FromString(idx.caser, camel.Lower()),
 	}
 	var exists bool
 	var er IndexedReplacement
@@ -289,6 +295,7 @@ func (idx *Index) Add(camel token.Token, screaming token.Token) bool {
 		if _, ok = node.nodes[r]; !ok {
 			node.nodes[r] = &Index{
 				nodes: make(map[rune]*Index),
+				caser: idx.caser,
 			}
 		}
 		node = node.nodes[r]
@@ -301,6 +308,7 @@ func (idx *Index) Add(camel token.Token, screaming token.Token) bool {
 		if _, ok = node.nodes[r]; !ok {
 			node.nodes[r] = &Index{
 				nodes: make(map[rune]*Index),
+				caser: idx.caser,
 			}
 		}
 		node = node.nodes[r]

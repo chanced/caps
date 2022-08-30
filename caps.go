@@ -16,7 +16,8 @@ const (
 
 var (
 	// DefaultTokenizer is the default Tokenizer.
-	DefaultTokenizer TokenizerImpl = NewTokenizer(DEFAULT_DELIMITERS)
+	DefaultTokenizer TokenizerImpl = NewTokenizer(DEFAULT_DELIMITERS, token.DefaultCaser)
+
 	// DefaultReplacements is the list of Replacements passed to DefaultConverter.
 	// 	{"Acl", "ACL"},
 	// 	{"Api", "API"},
@@ -108,7 +109,7 @@ var (
 	//
 	// tokenizer:
 	//  DefaultTokenizer
-	DefaultConverter = NewConverter(DefaultReplacements, DefaultTokenizer)
+	DefaultConverter = NewConverter(DefaultReplacements, DefaultTokenizer, token.DefaultCaser)
 )
 
 // Tokenizer is an interface satisfied by tyeps which can
@@ -139,7 +140,14 @@ type Tokenizer interface {
 //	allowedSymbols: The set of allowed symbols. If set, these should take precedence over any delimiters
 //	numberRules:    Any custom rules dictating how to handle special characters in numbers.
 type Converter interface {
-	Convert(style Style, repStyle ReplaceStyle, input string, join string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) string
+	Convert(
+		style Style,
+		repStyle ReplaceStyle,
+		input string,
+		join string,
+		allowedSymbols []rune,
+		numberRules map[rune]func(index int, r rune, val []rune) bool,
+	) string
 }
 
 // NewTokenizer creates and returns a new TokenizerImpl which implements the
@@ -147,11 +155,12 @@ type Converter interface {
 //
 // Tokenizers are used by ConverterImpl to tokenize the input text into
 // token.Tokens that are then formatted.
-func NewTokenizer(delimiters string) TokenizerImpl {
+func NewTokenizer(delimiters string, caser token.Caser) TokenizerImpl {
 	d := runes(delimiters)
 	sort.Sort(d)
 	return TokenizerImpl{
 		delimiters: d,
+		caser:      token.CaserOrDefault(caser),
 	}
 }
 
@@ -166,6 +175,7 @@ func NewTokenizer(delimiters string) TokenizerImpl {
 // # Example:
 type TokenizerImpl struct {
 	delimiters runes
+	caser      token.Caser
 }
 
 // Tokenize splits a string into a list of token.Tokens based on the case of each
@@ -204,7 +214,7 @@ func (ti TokenizerImpl) Tokenize(str string, allowedSymbols []rune, numberRules 
 				tokens = append(tokens, current)
 				current = token.Token{}
 			}
-			current = token.AppendRune(current, r)
+			current = token.AppendRune(ti.caser, current, r)
 			prevNumber = false
 		case unicode.IsLower(r):
 			if !foundLower && current.Len() > 0 {
@@ -229,14 +239,14 @@ func (ti TokenizerImpl) Tokenize(str string, allowedSymbols []rune, numberRules 
 					tokens = append(tokens, split[:len(split)-1]...)
 				}
 			}
-			current = token.AppendRune(current, r)
+			current = token.AppendRune(ti.caser, current, r)
 			pending = nil
 			foundLower = true
 		case unicode.IsNumber(r):
 			// if adding the number onto current makes it a valid number
 			// then append this rune to current
-			if token.AppendRune(current, r).IsNumber(numberRules) {
-				current = token.AppendRune(current, r)
+			if token.AppendRune(ti.caser, current, r).IsNumber(numberRules) {
+				current = token.AppendRune(ti.caser, current, r)
 			} else {
 				// otherwise it is not a number and so we add the current token
 				// to the token or pending list depending on whether or not we
@@ -247,7 +257,7 @@ func (ti TokenizerImpl) Tokenize(str string, allowedSymbols []rune, numberRules 
 				} else if current.Len() > 0 { // otherwise, we have to push the current token into a pending state
 					pending = append(pending, current)
 				}
-				current = token.AppendRune(current, r)
+				current = token.AppendRune(ti.caser, current, r)
 			}
 			prevNumber = true
 		default:
@@ -260,37 +270,37 @@ func (ti TokenizerImpl) Tokenize(str string, allowedSymbols []rune, numberRules 
 						// a number or an 'e' and a number. as such, we have to check if
 						// both this and the next rune (and possibly the rune after
 						// that) make it a number.
-						n := token.AppendRune(current, r)
+						n := token.AppendRune(ti.caser, current, r)
 						runes := []rune(str)
 						if n.IsNumber(numberRules) {
 							current = n
 						} else if i <= len(runes)-2 && (unicode.IsNumber(runes[i+1]) || unicode.IsLetter(runes[i+1])) || allowed.Contains(runes[i+1]) {
-							next := token.AppendRune(n, runes[i+1])
+							next := token.AppendRune(ti.caser, n, runes[i+1])
 							if next.IsNumber(numberRules) {
 								current = n
 							} else {
 								if foundLower {
 									tokens = append(tokens, current)
-									current = token.FromRunes([]rune{r})
+									current = token.FromRunes(ti.caser, []rune{r})
 								} else {
 									pending = append(pending, current)
-									current = token.FromRunes([]rune{r})
+									current = token.FromRunes(ti.caser, []rune{r})
 								}
 							}
 						} else {
 							if foundLower {
 								tokens = append(tokens, current)
-								current = token.FromRunes([]rune{r})
+								current = token.FromRunes(ti.caser, []rune{r})
 							} else {
 								pending = append(pending, current)
-								current = token.FromRunes([]rune{r})
+								current = token.FromRunes(ti.caser, []rune{r})
 							}
 						}
 					} else {
-						current = token.AppendRune(current, r)
+						current = token.AppendRune(ti.caser, current, r)
 					}
 				} else {
-					current = token.AppendRune(current, r)
+					current = token.AppendRune(ti.caser, current, r)
 				}
 			} else if ti.delimiters.Contains(r) {
 				if current.Len() > 0 {
@@ -378,10 +388,11 @@ const (
 // formatting (e.g. { "Json", "JSON"}).
 //
 // tokenizer is used to tokenize the input text.
-func NewConverter(replacements []Replacement, tokenizer Tokenizer) ConverterImpl {
+func NewConverter(replacements []Replacement, tokenizer Tokenizer, caser token.Caser) ConverterImpl {
 	ci := ConverterImpl{
-		index:     index.New(),
+		index:     index.New(caser),
 		tokenizer: tokenizer,
+		caser:     token.CaserOrDefault(caser),
 	}
 	for _, v := range replacements {
 		ci.set(v.Camel, v.Screaming)
@@ -400,6 +411,7 @@ func NewConverter(replacements []Replacement, tokenizer Tokenizer) ConverterImpl
 type ConverterImpl struct {
 	index     *index.Index
 	tokenizer Tokenizer
+	caser     token.Caser
 }
 
 func (ci ConverterImpl) Index() index.Index {
@@ -408,7 +420,7 @@ func (ci ConverterImpl) Index() index.Index {
 
 // Contains reports whether a key is in the Converter's replacement table.
 func (ci ConverterImpl) Contains(key string) bool {
-	return ci.index.ContainsForward(token.FromString(key))
+	return ci.index.ContainsForward(token.FromString(ci.caser, key))
 }
 
 // Replacements returns a slice of Replacement in the lookup trie.
@@ -425,7 +437,7 @@ func (ci ConverterImpl) Replacements() []Replacement {
 }
 
 func (ci *ConverterImpl) set(key, value string) {
-	ci.index.Add(token.FromString(key), token.FromString(value))
+	ci.index.Add(token.FromString(ci.caser, key), token.FromString(ci.caser, value))
 }
 
 func lowerAndCheck(input string) (string, bool) {
@@ -458,7 +470,7 @@ func (ci *ConverterImpl) Set(key, value string) {
 
 // Remove deletes the key from the map. Either variant is sufficient.
 func (ci *ConverterImpl) Delete(key string) {
-	tok := token.FromString(key)
+	tok := token.FromString(ci.caser, key)
 	ci.index.Delete(tok)
 }
 

@@ -1,8 +1,6 @@
 package token
 
-import (
-	"unicode"
-)
+import "unicode"
 
 // Token contains a slice of runes representing the raw value and value in
 // lowercase form.
@@ -16,47 +14,72 @@ type Token struct {
 }
 
 // Append appends all of o to t
-func Append(t Token, elems ...Token) Token {
+func Append(caser Caser, t Token, elems ...Token) Token {
+	caser = CaserOrDefault(caser)
 	for _, e := range elems {
+		if e.Len() == 0 {
+			continue
+		}
+		if t.Len() == 0 {
+			t = e
+		}
+		// just incase the first rune is a Title
+		if unicode.IsTitle(e.value[0]) {
+			e.value[0] = caser.ToUpper(e.value[0])
+		}
+		e.upper[0] = caser.ToUpper(e.upper[0])
 		t = Token{
 			value: append(t.value, e.value...),
 			lower: append(t.lower, e.lower...),
 			upper: append(t.upper, e.upper...),
-			len:   t.len + e.len,
 		}
 	}
 	return t
 }
 
 // AppendRune append the rune to the current token.
-func AppendRune(t Token, r rune) Token {
+func AppendRune(caser Caser, t Token, r rune) Token {
+	caser = CaserOrDefault(caser)
+	if unicode.IsTitle(r) {
+		r = caser.ToUpper(r)
+	}
+	upper := append(t.upper, caser.ToUpper(r))
+	if t.len == 0 && len(upper) > 0 {
+		upper[0] = caser.ToTitle(upper[0])
+	}
 	return Token{
 		value: append(t.value, r),
-		lower: append(t.lower, unicode.ToLower(r)),
-		upper: append(t.upper, unicode.ToUpper(r)),
+		lower: append(t.lower, caser.ToLower(r)),
+		upper: upper,
 		len:   t.len + 1,
 	}
 }
 
-func FromString[T ~string](value T) Token {
-	return FromRunes([]rune(value))
+func FromString[T ~string](caser Caser, value T) Token {
+	return FromRunes(caser, []rune(value))
 }
 
-func FromRune(value rune) Token {
+func FromRune(caser Caser, value rune) Token {
+	caser = CaserOrDefault(caser)
 	return Token{
 		value: []rune{value},
-		lower: []rune{unicode.ToLower(value)},
-		upper: []rune{unicode.ToUpper(value)},
+		lower: []rune{caser.ToLower(value)},
+		upper: []rune{caser.ToTitle(value)},
 		len:   1,
 	}
 }
 
-func FromRunes(value []rune) Token {
+func FromRunes(caser Caser, value []rune) Token {
+	caser = CaserOrDefault(caser)
 	upper := make([]rune, len(value))
 	lower := make([]rune, len(value))
 	for i, r := range value {
-		upper[i] = unicode.ToUpper(r)
-		lower[i] = unicode.ToLower(r)
+		if i == 0 {
+			upper[i] = caser.ToTitle(r)
+		} else {
+			upper[i] = caser.ToUpper(r)
+		}
+		lower[i] = caser.ToLower(r)
 	}
 	return Token{
 		value: value,
