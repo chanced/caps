@@ -4,6 +4,17 @@ import (
 	"unicode"
 )
 
+// Token contains a slice of runes representing the raw value and value in
+// lowercase form.
+//
+// This is used for the
+type Token struct {
+	value []rune
+	lower []rune
+	upper []rune
+	len   int
+}
+
 // Append appends all of o to t
 func Append(t Token, o Token) Token {
 	return Token{
@@ -24,19 +35,17 @@ func AppendRune(t Token, r rune) Token {
 	}
 }
 
-// Token contains a slice of runes representing the raw value and value in
-// lowercase form.
-//
-// This is used for the
-type Token struct {
-	value []rune
-	lower []rune
-	upper []rune
-	len   int
-}
-
 func FromString[T ~string](value T) Token {
 	return FromRunes([]rune(value))
+}
+
+func FromRune(value rune) Token {
+	return Token{
+		value: []rune{value},
+		lower: []rune{unicode.ToLower(value)},
+		upper: []rune{unicode.ToUpper(value)},
+		len:   1,
+	}
 }
 
 func FromRunes(value []rune) Token {
@@ -73,6 +82,10 @@ func (t Token) Lower() string {
 
 func (t Token) Upper() string {
 	return string(t.upper)
+}
+
+func (t Token) IsEmpty() bool {
+	return t.Len() == 0
 }
 
 func (t Token) UpperFirstLowerRest() string {
@@ -203,6 +216,22 @@ func (t Token) IsNumber(additionalRules ...map[rune]func(index int, r rune, val 
 	return true
 }
 
+func (t Token) Reverse() Token {
+	r := Token{
+		value: make([]rune, len(t.value)),
+		lower: make([]rune, len(t.lower)),
+		upper: make([]rune, len(t.upper)),
+	}
+	x := 0
+	for i := t.len - 1; i >= 0; i-- {
+		x = t.len - 1 - i
+		r.value[x] = t.value[i]
+		r.lower[x] = t.lower[i]
+		r.upper[x] = t.upper[i]
+	}
+	return r
+}
+
 // Split returns the current token split into a slice of Tokens for each rune in
 // the list.
 func (t Token) Split() []Token {
@@ -216,4 +245,58 @@ func (t Token) Split() []Token {
 		}
 	}
 	return result
+}
+
+func (t Token) FirstLowerRune() (rune, bool) {
+	if t.len == 0 {
+		return 0, false
+	}
+	return t.lower[0], true
+}
+
+func (t Token) FirstUpperRune() (rune, bool) {
+	if t.len == 0 {
+		return 0, false
+	}
+	return t.upper[0], true
+}
+
+func (t Token) FirstRune() (rune, bool) {
+	if t.len == 0 {
+		return 0, false
+	}
+	return t.value[0], true
+}
+
+func (t Token) ReverseSplit() []Token {
+	result := make([]Token, t.Len())
+	for i := t.len - 1; i >= 0; i-- {
+		result[t.len-1-i] = Token{
+			value: []rune{t.value[i]},
+			lower: []rune{t.lower[i]},
+			upper: []rune{t.upper[i]},
+			len:   1,
+		}
+	}
+	return result
+}
+
+func (t Token) LowerRunes() []rune {
+	return t.lower
+}
+
+func (t Token) UpperRunes() []rune {
+	return t.upper
+}
+
+func (t Token) Runes() []rune {
+	return t.value
+}
+
+func (t Token) LowerReversedRunes() []rune {
+	res := make([]rune, len(t.lower))
+	for i := t.len - 1; i >= 0; i-- {
+		res[t.len-1-i] = t.lower[i]
+	}
+	return res
 }

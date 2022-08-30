@@ -5,6 +5,7 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/chanced/caps/index"
 	"github.com/chanced/caps/token"
 )
 
@@ -335,9 +336,7 @@ const (
 // tokenizer is used to tokenize the input text.
 func NewConverter(replacements []Replacement, tokenizer Tokenizer) ConverterImpl {
 	r := ConverterImpl{
-		from:      make(map[string]token.Token, len(replacements)),
-		to:        make(map[string]token.Token, len(replacements)),
-		lookup:    make(map[string]lookupResult, len(replacements)*2),
+		index:     index.New(true),
 		tokenizer: tokenizer,
 	}
 	for _, v := range replacements {
@@ -365,73 +364,38 @@ func NewConverter(replacements []Replacement, tokenizer Tokenizer) ConverterImpl
 //	{ "Gcp",   "GCP" },
 //	{ "Sql",   "SQL" },
 type ConverterImpl struct {
-	from      map[string]token.Token
-	to        map[string]token.Token
-	lookup    map[string]lookupResult
+	index     *index.Index
 	tokenizer Tokenizer
 }
 
-type lookupResult struct {
-	from token.Token
-	to   token.Token
-}
-
 // Contains reports whether a key is in the Converter's replacement table.
-func (f ConverterImpl) Contains(key string) bool {
-	_, ok := f.lookup[strings.ToLower(key)]
-	return ok
+func (c ConverterImpl) Contains(key string) bool {
+	return c.index.Contains(token.FromString(key))
 }
 
-// Lookup returns the Replacement for the given key, returning nil if it does
-// not exist.
-func (r ConverterImpl) Lookup(key string) *Replacement {
-	res, ok := r.lookup[key]
-	if ok {
-		return &Replacement{Camel: res.from.String(), Screaming: res.to.String()}
-	}
-	if res, ok = r.lookup[strings.ToLower(key)]; ok {
-		return &Replacement{Camel: res.from.String(), Screaming: res.to.String()}
-	} else {
-		return nil
-	}
+// Match returns an index.Index containing all of the Replacements that match
+// the input token.
+//
+// Note: the input is expected to be reversed. (e.g. "json" should be "nsoj")
+func (c ConverterImpl) Match(input rune) index.Index {
+	return c.index.Match(token.FromRune(input))
 }
 
-// Table returns a representation of the internal table.
-func (r ConverterImpl) Table(key string) map[string]token.Token {
-	m := make(map[string]token.Token, len(r.from))
-	for k, v := range r.from {
-		m[k] = v
-	}
-	return m
-}
-
-// Replacements returns a slice of Replacement in the lookup table.
-func (r ConverterImpl) Replacements() []Replacement {
-	res := make([]Replacement, 0, len(r.from))
-	for upper, screaming := range r.from {
-		res = append(res, Replacement{
-			Camel:     upper,
-			Screaming: string(screaming.Value()),
-		})
+// Replacements returns a slice of Replacement in the lookup trie.
+func (c ConverterImpl) Replacements() []Replacement {
+	indexedVals := c.index.Values()
+	res := make([]Replacement, len(indexedVals))
+	for i, v := range indexedVals {
+		res[i] = Replacement{
+			Camel:     v.Camel.Value(),
+			Screaming: v.Screaming.Value(),
+		}
 	}
 	return res
 }
 
-func (r *ConverterImpl) set(key, value string) {
-	from := token.FromString(key)
-	to := token.FromString(value)
-	r.lookup[from.Lower()] = lookupResult{
-		from: from,
-		to:   to,
-	}
-	if to.Lower() != from.Lower() {
-		r.lookup[to.Lower()] = lookupResult{
-			from: from,
-			to:   to,
-		}
-	}
-	r.from[key] = from
-	r.to[value] = to
+func (c *ConverterImpl) set(key, value string) {
+	c.index.Add(token.FromString(key), token.FromString(value))
 }
 
 func lowerAndCheck(input string) (string, bool) {
@@ -448,55 +412,49 @@ func lowerAndCheck(input string) (string, bool) {
 }
 
 // Set adds the key/value pair to the table.
-func (r *ConverterImpl) Set(key, value string) {
+func (c *ConverterImpl) Set(key, value string) {
 	kstr, keyHasLower := lowerAndCheck(key)
 	vstr, valueHasLower := lowerAndCheck(value)
-
-	if v, ok := r.lookup[kstr]; ok {
-		delete(r.from, v.from.String())
-		delete(r.to, v.to.String())
-		delete(r.lookup, key)
-		return
-	}
-
-	if v, ok := r.lookup[vstr]; ok {
-		delete(r.from, v.from.String())
-		delete(r.to, v.to.String())
-		delete(r.lookup, key)
-	}
+	c.Delete(kstr)
+	c.Delete(vstr)
 
 	// checking to see if we need to swap these.
 	if !keyHasLower && valueHasLower {
-		r.set(value, key)
+		c.set(value, key)
 	} else {
-		r.set(key, value)
+		c.set(key, value)
 	}
 }
 
 // Remove deletes the key from the map. Either variant is sufficient.
-func (r *ConverterImpl) Delete(key string) {
-	l := strings.ToLower(key)
-	if v, ok := r.lookup[l]; ok {
-		delete(r.from, v.from.String())
-		delete(r.to, v.to.String())
-		delete(r.lookup, l)
+func (c *ConverterImpl) Delete(key string) {
+	tok := token.FromString(key)
+	if val, ok := c.index.Get(tok); ok {
+		c.index.Delete(token.FromString(val.Camel.Lower()))
+		c.index.Delete(token.FromString(val.Screaming.Lower()))
 	}
+	c.index.Delete(tok)
 }
 
-func (r *ConverterImpl) resolve(tok token.Token, style ReplaceStyle) (token.Token, bool) {
-	l := string(tok.Lower())
-	if lookup, ok := r.lookup[l]; ok {
+type resolvedReplacement struct {
+	resolved       token.Token
+	partialMatches []token.Token
+}
+
+func (c *ConverterImpl) resolve(idx index.Index, style ReplaceStyle) resolvedReplacement {
+	var res resolvedReplacement
+	if idx.LastMatch().HasValue() {
 		switch style {
 		case ReplaceStyleCamel:
-			return lookup.from, true
+			res.resolved = idx.LastMatch().Camel
 		case ReplaceStyleScreaming:
-			return lookup.to, true
+			res.resolved = idx.LastMatch().Screaming
 		case ReplaceStyleLower:
-			return token.FromString(lookup.to.Lower()), true
-
+			res.resolved = idx.LastMatch().Lower
 		}
 	}
-	return token.Token{}, false
+	res.partialMatches = idx.PartialMatches()
+	return res
 }
 
 // FormatToken formats the token with the desired style.

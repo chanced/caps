@@ -3,9 +3,17 @@ package caps_test
 import (
 	"fmt"
 	"testing"
+	"unicode"
 
 	"github.com/chanced/caps"
 )
+
+func TestTurkish(t *testing.T) {
+	fmt.Println("i -> ", string(unicode.ToUpper('i')), string(unicode.TurkishCase.ToUpper('i')))
+	fmt.Println("ı ->", string(unicode.ToUpper('ı')), string(unicode.TurkishCase.ToUpper('ı')))
+
+	fmt.Println(unicode.IsUpper('İ'))
+}
 
 func TestTokenizer(t *testing.T) {
 	tests := []struct {
