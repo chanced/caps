@@ -32,8 +32,16 @@ func main() {
     fmt.Println(caps.ToCamel("an example"))
     // Output:
     // AnExample
+    fmt.Println(caps.ToLowerCamel("SomeID"))
+    // Output:
+    // someID
+    fmt.Println(caps.ToLowerCamel("SomeID", Opts{ReplaceStyle: ReplaceStyleLower})
+    // Output:
+    // someId
 }
 ```
+
+[playground link](https://go.dev/play/p/f5JoVlp4Kv2)
 
 Word boundaries are determined by the `caps.Converter`. The provided implementation, `caps.ConverterImpl`,
 delegates the boundary detection to `caps.Tokenizer`. The provided implementation, `caps.TokenizerImpl`,
