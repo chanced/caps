@@ -24,20 +24,20 @@ Out of the box, the following case conversion are supported:
 ```go
 package main
 import (
-    "fmt"
-    "github.com/chanced/caps"
+	"fmt"
+	"github.com/chanced/caps"
 )
 
 func main() {
-    fmt.Println(caps.ToCamel("an example"))
-    // Output:
-    // AnExample
-    fmt.Println(caps.ToLowerCamel("SomeID"))
-    // Output:
-    // someID
-    fmt.Println(caps.ToLowerCamel("SomeID", Opts{ReplaceStyle: ReplaceStyleLower})
-    // Output:
-    // someId
+	fmt.Println(caps.ToCamel("an example"))
+	// Output:
+	// AnExample
+	fmt.Println(caps.ToLowerCamel("SomeID"))
+	// Output:
+	// someID
+	fmt.Println(caps.ToLowerCamel("SomeID", caps.Opts{ReplaceStyle: caps.ReplaceStyleLower}))
+	// Output:
+	// someId
 }
 ```
 
