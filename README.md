@@ -32,7 +32,7 @@ func main() {
 	fmt.Println(caps.ToCamel("an example"))
 	// Output:
 	// AnExample
-	fmt.Println(caps.ToLowerCamel("SomeID"))
+	fmt.Println(caps.ToLowerCamel("some_id"))
 	// Output:
 	// someID
 	fmt.Println(caps.ToLowerCamel("SomeID", caps.Opts{ReplaceStyle: caps.ReplaceStyleLower}))
