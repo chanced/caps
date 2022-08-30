@@ -46,13 +46,13 @@ func ExampleToScreamingKebab() {
 	// THIS-IS-AN-EXAMPLE-ID-32
 }
 
-func ExampleToDot() {
-	fmt.Println(caps.ToDot("This is [an] {example}${id32}."))
+func ExampleToDotNotation() {
+	fmt.Println(caps.ToScreamingDot("This is [an] {example}${id32}."))
 	// Output:
 	// this.is.an.example.id.32
 }
 
-func ExampleToScreamingDot() {
+func ExampleToScreamingDotNotation() {
 	fmt.Println(caps.ToScreamingDot("This is [an] {example}${id32}."))
 	// Output:
 	// THIS.IS.AN.EXAMPLE.ID.32
