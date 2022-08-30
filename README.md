@@ -27,45 +27,45 @@ uses the following runes as delimiters: `" _.!?:;$-(){}[]#@&+~"`.
 
 `caps.StdConverter` also allows users to register `caps.Replacement`s for acronym replacement. The default list is:
 
-```go
-		{"Acl", "ACL"},
-		{"Api", "API"},
-		{"Ascii", "ASCII"},
-		{"Cpu", "CPU"},
-		{"Css", "CSS"},
-		{"Dns", "DNS"},
-		{"Eof", "EOF"},
-		{"Guid", "GUID"},
-		{"Html", "HTML"},
-		{"Http", "HTTP"},
-		{"Https", "HTTPS"},
-		{"Id", "ID"},
-		{"Ip", "IP"},
-		{"Json", "JSON"},
-		{"Lhs", "LHS"},
-		{"Qps", "QPS"},
-		{"Ram", "RAM"},
-		{"Rhs", "RHS"},
-		{"Rpc", "RPC"},
-		{"Sla", "SLA"},
-		{"Smtp", "SMTP"},
-		{"Sql", "SQL"},
-		{"Ssh", "SSH"},
-		{"Tcp", "TCP"},
-		{"Tls", "TLS"},
-		{"Ttl", "TTL"},
-		{"Udp", "UDP"},
-		{"Ui", "UI"},
-		{"Uid", "UID"},
-		{"Uuid", "UUID"},
-		{"Uri", "URI"},
-		{"Url", "URL"},
-		{"Utf8", "UTF8"},
-		{"Vm", "VM"},
-		{"Xml", "XML"},
-		{"Xmpp", "XMPP"},
-		{"Xsrf", "XSRF"},
-		{"Xss", "XSS"},
+```
+"Acl" -> "ACL"
+"Api" -> "API"
+"Ascii" -> "ASCII"
+"Cpu" -> "CPU"
+"Css" -> "CSS"
+"Dns" -> "DNS"
+"Eof" -> "EOF"
+"Guid" -> "GUID"
+"Html" -> "HTML"
+"Http" -> "HTTP"
+"Https" -> "HTTPS"
+"Id" -> "ID"
+"Ip" -> "IP"
+"Json" -> "JSON"
+"Lhs" -> "LHS"
+"Qps" -> "QPS"
+"Ram" -> "RAM"
+"Rhs" -> "RHS"
+"Rpc" -> "RPC"
+"Sla" -> "SLA"
+"Smtp" -> "SMTP"
+"Sql" -> "SQL"
+"Ssh" -> "SSH"
+"Tcp" -> "TCP"
+"Tls" -> "TLS"
+"Ttl" -> "TTL"
+"Udp" -> "UDP"
+"Ui" -> "UI"
+"Uid" -> "UID"
+"Uuid" -> "UUID"
+"Uri" -> "URI"
+"Url" -> "URL"
+"Utf8" -> "UTF8"
+"Vm" -> "VM"
+"Xml" -> "XML"
+"Xmpp" -> "XMPP"
+"Xsrf" -> "XSRF"
+"Xss" -> "XSS"
 ```
 
 If you would like to add or remove entries from that list, you have a few
