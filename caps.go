@@ -243,6 +243,7 @@ func (ti TokenizerImpl) Tokenize(str string, allowedSymbols []rune, numberRules 
 			pending = nil
 			foundLower = true
 		case unicode.IsNumber(r):
+
 			// if adding the number onto current makes it a valid number
 			// then append this rune to current
 			if token.AppendRune(ti.caser, current, r).IsNumber(numberRules) {
@@ -535,6 +536,12 @@ func (ci ConverterImpl) Convert(style Style, repStyle ReplaceStyle, input string
 				idx = ci.Index()
 			}
 		default:
+			// an edge case for utf8
+			clonedIdx := idx.Clone()
+			if clonedIdx, ok = clonedIdx.MatchForward(tok); ok && clonedIdx.HasMatch() && len(clonedIdx.PartialMatches()) == 0 {
+				idx = clonedIdx
+			}
+
 			if idx.HasMatch() {
 				parts = append(parts, FormatIndexedReplacement(style, repStyle, i+1, idx.LastMatch()))
 			}

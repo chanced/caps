@@ -39,6 +39,16 @@ type Index struct {
 	caser          token.Caser
 }
 
+func (idx *Index) Clone() Index {
+	return Index{
+		value:          idx.value,
+		nodes:          idx.nodes,
+		lastMatch:      idx.lastMatch,
+		partialMatches: idx.partialMatches,
+		caser:          idx.caser,
+	}
+}
+
 // NewIndex creates a new Index of Replacements,
 // internally represented as Trie
 //

@@ -81,6 +81,7 @@ func TestConverterConvert(t *testing.T) {
 		{"SomeUID", "some_uid", "_", caps.StyleLower, caps.ReplaceStyleLower, nil, nil, nil},
 		{"FULLURI", "fulluri", "_", caps.StyleLower, caps.ReplaceStyleLower, nil, nil, nil},
 		{"FullURI", "full_uri", "_", caps.StyleLower, caps.ReplaceStyleLower, nil, nil, nil},
+		{"some_uri8_text", "SomeURI8Text", "", caps.StyleCamel, caps.ReplaceStyleScreaming, nil, nil, nil},
 	}
 
 	for _, test := range tests {
