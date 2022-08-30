@@ -102,15 +102,15 @@ func main() {
     replacements := []caps.Replacement{
         { Camel: "Http", Screaming: "HTTP" }, // just an example
     }
-    turkishConverter := caps.NewConverter(replacements, tokenizer, token.TurkishCaser)
+    turkish := caps.NewConverter(replacements, tokenizer, token.TurkishCaser)
 
     // to use this as your default throughout your application
     // you can set it **BEFORE YOU USE IT** (caps.ConverterImpl is not guarded for thread-safety)
     //
-    // caps.DefaultConverter = turkishConverter
+    // caps.DefaultConverter = turkish
     //
     // otherwise, you can pass in the converter to the config for each call:
-    caps.To
+    caps.ToCamel("An example", caps.Opts{Converter: turkish})
 }
 
 
