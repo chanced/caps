@@ -645,29 +645,26 @@ func loadOpts(opts []Opts) Opts {
 }
 
 // UpperFirst converts the first rune of str to uppercase.
-func UpperFirst[T ~string](str T) T {
+func UpperFirst[T ~string](caser token.Caser, str T) T {
 	runes := []rune(str)
-	switch len(runes) {
-	case 0:
+	if len(runes) == 0 {
 		return ""
-	case 1:
-		return T(unicode.ToUpper(runes[0]))
-	default:
-		runes[0] = unicode.ToUpper(runes[0])
-		return T(runes)
 	}
+	runes[0] = caser.ToTitle(runes[0])
+	return T(runes)
 }
 
 // LowerFirst converts the first rune of str to lowercase.
-func LowerFirst[T ~string](str T) T {
+func LowerFirst[T ~string](caser token.Caser, str T) T {
+	caser = token.CaserOrDefault(caser)
 	runes := []rune(str)
 	switch len(runes) {
 	case 0:
 		return ""
 	case 1:
-		return T(unicode.ToLower(runes[0]))
+		return T(caser.ToLower(runes[0]))
 	default:
-		runes[0] = unicode.ToLower(runes[0])
+		runes[0] = caser.ToLower(runes[0])
 		return T(runes)
 	}
 }
