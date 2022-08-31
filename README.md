@@ -73,7 +73,8 @@ uses the following rules:
     letters are considered boundaries (e.g. `"ThisVar"` would be tokenized into `["This", "Var"]`)
 -   When mixed with lower and upper case characters, sequences of upper case are
     broken up into tokens (e.g. `"SomeID"` would be tokenized into `["Some", "I", "D"]`).
--   Replacement rules are then evaluated based on the `Token`s, which may combine them.
+-   Replacement rules are then evaluated based on the `Token`s, which may
+    combine them based on the rules below.
 
 ## Replacements
 
