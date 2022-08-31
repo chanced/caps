@@ -1,0 +1,93 @@
+package caps
+
+// DefaultReplacements is the list of Replacements passed to DefaultConverter.
+//
+//	{"Acl", "ACL"},
+//	{"Api", "API"},
+//	{"Ascii", "ASCII"},
+//	{"Cpu", "CPU"},
+//	{"Css", "CSS"},
+//	{"Dns", "DNS"},
+//	{"Eof", "EOF"},
+//	{"Guid", "GUID"},
+//	{"Html", "HTML"},
+//	{"Http", "HTTP"},
+//	{"Https", "HTTPS"},
+//	{"Id", "ID"},
+//	{"Ip", "IP"},
+//	{"Json", "JSON"},
+//	{"Lhs", "LHS"},
+//	{"Qps", "QPS"},
+//	{"Ram", "RAM"},
+//	{"Rhs", "RHS"},
+//	{"Rpc", "RPC"},
+//	{"Sla", "SLA"},
+//	{"Smtp", "SMTP"},
+//	{"Sql", "SQL"},
+//	{"Ssh", "SSH"},
+//	{"Tcp", "TCP"},
+//	{"Tls", "TLS"},
+//	{"Ttl", "TTL"},
+//	{"Udp", "UDP"},
+//	{"Ui", "UI"},
+//	{"Uid", "UID"},
+//	{"Uuid", "UUID"},
+//	{"Uri", "URI"},
+//	{"Url", "URL"},
+//	{"Utf8", "UTF8"},
+//	{"Vm", "VM"},
+//	{"Xml", "XML"},
+//	{"Xmpp", "XMPP"},
+//	{"Xsrf", "XSRF"},
+//	{"Xss", "XSS"},
+var DefaultReplacements []Replacement = []Replacement{
+	{"Acl", "ACL"},
+	{"Api", "API"},
+	{"Ascii", "ASCII"},
+	{"Cpu", "CPU"},
+	{"Css", "CSS"},
+	{"Dns", "DNS"},
+	{"Eof", "EOF"},
+	{"Guid", "GUID"},
+	{"Html", "HTML"},
+	{"Http", "HTTP"},
+	{"Https", "HTTPS"},
+	{"Id", "ID"},
+	{"Ip", "IP"},
+	{"Json", "JSON"},
+	{"Lhs", "LHS"},
+	{"Qps", "QPS"},
+	{"Ram", "RAM"},
+	{"Rhs", "RHS"},
+	{"Rpc", "RPC"},
+	{"Sla", "SLA"},
+	{"Smtp", "SMTP"},
+	{"Sql", "SQL"},
+	{"Ssh", "SSH"},
+	{"Tcp", "TCP"},
+	{"Tls", "TLS"},
+	{"Ttl", "TTL"},
+	{"Udp", "UDP"},
+	{"Ui", "UI"},
+	{"Uid", "UID"},
+	{"Uuid", "UUID"},
+	{"Uri", "URI"},
+	{"Url", "URL"},
+	{"Utf8", "UTF8"},
+	{"Vm", "VM"},
+	{"Xml", "XML"},
+	{"Xmpp", "XMPP"},
+	{"Xsrf", "XSRF"},
+	{"Xss", "XSS"},
+}
+
+type (
+	Replacement struct {
+		// Camel case variant of the word which should be replaced.
+		// e.g. "Http"
+		Camel string
+		// Screaming (all upper case) representation of the word to replace.
+		// e.g. "HTTP"
+		Screaming string
+	}
+)

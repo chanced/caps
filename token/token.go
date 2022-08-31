@@ -10,7 +10,6 @@ type Token struct {
 	value []rune
 	lower []rune
 	upper []rune
-	len   int
 }
 
 // Append appends all of o to t
@@ -19,9 +18,6 @@ func Append(caser Caser, t Token, elems ...Token) Token {
 	for _, e := range elems {
 		if e.Len() == 0 {
 			continue
-		}
-		if t.Len() == 0 {
-			t = e
 		}
 		// just incase the first rune is a Title
 		if unicode.IsTitle(e.value[0]) {
@@ -44,14 +40,13 @@ func AppendRune(caser Caser, t Token, r rune) Token {
 		r = caser.ToUpper(r)
 	}
 	upper := append(t.upper, caser.ToUpper(r))
-	if t.len == 0 && len(upper) > 0 {
+	if t.Len() == 0 && len(upper) > 0 {
 		upper[0] = caser.ToTitle(upper[0])
 	}
 	return Token{
 		value: append(t.value, r),
 		lower: append(t.lower, caser.ToLower(r)),
 		upper: upper,
-		len:   t.len + 1,
 	}
 }
 
@@ -65,7 +60,6 @@ func FromRune(caser Caser, value rune) Token {
 		value: []rune{value},
 		lower: []rune{caser.ToLower(value)},
 		upper: []rune{caser.ToTitle(value)},
-		len:   1,
 	}
 }
 
@@ -85,7 +79,6 @@ func FromRunes(caser Caser, value []rune) Token {
 		value: value,
 		lower: lower,
 		upper: upper,
-		len:   len(value),
 	}
 }
 
@@ -95,7 +88,7 @@ func (t Token) String() string {
 
 // Len returns the number of runes in the Part.
 func (t Token) Len() int {
-	return t.len
+	return len(t.value)
 }
 
 func (t Token) Value() string {
@@ -247,11 +240,10 @@ func (t Token) Reverse() Token {
 		value: make([]rune, len(t.value)),
 		lower: make([]rune, len(t.lower)),
 		upper: make([]rune, len(t.upper)),
-		len:   t.len,
 	}
 	x := 0
-	for i := t.len - 1; i >= 0; i-- {
-		x = t.len - 1 - i
+	for i := t.Len() - 1; i >= 0; i-- {
+		x = t.Len() - 1 - i
 		r.value[x] = t.value[i]
 		r.lower[x] = t.lower[i]
 		r.upper[x] = t.upper[i]
@@ -269,28 +261,27 @@ func (t Token) Split() []Token {
 			value: []rune{r},
 			lower: []rune{t.lower[i]},
 			upper: []rune{t.upper[i]},
-			len:   1,
 		}
 	}
 	return result
 }
 
 func (t Token) FirstLowerRune() (rune, bool) {
-	if t.len == 0 {
+	if t.Len() == 0 {
 		return 0, false
 	}
 	return t.lower[0], true
 }
 
 func (t Token) FirstUpperRune() (rune, bool) {
-	if t.len == 0 {
+	if t.Len() == 0 {
 		return 0, false
 	}
 	return t.upper[0], true
 }
 
 func (t Token) FirstRune() (rune, bool) {
-	if t.len == 0 {
+	if t.Len() == 0 {
 		return 0, false
 	}
 	return t.value[0], true
@@ -298,12 +289,11 @@ func (t Token) FirstRune() (rune, bool) {
 
 func (t Token) ReverseSplit() []Token {
 	result := make([]Token, t.Len())
-	for i := t.len - 1; i >= 0; i-- {
-		result[t.len-1-i] = Token{
+	for i := t.Len() - 1; i >= 0; i-- {
+		result[t.Len()-1-i] = Token{
 			value: []rune{t.value[i]},
 			lower: []rune{t.lower[i]},
 			upper: []rune{t.upper[i]},
-			len:   1,
 		}
 	}
 	return result
@@ -323,8 +313,8 @@ func (t Token) Runes() []rune {
 
 func (t Token) LowerReversedRunes() []rune {
 	res := make([]rune, len(t.lower))
-	for i := t.len - 1; i >= 0; i-- {
-		res[t.len-1-i] = t.lower[i]
+	for i := t.Len() - 1; i >= 0; i-- {
+		res[t.Len()-1-i] = t.lower[i]
 	}
 	return res
 }
