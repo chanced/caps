@@ -54,8 +54,8 @@ func main() {
 
 ## Word boundaries
 
-Word boundaries are determined by the `caps.Converter`. The provided implementation, `caps.ConverterImpl`,
-delegates the boundary detection to `caps.Tokenizer`. The provided implementation, `caps.TokenizerImpl`,
+Word boundaries are determined by the `caps.Converter`. The provided implementation, `caps.StdConverter`,
+delegates the boundary detection to `caps.Tokenizer`. The provided implementation, `caps.StdTokenizer`,
 uses the following rules:
 
 -   The following characters are considered word breaks `" _.!?:;$-(){}[]#@&+~"` unless present in `AllowedSymbols`
@@ -78,7 +78,7 @@ uses the following rules:
 
 ## Replacements
 
-`caps.ConverterImpl` also allows users to register `caps.Replacement`s for
+`caps.StdConverter` also allows users to register `caps.Replacement`s for
 initialism replacements. Each `Replacement` is indexed in a trie (see
 [Index](https://github.com/chanced/caps/blob/main/index/index.go)).
 
@@ -136,9 +136,9 @@ options. See below.
 
 ## Customizing the `Converter`
 
-### Creating isolated `caps.ConverterImpl` instances
+### Creating isolated `caps.StdConverter` instances
 
-You can pass a new instance of `caps.ConverterImpl` with a new set of
+You can pass a new instance of `caps.StdConverter` with a new set of
 `caps.Replacement`.
 
 ```go
