@@ -123,9 +123,9 @@ You can pass a new instance of `caps.StdConverter` with a new set of
     }
 ```
 
-You can update `caps.DefaultConverter`. Just be aware that the
-module was not built with thread-safety in mind so you should set it once.
-Otherwise, you'll need guard your usage of the library accordingly.
+You can update `caps.DefaultConverter`. Just be aware that the module was not
+built with thread-safety in mind so you should set it before you make any
+conversions. Otherwise, you'll need guard your usage of the library accordingly.
 
 ```go
 package main
@@ -172,13 +172,12 @@ func main() {
 
     // to use this as your default throughout your application
     // you can overwrite caps.DefaultConverter
-    // **BEFORE YOU USE IT** (caps.ConverterImpl is not guarded for thread-safety)
     //
     // caps.DefaultConverter = turkish
     //
     // otherwise, you can pass in the converter to the config for each call:
 
-    fmt.Println(caps.ToCamel("An example", caps.Opts{Converter: turkish}))
+    fmt.Println(caps.ToCamel("An example", caps.WithConverter(turkish)))
 }
 
 ```
