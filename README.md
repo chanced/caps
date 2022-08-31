@@ -9,6 +9,11 @@ caps is a unicode aware, case conversion library for Go with zero depencies. It
 was built with the following priorites in mind: configurability, consistency,
 correctness, ergonomic, and reasonable performance; in that order.
 
+It has built in support for configurable initialism replacements (e.g. "Uuid"
+`->` "UUID"), can support special case unicode (e.g. Turkish, Azeri, ...), and
+finally is modular in that each part of the process can be configured,
+augmented, or replaced.
+
 The following case conversions are supported:
 
 -   Camel Case (e.g. CamelCase)
