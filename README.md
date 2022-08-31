@@ -73,9 +73,7 @@ uses the following rules:
     letters are considered boundaries (e.g. `"ThisVar"` would be tokenized into `["This", "Var"]`)
 -   When mixed with lower and upper case characters, sequences of upper case are
     broken up into tokens (e.g. `"SomeID"` would be tokenized into `["Some", "I", "D"]`).
--   Replacement rules are then evaluated for both multi-rune `Token`s and single
-    rune sequences. (e.g. both `["I", "D"]` and `"id"` would match the default
-    replacement of `{"Id", "ID"}`)
+-   Replacement rules are then evaluated based on the `Token`s, which may combine them.
 
 ## Replacements
 
@@ -85,8 +83,8 @@ initialism replacements. Each `Replacement` is indexed in a trie (see
 
 -   Multi-rune `Token`s are searched independently unless followed by a number (e.g.
     `"ID"`, `"UTF8"`).
--   `Token`s with single rune sequences (e.g.`["U", "U", "I", "D"]`) are
-    evaluated as a word until as potential `Replacement` until a non-match is
+-   Sequences of single rune `Token`s (e.g.`["U", "U", "I", "D"]`) are
+    evaluated as a potential `Replacement` until a non-match is
     found or the sequence is broken by a `Token` with more than one rune.
 
 ### Default `Replacement` list:
