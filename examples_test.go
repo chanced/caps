@@ -78,19 +78,3 @@ func ExampleToTitle() {
 	// Output:
 	// This Is An Example ID 32
 }
-
-type MyConverter struct{}
-
-func (MyConverter) Convert(req caps.ConvertRequest) string {
-	res := caps.DefaultConverter.Convert(req)
-	if req.Style == caps.StyleLowerCamel && req.ReplaceStyle == caps.ReplaceStyleCamel && res == "id" {
-		return "_id"
-	}
-	return res
-}
-
-func ExampleWithConverter() {
-	fmt.Println(caps.ToLowerCamel("id", caps.WithConverter(MyConverter{}), caps.WithReplaceStyle(caps.ReplaceStyleCamel)))
-	// Output:
-	// _id
-}

@@ -1,6 +1,7 @@
 package caps_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/chanced/caps"
@@ -105,4 +106,20 @@ func TestConverterTableOps(t *testing.T) {
 	// if wss.Screaming != "WSS" {
 	// 	t.Errorf("expected \"WSS\", got \"%s\"", wss.Screaming)
 	// }
+}
+
+type MyConverter struct{}
+
+func (MyConverter) Convert(req caps.ConvertRequest) string {
+	res := caps.DefaultConverter.Convert(req)
+	if req.Style == caps.StyleLowerCamel && req.ReplaceStyle == caps.ReplaceStyleCamel && res == "id" {
+		return "_id"
+	}
+	return res
+}
+
+func ExampleWithConverter() {
+	fmt.Println(caps.ToLowerCamel("id", caps.WithConverter(MyConverter{}), caps.WithReplaceStyle(caps.ReplaceStyleCamel)))
+	// Output:
+	// _id
 }
