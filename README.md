@@ -123,9 +123,9 @@ You can pass a new instance of `caps.StdConverter` with a new set of
     }
 ```
 
-You can update `caps.DefaultConverter`. Just be aware that the module was not
-built with thread-safety in mind so you should set it before you make any
-conversions. Otherwise, you'll need guard your usage of the library accordingly.
+You can update `caps.DefaultConverter`. You should set it before you make any
+conversions. Otherwise, you'll need guard your usage of the library accordingly
+(e.g. a mutex).
 
 ```go
 package main
