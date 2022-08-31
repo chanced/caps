@@ -65,14 +65,22 @@ uses the following rules:
 -   When a string consists of both upper case and lower case letters, upper case
     letters are considered boundaries (e.g. `"ThisVar"` would be tokenized into `["This", "Var"]`)
 -   When mixed with lower and upper case characters, sequences of upper case are
-    broken up into tokens (e.g. `"SomeID"` would be tokenized into `["Some", "I", "D"]`). Replacement rules are then evaluated for single rune sequences. (e.g.
-    `"i"`, `"d"` would match the default replacement of `{"Id", "ID"}`)
+    broken up into tokens (e.g. `"SomeID"` would be tokenized into `["Some", "I", "D"]`).
+-   Replacement rules are then evaluated for single rune sequences. (e.g. `"I"`, `"D"` would match the default replacement of `{"Id", "ID"}`)
 
 ## Replacements
 
-`caps.StdConverter` also allows users to register `caps.Replacement`s for initialism replacements.
+`caps.StdConverter` also allows users to register `caps.Replacement`s for
+initialism replacements. Each `Replacement` is indexed in a trie (see
+[Index](https://github.com/chanced/caps/blob/main/index/index.go)).
 
-The default list is:
+-   Multi-rune `Token`s are searched independently unless followed by a number (e.g.
+    `"ID"`, `"UTF8"`).
+-   `Token`s with single rune sequences (e.g.`["U", "U", "I", "D"]`) are
+    evaluated as a word until as potential `Replacement` until a non-match is
+    found or the sequence is broken by a `Token` with more than one rune.
+
+The default list of `Replacement`s is:
 
 ```go
 {"Acl", "ACL"}
