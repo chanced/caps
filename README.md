@@ -127,7 +127,7 @@ If you would like to add or remove entries from that list, you have a few
 options.
 
 You can pass a new instance of `caps.StdConverter` with a new set of
-`caps.Replacement` (likely preferred).
+`caps.Replacement`.
 
 ```go
     package main
@@ -173,6 +173,27 @@ func main() {
 Finally, if you are so inclined, you can create your own `caps.Converter`. This
 could be as simple as implementing the single `Convert` method, calling
 `caps.DefaultConverter.Convert`, and then modifying the result.
+
+```go
+package main
+import (
+	"fmt"
+	"github.com/chanced/caps"
+)
+type MyConverter struct{}
+func (MyConverter) Convert(style caps.Style, repStyle caps.ReplaceStyle, input string, join string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) string {
+	res := caps.DefaultConverter.Convert(style, repStyle, input, join, allowedSymbols, numberRules)
+	if style == caps.StyleLowerCamel && repStyle == caps.ReplaceStyleCamel && res == "id" {
+		return "_id"
+	}
+	return res
+}
+func main() {
+	fmt.Println(caps.ToLowerCamel("ID", caps.WithReplaceStyleCamel(), caps.WithConverter(MyConverter{})))
+	// Output:
+	// _id
+}
+```
 
 ## Support for special case unicode (e.g. Turkish, Azeri)
 
