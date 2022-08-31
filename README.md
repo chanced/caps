@@ -30,15 +30,9 @@ import (
 )
 
 func main() {
-	fmt.Println(caps.ToCamel("http request"))
-	// Output:
-	// HTTPRequest
-	fmt.Println(caps.ToLowerCamel("some_id"))
-	// Output:
-	// someID
-	fmt.Println(caps.ToLowerCamel("SomeID", caps.WithReplaceStyleCamel()))
-	// Output:
-	// someId
+	fmt.Println(caps.ToCamel("http request")) // HTTPRequest
+	fmt.Println(caps.ToLowerCamel("some_id")) // someID
+	fmt.Println(caps.ToLowerCamel("SomeID", caps.WithReplaceStyleCamel())) // someId
 }
 
 ```
