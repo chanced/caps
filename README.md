@@ -40,7 +40,6 @@ func main() {
 	// Output:
 	// someId
 }
-
 ```
 
 [playground link](https://go.dev/play/p/ELuLROqicfy)
@@ -154,6 +153,8 @@ You can pass a new instance of `caps.StdConverter` with a new set of
     }
 ```
 
+[playground link](https://go.dev/play/p/jlFAj3ujhTW)
+
 ### Modifying the `caps.DefaultConverter` global
 
 You can update `caps.DefaultConverter`. You should set it before you make any
@@ -174,6 +175,8 @@ func main() {
 }
 ```
 
+[playground link](https://go.dev/play/p/QARyN7-fUQ5)
+
 ### Creating a custom `caps.Converter`
 
 Finally, if you are so inclined, you can create your own `caps.Converter`. This
@@ -189,6 +192,12 @@ import (
 type MyConverter struct{}
 func (MyConverter) Convert(style caps.Style, repStyle caps.ReplaceStyle, input string, join string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) string {
 	res := caps.DefaultConverter.Convert(style, repStyle, input, join, allowedSymbols, numberRules)
+    switch res {
+        case "id":
+            if style == caps.StyleLowerCamel && repStyle == caps.ReplaceStyleCamel {
+                return "_id"
+            }
+    }
 	if style == caps.StyleLowerCamel && repStyle == caps.ReplaceStyleCamel && res == "id" {
 		return "_id"
 	}
@@ -200,6 +209,8 @@ func main() {
 	// _id
 }
 ```
+
+[playground link](https://go.dev/play/p/rP67DjVgrMg)
 
 ## Support for special case unicode (e.g. Turkish, Azeri)
 
