@@ -34,8 +34,8 @@ func main() {
 	// Output:
 	// HTTPRequest
 	fmt.Println(caps.ToLowerCamel("some_id"))
-    // Output:
-    // someID
+	// Output:
+	// someID
 	fmt.Println(caps.ToLowerCamel("SomeID", caps.WithReplaceStyleCamel()))
 	// Output:
 	// someId
