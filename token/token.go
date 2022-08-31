@@ -26,7 +26,6 @@ func Append(caser Caser, t Token, elems ...Token) Token {
 			}
 			e.upper = append([]rune{caser.ToUpper(e.upper[0])}, e.upper[1:]...)
 		}
-
 		t = Token{
 			value: append(t.value, e.value...),
 			lower: append(t.lower, e.lower...),
@@ -331,6 +330,22 @@ func (t Token) HasLower() bool {
 		}
 	}
 	return false
+}
+
+func (t Token) Clone() Token {
+	val := make([]rune, len(t.value))
+	lower := make([]rune, len(t.lower))
+	upper := make([]rune, len(t.upper))
+	for i, v := range t.value {
+		val[i] = v
+		lower[i] = t.lower[i]
+		upper[i] = t.upper[i]
+	}
+	return Token{
+		value: val,
+		lower: lower,
+		upper: upper,
+	}
 }
 
 func (t Token) Clone() Token {

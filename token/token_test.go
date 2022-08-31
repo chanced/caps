@@ -46,7 +46,7 @@ func TestAppend(t *testing.T) {
 		t.Errorf("expected %U to be title, got %U", titleDZ, res.Runes()[0])
 	}
 	if res.Runes()[1] != upperDZ {
-		t.Errorf("expected %U to be upper, got %U", upperDZ, res.Runes()[1])
+		t.Errorf("expected %U to be upper to be upper, got %U", upperDZ, res.Runes()[1])
 	}
 }
 
