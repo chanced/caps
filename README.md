@@ -54,7 +54,7 @@ uses the following rules:
 -   The following characters are considered word breaks `" _.!?:;$-(){}[]#@&+~"` unless present in `AllowedSymbols`
 -   Strings with all upper case characters are split by the above symbols or by
     numbers, unless the character is allowed in a number based on the following rules:
-    -   `'v'` or `'V'` proceeded by numbers
+    -   `'v'` or `'V'` followed by numbers
     -   `'.'` before/after a number and only once
     -   `'e'` or `'E'` if in the fractional part of a number and only once
     -   `'-'`, '`+`' if at the start and followed by either a number or `'.'` and a
