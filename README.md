@@ -73,7 +73,9 @@ uses the following rules:
     letters are considered boundaries (e.g. `"ThisVar"` would be tokenized into `["This", "Var"]`)
 -   When mixed with lower and upper case characters, sequences of upper case are
     broken up into tokens (e.g. `"SomeID"` would be tokenized into `["Some", "I", "D"]`).
--   Replacement rules are then evaluated for single rune sequences. (e.g. `"I"`, `"D"` would match the default replacement of `{"Id", "ID"}`)
+-   Replacement rules are then evaluated for both multi-rune `Token`s and single
+    rune sequences. (e.g. both `["I", "D"]` and `"id"` would match the default
+    replacement of `{"Id", "ID"}`)
 
 ## Replacements
 
