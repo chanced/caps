@@ -124,7 +124,9 @@ The default list of `Replacement`s is:
 ```
 
 If you would like to add or remove entries from that list, you have a few
-options.
+options:
+
+### Creating isolated `caps.StdConverter` instances
 
 You can pass a new instance of `caps.StdConverter` with a new set of
 `caps.Replacement`.
@@ -152,6 +154,8 @@ You can pass a new instance of `caps.StdConverter` with a new set of
     }
 ```
 
+### Modifying the `caps.DefaultConverter` global
+
 You can update `caps.DefaultConverter`. You should set it before you make any
 conversions. Otherwise, you'll need guard your usage of the library accordingly
 (e.g. a mutex).
@@ -169,6 +173,8 @@ func main() {
     // SomeGCPVar
 }
 ```
+
+### Creating a custom `caps.Converter`
 
 Finally, if you are so inclined, you can create your own `caps.Converter`. This
 could be as simple as implementing the single `Convert` method, calling
