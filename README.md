@@ -63,7 +63,7 @@ uses the following rules:
     -   NOTE: If `'.'`, `'+'`, `'-'` are not in the `AllowedSymbols` they are
         considered breaks even for numbers
 -   When a string consists of both upper case and lower case letters, upper case
-    letters are considered boundaries (e.g. `"ThisVar"` would be tokenized into `["This", "VAR"]`)
+    letters are considered boundaries (e.g. `"ThisVar"` would be tokenized into `["This", "Var"]`)
 -   When mixed with lower and upper case characters, sequences of upper case are
     broken up into tokens (e.g. `"SomeID"` would be tokenized into `["Some", "I", "D"]`). Replacement rules are then evaluated for single rune sequences. (e.g.
     `"i"`, `"d"` would match the default replacement of `{"Id", "ID"}`)
