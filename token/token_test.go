@@ -26,18 +26,27 @@ func TestTurkish(t *testing.T) {
 }
 
 func TestAppend(t *testing.T) {
-	tok := token.FromString(nil, "abc")
-	res := token.Append(nil, tok, token.FromString(nil, "def"))
-	if res.String() != "abcdef" {
-		t.Error("expected \"abcdef\", got", res)
-	}
-	titleDZ := token.FromRune(nil, unicode.ToTitle('ǳ'))
+	var res token.Token
+	// tok := token.FromString(nil, "abc")
+	// res = token.Append(nil, tok, token.FromString(nil, "def"), token.FromRune(nil, 'g'), token.FromString(nil, "hij"))
+	// if res.String() != "abcdefghij" {
+	// 	t.Error("expected \"abcdefghij\", got", res)
+	// }
+	titleDZ := unicode.ToTitle('ǳ')
 	upperDZ := unicode.ToUpper('ǳ')
-
-	res = token.Append(nil, tok, titleDZ, titleDZ)
-
+	if unicode.IsTitle(upperDZ) {
+		t.Error("expected upperDZ to not be title")
+	}
+	// fmt.Println("is title to upperDZ", unicode.IsTitle(upperDZ))
+	// fmt.Println("is title to titleDZ", unicode.IsTitle(titleDZ))
+	// fmt.Println("is title to titleDZ after ToUpper", unicode.IsTitle(unicode.ToUpper(titleDZ)))
+	titleDZTok := token.FromRune(nil, titleDZ)
+	res = token.Append(nil, titleDZTok, titleDZTok)
+	if res.Runes()[0] != titleDZ {
+		t.Errorf("expected %U to be title, got %U", titleDZ, res.Runes()[0])
+	}
 	if res.Runes()[1] != upperDZ {
-		t.Errorf("expected %U, got %U", upperDZ, res.Runes()[1])
+		t.Errorf("expected %U to be upper, got %U", upperDZ, res.Runes()[1])
 	}
 }
 
