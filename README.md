@@ -14,7 +14,7 @@ It has built in support for configurable initialism replacements (e.g. "Uuid" ->
 finally is modular in that each step in the case conversion process can be
 configured, augmented, or replaced.
 
-The following case conversions are supported:
+The following case conversions are available:
 
 -   Camel Case (e.g. CamelCase)
 -   Lower Camel Case (e.g. lowerCamelCase)
