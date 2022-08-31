@@ -1,3 +1,4 @@
+// Package index contains a trie index used by Converter to lookup Replacements.
 package index
 
 import (
@@ -21,7 +22,7 @@ func (ir IndexedReplacement) HasValue() bool {
 	return !ir.IsEmpty()
 }
 
-// Index is a double trie (forward and backward indexed) of token.Token.
+// Index is a trie index used by Converter to lookup Replacements.
 type Index struct {
 	value          IndexedReplacement
 	nodes          map[rune]*Index

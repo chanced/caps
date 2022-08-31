@@ -1,3 +1,7 @@
+// Package text contains a single Text type with functions from caps and strings
+// as methods.
+//
+// All methods return new values and do not mutate the existing Text.
 package text
 
 import (

@@ -143,7 +143,7 @@ Finally, if you are so inclined, you can create your own `caps.Converter`. This
 could be as simple as implementing the single `Convert` method, calling
 `caps.DefaultConverter.Convert`, and then modifying the result.
 
-### Support for special case unicode (e.g. Turkish, Azeri)
+## Support for special case unicode (e.g. Turkish, Azeri)
 
 caps supports Turkish and Azeri through the `token.Caser` interface. It is
 satisfied by `unicode.TurkishCase` and `unicode.AzeriCase`. `token.TurkishCaser`
