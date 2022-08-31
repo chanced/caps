@@ -16,8 +16,12 @@ func ExampleToCamel() {
 
 func ExampleToLowerCamel() {
 	fmt.Println(caps.ToLowerCamel("This is [an] {example}${id32}."))
+	fmt.Println(caps.ToLowerCamel("entity id"))
+	fmt.Println(caps.ToLowerCamel("entity id", caps.WithReplaceStyleCamel()))
 	// Output:
 	// thisIsAnExampleID32
+	// entityID
+	// entityId
 }
 
 func ExampleToSnake() {
