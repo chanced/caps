@@ -192,12 +192,6 @@ import (
 type MyConverter struct{}
 func (MyConverter) Convert(style caps.Style, repStyle caps.ReplaceStyle, input string, join string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) string {
 	res := caps.DefaultConverter.Convert(style, repStyle, input, join, allowedSymbols, numberRules)
-    switch res {
-        case "id":
-            if style == caps.StyleLowerCamel && repStyle == caps.ReplaceStyleCamel {
-                return "_id"
-            }
-    }
 	if style == caps.StyleLowerCamel && repStyle == caps.ReplaceStyleCamel && res == "id" {
 		return "_id"
 	}
@@ -210,7 +204,7 @@ func main() {
 }
 ```
 
-[playground link](https://go.dev/play/p/rP67DjVgrMg)
+[playground link](https://go.dev/play/p/dg19iBIsHvh)
 
 ## Support for special case unicode (e.g. Turkish, Azeri)
 
