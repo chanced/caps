@@ -14,6 +14,8 @@ It has built in support for configurable initialism replacements (e.g. "Uuid" ->
 finally is modular in that each step in the case conversion process can be
 configured, augmented, or replaced.
 
+## Supported Case Conversions
+
 The following case conversions are available:
 
 -   Camel Case (e.g. CamelCase)
@@ -33,7 +35,6 @@ import (
 	"fmt"
 	"github.com/chanced/caps"
 )
-
 func main() {
 	fmt.Println(caps.ToCamel("http request"))
 	// Output:
