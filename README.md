@@ -132,7 +132,9 @@ initialism replacements. Each `Replacement` is indexed in a trie (see
 ```
 
 If you would like to add or remove entries from that list, you have a few
-options:
+options. See below.
+
+## Custom `Converter` logic
 
 ### Creating isolated `caps.StdConverter` instances
 
