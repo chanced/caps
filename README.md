@@ -51,6 +51,8 @@ Word boundaries are determined by the `caps.Converter`. The provided implementat
 delegates the boundary detection to `caps.Tokenizer`. The provided implementation, `caps.TokenizerImpl`,
 uses the following runes as delimiters: `" _.!?:;$-(){}[]#@&+~"`.
 
+## Replacements
+
 `caps.StdConverter` also allows users to register `caps.Replacement`s for acronym replacement. The default list is:
 
 ```go
