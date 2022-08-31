@@ -29,6 +29,8 @@ The following case conversions are available:
 -   Title Case (e.g. Title Case)
 -   Other deliminations
 
+## Example
+
 ```go
 package main
 import (
