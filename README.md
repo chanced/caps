@@ -53,7 +53,9 @@ uses the following runes as delimiters: `" _.!?:;$-(){}[]#@&+~"`.
 
 ## Replacements
 
-`caps.StdConverter` also allows users to register `caps.Replacement`s for acronym replacement. The default list is:
+`caps.StdConverter` also allows users to register `caps.Replacement`s for initialism replacements.
+
+The default list is:
 
 ```go
 {"Acl", "ACL"}
