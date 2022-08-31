@@ -31,14 +31,14 @@ import (
 
 func main() {
 	fmt.Println(caps.ToCamel("http request"))
-    // Output:
-    // HTTPRequest
+	// Output:
+	// HTTPRequest
 	fmt.Println(caps.ToLowerCamel("some_id"))
     // Output:
     // someID
 	fmt.Println(caps.ToLowerCamel("SomeID", caps.WithReplaceStyleCamel()))
-    // Output:
-    // someId
+	// Output:
+	// someId
 }
 
 ```
