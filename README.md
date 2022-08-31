@@ -113,7 +113,7 @@ You can pass a new instance of `caps.StdConverter` with a new set of
             // ... your replacements
         }
         converter := caps.NewConverter(replacements, caps.DefaultTokenizer, token.DefaultCaser)
-        fmt.Println(caps.ToCamel("ex id", caps.Opts{ Converter: converter }))
+        fmt.Println(caps.ToCamel("ex id", caps.WithConverter(converter)))
         // note: ID was not in the replacement list above
         // Output:
         // "EXId"
