@@ -60,6 +60,8 @@ uses the following rules:
     -   `'-'`, '`+`' if at the start and followed by either a number or `'.'` and a
         number or in the fractional part proceeded by `'e'` or `'E'`
     -   additional rules can be added through the number rules (e.g. `WithNumberRules`)
+    -   NOTE: If `'.'`, `'+'`, `'-'` are not in the `AllowedSymbols` they are
+        considered breaks even for numbers
 -   When a string consists of both upper case and lower case letters, upper case
     letters are considered boundaries (e.g. `"ThisVar"` would be tokenized into `["this", "var"]`)
 -   When mixed with lower and upper case characters, sequences of upper case are
