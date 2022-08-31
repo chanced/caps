@@ -10,7 +10,7 @@ was built with the following priorites in mind: configurability, consistency,
 correctness, ergonomic, and reasonable performance; in that order.
 
 It has built in support for configurable initialism replacements (e.g. "Uuid"
-`->` "UUID"), can support special case unicode (e.g. Turkish, Azeri, ...), and
+-> "UUID"), can support special case unicode (e.g. Turkish, Azeri, ...), and
 finally is modular in that each part of the process can be configured,
 augmented, or replaced.
 
