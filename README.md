@@ -219,7 +219,7 @@ For example, to use Turkish, you would need to instantiate a few variables:
 package main
 import (
     "github.com/chanced/caps"
-    "github.com/chanced/token"
+    "github.com/chanced/caps/token"
 
 )
 func main() {
@@ -237,11 +237,13 @@ func main() {
     // caps.DefaultConverter = turkish
     //
     // otherwise, you can pass in the converter to the config for each call:
-
-    fmt.Println(caps.ToCamel("An example", caps.WithConverter(turkish)))
+    fmt.Println(caps.ToScreamingKebab("i ı", caps.WithConverter(turkish)))
+    // Output:
+    // İ-I
 }
-
 ```
+
+[playground link](https://go.dev/play/p/aKfuU5eZJgp)
 
 ## License
 
