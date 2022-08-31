@@ -36,7 +36,7 @@ func main() {
 	fmt.Println(caps.ToLowerCamel("some_id"))
 	// Output:
 	// someID
-	fmt.Println(caps.ToLowerCamel("SomeID", caps.Opts{ReplaceStyle: caps.ReplaceStyleLower}))
+	fmt.Println(caps.ToLowerCamel("SomeID", caps.WithReplaceStyleLower))
 	// Output:
 	// someId
 }
