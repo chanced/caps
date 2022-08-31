@@ -13,7 +13,7 @@ const (
 )
 
 // DefaultTokenizer is the default Tokenizer.
-var DefaultTokenizer TokenizerImpl = NewTokenizer(DEFAULT_DELIMITERS, token.DefaultCaser)
+var DefaultTokenizer StdTokenizer = NewTokenizer(DEFAULT_DELIMITERS, token.DefaultCaser)
 
 // Tokenizer is an interface satisfied by tyeps which can
 type Tokenizer interface {
@@ -25,25 +25,25 @@ type Tokenizer interface {
 //
 // Tokenizers are used by ConverterImpl to tokenize the input text into
 // token.Tokens that are then formatted.
-func NewTokenizer(delimiters string, caser token.Caser) TokenizerImpl {
+func NewTokenizer(delimiters string, caser token.Caser) StdTokenizer {
 	d := runes(delimiters)
 	sort.Sort(d)
-	return TokenizerImpl{
+	return StdTokenizer{
 		delimiters: d,
 		caser:      token.CaserOrDefault(caser),
 	}
 }
 
-// TokenizerImpl is the provided implementation of the Tokenizer interface.
+// StdTokenizer is the provided implementation of the Tokenizer interface.
 //
-// TokenizerImpl tokenizes the input text into token.Tokens based on a set of
+// StdTokenizer tokenizes the input text into token.Tokens based on a set of
 // delimiters (runes).
 //
 // If you need custom logic, consider wrapping the logic by implementing
-// Tokenizer and then calling a TokenizerImpl's Tokenize method.
+// Tokenizer and then calling a StdTokenizer's Tokenize method.
 //
 // # Example:
-type TokenizerImpl struct {
+type StdTokenizer struct {
 	delimiters runes
 	caser      token.Caser
 }
@@ -69,7 +69,7 @@ type TokenizerImpl struct {
 //
 //	t := caps.token.Newizer("_")
 //	t.Tokenize("A_SCREAMING_SNAKECASE_VARIABLE", []rune{'_'}) -> ["A_SCREAMING_SNAKECASE_VARIABLE"]
-func (ti TokenizerImpl) Tokenize(str string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) []token.Token {
+func (ti StdTokenizer) Tokenize(str string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) []token.Token {
 	tokens := []token.Token{}
 	pending := []token.Token{}
 	foundLower := false
@@ -214,4 +214,7 @@ func (ti TokenizerImpl) Tokenize(str string, allowedSymbols []rune, numberRules 
 	}
 }
 
-var _ Tokenizer = TokenizerImpl{}
+// Deprecated: Use StdTokenizer.
+type TokenizerImpl = StdTokenizer
+
+var _ Tokenizer = StdTokenizer{}

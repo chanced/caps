@@ -50,8 +50,8 @@ type Converter interface {
 // formatting (e.g. { "Json", "JSON"}).
 //
 // tokenizer is used to tokenize the input text.
-func NewConverter(replacements []Replacement, tokenizer Tokenizer, caser token.Caser) ConverterImpl {
-	ci := ConverterImpl{
+func NewConverter(replacements []Replacement, tokenizer Tokenizer, caser token.Caser) StdConverter {
+	ci := StdConverter{
 		index:     index.New(caser),
 		tokenizer: tokenizer,
 		caser:     token.CaserOrDefault(caser),
@@ -62,7 +62,7 @@ func NewConverter(replacements []Replacement, tokenizer Tokenizer, caser token.C
 	return ci
 }
 
-// ConverterImpl contains a table of words to their desired replacement. Tokens
+// StdConverter contains a table of words to their desired replacement. Tokens
 // will be compared against the keys of this table to determine if the string
 // should be replaced with the value of the table.
 //
@@ -70,23 +70,23 @@ func NewConverter(replacements []Replacement, tokenizer Tokenizer, caser token.C
 // purposes.
 //
 // The default Replacements can be found in the DefaultReplacements variable.
-type ConverterImpl struct {
+type StdConverter struct {
 	index     *index.Index
 	tokenizer Tokenizer
 	caser     token.Caser
 }
 
-func (ci ConverterImpl) Index() index.Index {
+func (ci StdConverter) Index() index.Index {
 	return *ci.index
 }
 
 // Contains reports whether a key is in the Converter's replacement table.
-func (ci ConverterImpl) Contains(key string) bool {
+func (ci StdConverter) Contains(key string) bool {
 	return ci.index.Contains(token.FromString(ci.caser, key))
 }
 
 // Replacements returns a slice of Replacement in the lookup trie.
-func (ci ConverterImpl) Replacements() []Replacement {
+func (ci StdConverter) Replacements() []Replacement {
 	indexedVals := ci.index.Values()
 	res := make([]Replacement, len(indexedVals))
 	for i, v := range indexedVals {
@@ -98,12 +98,12 @@ func (ci ConverterImpl) Replacements() []Replacement {
 	return res
 }
 
-func (ci *ConverterImpl) set(key, value string) {
+func (ci *StdConverter) set(key, value string) {
 	ci.index.Add(token.FromString(ci.caser, key), token.FromString(ci.caser, value))
 }
 
 // Set adds the key/value pair to the table.
-func (ci *ConverterImpl) Set(key, value string) {
+func (ci *StdConverter) Set(key, value string) {
 	kstr, keyHasLower := lowerAndCheck(key)
 	vstr, valueHasLower := lowerAndCheck(value)
 	ci.Delete(kstr)
@@ -118,13 +118,13 @@ func (ci *ConverterImpl) Set(key, value string) {
 }
 
 // Remove deletes the key from the map. Either variant is sufficient.
-func (ci *ConverterImpl) Delete(key string) {
+func (ci *StdConverter) Delete(key string) {
 	tok := token.FromString(ci.caser, key)
 	ci.index.Delete(tok)
 }
 
 // Convert formats the string with the desired style.
-func (ci ConverterImpl) Convert(style Style, repStyle ReplaceStyle, input string, join string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) string {
+func (ci StdConverter) Convert(style Style, repStyle ReplaceStyle, input string, join string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) string {
 	tokens := ci.tokenizer.Tokenize(input, allowedSymbols, numberRules)
 	var parts []string
 	var ok bool
@@ -264,3 +264,6 @@ func lowerAndCheck(input string) (string, bool) {
 	}
 	return bldr.String(), foundLower
 }
+
+// Deprecated: Use StdConverter
+type ConverterImpl = StdConverter
