@@ -88,7 +88,7 @@ initialism replacements. Each `Replacement` is indexed in a trie (see
     evaluated as a potential `Replacement` until a non-match is
     found or the sequence is broken by a `Token` with more than one rune.
 
-### `DefaultReplacements`
+### Default replacements
 
 ```go
 {"Acl", "ACL"}
