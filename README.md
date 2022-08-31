@@ -78,7 +78,7 @@ uses the following rules:
 
 ## Replacements
 
-`caps.StdConverter` also allows users to register `caps.Replacement`s for
+`caps.ConverterImpl` also allows users to register `caps.Replacement`s for
 initialism replacements. Each `Replacement` is indexed in a trie (see
 [Index](https://github.com/chanced/caps/blob/main/index/index.go)).
 
@@ -136,9 +136,9 @@ options. See below.
 
 ## Customizing the `Converter`
 
-### Creating isolated `caps.StdConverter` instances
+### Creating isolated `caps.ConverterImpl` instances
 
-You can pass a new instance of `caps.StdConverter` with a new set of
+You can pass a new instance of `caps.ConverterImpl` with a new set of
 `caps.Replacement`.
 
 ```go
