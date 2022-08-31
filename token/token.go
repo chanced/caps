@@ -347,19 +347,3 @@ func (t Token) Clone() Token {
 		upper: upper,
 	}
 }
-
-func (t Token) Clone() Token {
-	val := make([]rune, len(t.value))
-	lower := make([]rune, len(t.lower))
-	upper := make([]rune, len(t.upper))
-	for i, v := range t.value {
-		val[i] = v
-		lower[i] = t.lower[i]
-		upper[i] = t.upper[i]
-	}
-	return Token{
-		value: val,
-		lower: lower,
-		upper: upper,
-	}
-}
