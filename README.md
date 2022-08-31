@@ -57,15 +57,15 @@ uses the following rules:
     -   `'v'` or `'V'` followed by numbers
     -   `'.'` before/after a number and only once
     -   `'e'` or `'E'` if in the fractional part of a number and only once
-    -   `'-'`, '`+`' if at the start and followed by either a number or `'.'` and a
+    -   `'-'`, `'+'` if at the start and followed by either a number or `'.'` and a
         number or in the fractional part proceeded by `'e'` or `'E'`
     -   additional rules can be added through the number rules (e.g. `WithNumberRules`)
     -   NOTE: If `'.'`, `'+'`, `'-'` are not in the `AllowedSymbols` they are
         considered breaks even for numbers
 -   When a string consists of both upper case and lower case letters, upper case
-    letters are considered boundaries (e.g. `"ThisVar"` would be tokenized into `["this", "var"]`)
+    letters are considered boundaries (e.g. `"ThisVar"` would be tokenized into `["This", "VAR"]`)
 -   When mixed with lower and upper case characters, sequences of upper case are
-    broken up into tokens (e.g. `"SomeID"` would be tokenized into `["some", "i", "d"]`). Replacement rules are then evaluated for single rune sequences. (e.g.
+    broken up into tokens (e.g. `"SomeID"` would be tokenized into `["Some", "I", "D"]`). Replacement rules are then evaluated for single rune sequences. (e.g.
     `"i"`, `"d"` would match the default replacement of `{"Id", "ID"}`)
 
 ## Replacements
