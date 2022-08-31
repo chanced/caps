@@ -1,7 +1,6 @@
 package caps_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/chanced/caps"
@@ -118,8 +117,9 @@ func (MyConverter) Convert(req caps.ConvertRequest) string {
 	return res
 }
 
-func ExampleWithConverter() {
-	fmt.Println(caps.ToLowerCamel("id", caps.WithConverter(MyConverter{}), caps.WithReplaceStyle(caps.ReplaceStyleCamel)))
-	// Output:
-	// _id
+func TestCustomConverter(t *testing.T) {
+	res := caps.ToLowerCamel("ID", caps.WithReplaceStyleCamel(), caps.WithConverter(MyConverter{}))
+	if res != "_id" {
+		t.Errorf("expected _id, got %s", res)
+	}
 }

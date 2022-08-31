@@ -18,6 +18,18 @@ const (
 	ReplaceStyleLower                     // Text should be replaced with the lowercase variant (e.g. "json").
 )
 
+func (rs ReplaceStyle) IsCamel() bool {
+	return rs == ReplaceStyleCamel
+}
+
+func (rs ReplaceStyle) IsScreaming() bool {
+	return rs == ReplaceStyleScreaming
+}
+
+func (rs ReplaceStyle) IsLower() bool {
+	return rs == ReplaceStyleLower
+}
+
 type Style uint8
 
 const (
@@ -27,6 +39,24 @@ const (
 	StyleCamel              // The output should be camel case (e.g. "AnExample")
 	StyleLowerCamel         // The output should be lower camel case (e.g. "anExample")
 )
+
+func (s Style) IsLower() bool {
+	return s == StyleLower
+}
+
+func (s Style) IsScreaming() bool {
+	return s == StyleScreaming
+}
+
+func (s Style) IsCamel() bool {
+	return s == StyleCamel
+}
+
+func (s Style) IsLowerCamel() bool {
+	return s == StyleLowerCamel
+}
+
+
 
 // Opts include configurable options for case conversion.
 //

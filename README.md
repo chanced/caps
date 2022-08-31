@@ -203,7 +203,7 @@ import (
 type MyConverter struct{}
 func (MyConverter) Convert(req caps.ConvertRequest) string {
 	res := caps.DefaultConverter.Convert(req)
-	if req.Style == caps.StyleLowerCamel && req.ReplaceStyle == caps.ReplaceStyleCamel && res == "id" {
+	if req.Style.IsLowerCamel() && req.ReplaceStyle.IsCamel() && res == "id" {
 		return "_id"
 	}
 	return res
