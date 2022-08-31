@@ -42,7 +42,7 @@ func main() {
 }
 ```
 
-[playground link](https://go.dev/play/p/ELuLROqicfy)
+[go playground link](https://go.dev/play/p/ELuLROqicfy)
 
 ## Word boundaries
 
