@@ -153,7 +153,7 @@ You can pass a new instance of `caps.StdConverter` with a new set of
     }
 ```
 
-[playground link](https://go.dev/play/p/jlFAj3ujhTW)
+[go playground link](https://go.dev/play/p/jlFAj3ujhTW)
 
 ### Modifying the `caps.DefaultConverter` global
 
@@ -175,7 +175,7 @@ func main() {
 }
 ```
 
-[playground link](https://go.dev/play/p/QARyN7-fUQ5)
+[go playground link](https://go.dev/play/p/QARyN7-fUQ5)
 
 ### Creating a custom `caps.Converter`
 
@@ -204,7 +204,7 @@ func main() {
 }
 ```
 
-[playground link](https://go.dev/play/p/dg19iBIsHvh)
+[go playground link](https://go.dev/play/p/dg19iBIsHvh)
 
 ## Support for special case unicode (e.g. Turkish, Azeri)
 
@@ -243,7 +243,7 @@ func main() {
 }
 ```
 
-[playground link](https://go.dev/play/p/aKfuU5eZJgp)
+[go playground link](https://go.dev/play/p/aKfuU5eZJgp)
 
 ## License
 
