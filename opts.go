@@ -61,25 +61,77 @@ type Opts struct {
 	NumberRules map[rune]func(index int, r rune, val []rune) bool
 }
 
+// Deprecated: Use WithAllowedSymbols instead.
 func UseAllowedSymbols(symbols string) Opts {
 	return Opts{
 		AllowedSymbols: symbols,
 	}
 }
 
+// WithConverter sets the Converter to use
+func WithConverter(converter Converter) Opts {
+	return Opts{
+		Converter: converter,
+	}
+}
+
+// WithReplaceStyle sets the ReplaceStyle to use
+//
+// There are also methods for each ReplaceStyle (e.g. WithReplaceStyleCamel)
+func WithReplaceStyle(style ReplaceStyle) Opts {
+	return Opts{
+		ReplaceStyle: style,
+	}
+}
+
+// WithReplaceStyleCamel indicates Replacements should use the Camel variant
+// (e.g. "Json").
+func WithReplaceStyleCamel() Opts {
+	return Opts{
+		ReplaceStyle: ReplaceStyleCamel,
+	}
+}
+
+// WithReplaceStyleScreaming indicates Replacements should use the screaming
+// variant (e.g. "JSON").
+func WithReplaceStyleScreaming() Opts {
+	return Opts{
+		ReplaceStyle: ReplaceStyleScreaming,
+	}
+}
+
+// WithReplaceStyleLower indicates Replacements should use the lowercase variant
+// (e.g. "json").
+func WithReplaceStyleLower() Opts {
+	return Opts{
+		ReplaceStyle: ReplaceStyleLower,
+	}
+}
+
+// WithNumberRules sets the NumberRules to use
+func WithNumberRules(rules map[rune]func(index int, r rune, val []rune) bool) Opts {
+	return Opts{
+		NumberRules: rules,
+	}
+}
+
 // UseConverter sets the Converter to use
+//
+// Deprecated: Use WithConverter instead.
 func UseConverter(converter Converter) Opts {
 	return Opts{
 		Converter: converter,
 	}
 }
 
+// Deprecated: Use WithReplaceStyle instead.
 func UseReplaceStyle(style ReplaceStyle) Opts {
 	return Opts{
 		ReplaceStyle: style,
 	}
 }
 
+// Deprecated: Use WithNumberRules instead.
 func UseNumberRules(rules map[rune]func(index int, r rune, val []rune) bool) Opts {
 	return Opts{
 		NumberRules: rules,
