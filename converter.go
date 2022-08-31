@@ -34,14 +34,16 @@ var DefaultConverter = NewConverter(DefaultReplacements, DefaultTokenizer, token
 //	allowedSymbols: The set of allowed symbols. If set, these should take precedence over any delimiters
 //	numberRules:    Any custom rules dictating how to handle special characters in numbers.
 type Converter interface {
-	Convert(
-		style Style,
-		repStyle ReplaceStyle,
-		input string,
-		join string,
-		allowedSymbols []rune,
-		numberRules map[rune]func(index int, r rune, val []rune) bool,
-	) string
+	Convert(req ConvertRequest) string
+}
+
+type ConvertRequest struct {
+	Style          Style
+	ReplaceStyle   ReplaceStyle
+	Input          string
+	Join           string
+	AllowedSymbols []rune
+	NumberRules    map[rune]func(index int, r rune, val []rune) bool
 }
 
 // NewConverter creates a new Converter which is used to convert the input text to the desired output.
@@ -51,15 +53,15 @@ type Converter interface {
 //
 // tokenizer is used to tokenize the input text.
 func NewConverter(replacements []Replacement, tokenizer Tokenizer, caser token.Caser) StdConverter {
-	ci := StdConverter{
+	sc := StdConverter{
 		index:     index.New(caser),
 		tokenizer: tokenizer,
 		caser:     token.CaserOrDefault(caser),
 	}
 	for _, v := range replacements {
-		ci.set(v.Camel, v.Screaming)
+		sc.set(v.Camel, v.Screaming)
 	}
-	return ci
+	return sc
 }
 
 // StdConverter contains a table of words to their desired replacement. Tokens
@@ -76,18 +78,18 @@ type StdConverter struct {
 	caser     token.Caser
 }
 
-func (ci StdConverter) Index() index.Index {
-	return *ci.index
+func (sc StdConverter) Index() index.Index {
+	return *sc.index
 }
 
 // Contains reports whether a key is in the Converter's replacement table.
-func (ci StdConverter) Contains(key string) bool {
-	return ci.index.Contains(token.FromString(ci.caser, key))
+func (sc StdConverter) Contains(key string) bool {
+	return sc.index.Contains(token.FromString(sc.caser, key))
 }
 
 // Replacements returns a slice of Replacement in the lookup trie.
-func (ci StdConverter) Replacements() []Replacement {
-	indexedVals := ci.index.Values()
+func (sc StdConverter) Replacements() []Replacement {
+	indexedVals := sc.index.Values()
 	res := make([]Replacement, len(indexedVals))
 	for i, v := range indexedVals {
 		res[i] = Replacement{
@@ -95,41 +97,43 @@ func (ci StdConverter) Replacements() []Replacement {
 			Screaming: v.Screaming.Value(),
 		}
 	}
+	b := strings.Builder{}
+	b.WriteByte('.')
 	return res
 }
 
-func (ci *StdConverter) set(key, value string) {
-	ci.index.Add(token.FromString(ci.caser, key), token.FromString(ci.caser, value))
+func (sc *StdConverter) set(key, value string) {
+	sc.index.Add(token.FromString(sc.caser, key), token.FromString(sc.caser, value))
 }
 
 // Set adds the key/value pair to the table.
-func (ci *StdConverter) Set(key, value string) {
+func (sc *StdConverter) Set(key, value string) {
 	kstr, keyHasLower := lowerAndCheck(key)
 	vstr, valueHasLower := lowerAndCheck(value)
-	ci.Delete(kstr)
-	ci.Delete(vstr)
+	sc.Delete(kstr)
+	sc.Delete(vstr)
 
 	// checking to see if we need to swap these.
 	if !keyHasLower && valueHasLower {
-		ci.set(value, key)
+		sc.set(value, key)
 	} else {
-		ci.set(key, value)
+		sc.set(key, value)
 	}
 }
 
 // Remove deletes the key from the map. Either variant is sufficient.
-func (ci *StdConverter) Delete(key string) {
-	tok := token.FromString(ci.caser, key)
-	ci.index.Delete(tok)
+func (sc *StdConverter) Delete(key string) {
+	tok := token.FromString(sc.caser, key)
+	sc.index.Delete(tok)
 }
 
 // Convert formats the string with the desired style.
-func (ci StdConverter) Convert(style Style, repStyle ReplaceStyle, input string, join string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) string {
-	tokens := ci.tokenizer.Tokenize(input, allowedSymbols, numberRules)
+func (sc StdConverter) Convert(req ConvertRequest) string {
+	tokens := sc.tokenizer.Tokenize(req.Input, req.AllowedSymbols, req.NumberRules)
 	var parts []string
 	var ok bool
 	var addedAsNumber bool
-	idx := ci.Index()
+	idx := sc.Index()
 	for i, tok := range tokens {
 		switch tok.Len() {
 		case 0:
@@ -139,72 +143,72 @@ func (ci StdConverter) Convert(style Style, repStyle ReplaceStyle, input string,
 			if idx, ok = idx.Match(tok); !ok {
 				if idx.LastMatch().HasValue() {
 					// appending the last match
-					parts = append(parts, formatIndexedReplacement(style, repStyle, len(parts), idx.LastMatch()))
+					parts = append(parts, formatIndexedReplacement(req.Style, req.ReplaceStyle, len(parts), idx.LastMatch()))
 				}
 				if idx.HasPartialMatches() {
 					// checking to make sure it isn't a number
-					accum := token.Append(ci.caser, tok, idx.PartialMatches()...)
+					accum := token.Append(sc.caser, tok, idx.PartialMatches()...)
 					if accum.IsNumber() {
-						parts = append(parts, FormatToken(style, len(parts), accum))
+						parts = append(parts, FormatToken(req.Style, len(parts), accum))
 						addedAsNumber = true
 					} else {
 						for _, partok := range idx.PartialMatches() {
-							parts = append(parts, FormatToken(style, len(parts), partok))
+							parts = append(parts, FormatToken(req.Style, len(parts), partok))
 						}
 						addedAsNumber = false
 					}
 				}
 				if !addedAsNumber {
-					parts = append(parts, FormatToken(style, len(parts), tok))
+					parts = append(parts, FormatToken(req.Style, len(parts), tok))
 				}
 				// resetting the index
-				idx = ci.Index()
+				idx = sc.Index()
 			}
 		default:
 			if idx.HasMatch() {
-				parts = append(parts, formatIndexedReplacement(style, repStyle, len(parts), idx.LastMatch()))
+				parts = append(parts, formatIndexedReplacement(req.Style, req.ReplaceStyle, len(parts), idx.LastMatch()))
 			}
 			if idx.HasPartialMatches() {
 				for _, partok := range idx.PartialMatches() {
-					parts = append(parts, FormatToken(style, len(parts), partok))
+					parts = append(parts, FormatToken(req.Style, len(parts), partok))
 				}
 			}
 			if idx.HasMatch() || idx.HasPartialMatches() {
 				// resetting index
-				idx = ci.Index()
+				idx = sc.Index()
 			}
 			if rep, ok := idx.Get(tok); ok {
-				parts = append(parts, formatIndexedReplacement(style, repStyle, len(parts), rep))
+				parts = append(parts, formatIndexedReplacement(req.Style, req.ReplaceStyle, len(parts), rep))
 			} else if isNextTokenNumber(tokens, i) {
 				if idx, ok = idx.Match(tok); !ok {
-					parts = append(parts, FormatToken(style, len(parts), tok))
-					idx = ci.Index()
+					parts = append(parts, FormatToken(req.Style, len(parts), tok))
+					idx = sc.Index()
 				}
 			} else {
-				parts = append(parts, FormatToken(style, len(parts), tok))
+				parts = append(parts, FormatToken(req.Style, len(parts), tok))
 			}
 		}
 	}
 	result := strings.Builder{}
-	result.Grow(len(input))
+	result.Grow(len(req.Input))
 
 	shouldWriteDelimiter := false
 	if idx.HasMatch() {
-		parts = append(parts, formatIndexedReplacement(style, repStyle, len(parts), idx.LastMatch()))
+		parts = append(parts, formatIndexedReplacement(req.Style, req.ReplaceStyle, len(parts), idx.LastMatch()))
 	}
 
 	if idx.HasPartialMatches() {
 		for _, partok := range idx.PartialMatches() {
-			parts = append(parts, FormatToken(style, len(parts), partok))
+			parts = append(parts, FormatToken(req.Style, len(parts), partok))
 		}
 	}
 	for _, part := range parts {
 		if shouldWriteDelimiter {
-			result.WriteString(join)
+			result.WriteString(req.Join)
 		}
 		result.WriteString(part)
 		if !shouldWriteDelimiter {
-			shouldWriteDelimiter = len(part) > 0 && len(join) > 0
+			shouldWriteDelimiter = len(part) > 0 && len(req.Join) > 0
 		}
 	}
 

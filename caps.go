@@ -57,7 +57,14 @@ func WithoutNumbers[T ~string](s T) T {
 //	caps.ToCamel("AN_EXAMPLE_STRING", ) // AnExampleString
 func ToCamel[T ~string](str T, options ...Opts) T {
 	opts := loadOpts(options)
-	return T(opts.Converter.Convert(StyleCamel, opts.ReplaceStyle, string(str), "", []rune(opts.AllowedSymbols), opts.NumberRules))
+	return T(opts.Converter.Convert(ConvertRequest{
+		Style:          StyleCamel,
+		ReplaceStyle:   opts.ReplaceStyle,
+		Input:          string(str),
+		Join:           "",
+		AllowedSymbols: []rune(opts.AllowedSymbols),
+		NumberRules:    opts.NumberRules,
+	}))
 }
 
 // ToLowerCamel transforms the case of str into Lower Camel Case (e.g. anExampleString) using
@@ -71,7 +78,15 @@ func ToCamel[T ~string](str T, options ...Opts) T {
 //	caps.ToLowerCamel("This is [an] {example}${id32}.") // thisIsAnExampleID32
 func ToLowerCamel[T ~string](str T, options ...Opts) T {
 	opts := loadOpts(options)
-	return T(opts.Converter.Convert(StyleLowerCamel, opts.ReplaceStyle, string(str), "", []rune(opts.AllowedSymbols), opts.NumberRules))
+
+	return T(opts.Converter.Convert(ConvertRequest{
+		Style:          StyleLowerCamel,
+		ReplaceStyle:   opts.ReplaceStyle,
+		Input:          string(str),
+		Join:           "",
+		AllowedSymbols: []rune(opts.AllowedSymbols),
+		NumberRules:    opts.NumberRules,
+	}))
 }
 
 // ToSnake transforms the case of str into Lower Snake Case (e.g. an_example_string) using
@@ -131,7 +146,14 @@ func ToScreamingDotNotation[T ~string](str T, options ...Opts) T {
 //	caps.ToTitle("This is [an] {example}${id32}.") // This Is An Example ID 32
 func ToTitle[T ~string](str T, options ...Opts) T {
 	opts := loadOpts(options)
-	return T(opts.Converter.Convert(StyleCamel, opts.ReplaceStyle, string(str), " ", []rune(opts.AllowedSymbols), opts.NumberRules))
+	return T(opts.Converter.Convert(ConvertRequest{
+		Style:          StyleCamel,
+		ReplaceStyle:   opts.ReplaceStyle,
+		Input:          string(str),
+		Join:           " ",
+		AllowedSymbols: []rune(opts.AllowedSymbols),
+		NumberRules:    opts.NumberRules,
+	}))
 }
 
 // ToDelimited transforms the case of str into a string separated by delimiter,
@@ -157,7 +179,14 @@ func ToDelimited[T ~string](str T, delimiter rune, lowercase bool, options ...Op
 		style = StyleScreaming
 		replacementStyle = ReplaceStyleScreaming
 	}
-	return T(opts.Converter.Convert(style, replacementStyle, string(str), string(delimiter), []rune(opts.AllowedSymbols), opts.NumberRules))
+	return T(opts.Converter.Convert(ConvertRequest{
+		Style:          style,
+		ReplaceStyle:   replacementStyle,
+		Input:          string(str),
+		Join:           string(delimiter),
+		AllowedSymbols: []rune(opts.AllowedSymbols),
+		NumberRules:    opts.NumberRules,
+	}))
 }
 
 // ToLower returns s with all Unicode letters mapped to their lower case.

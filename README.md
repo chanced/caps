@@ -201,9 +201,9 @@ import (
 	"github.com/chanced/caps"
 )
 type MyConverter struct{}
-func (MyConverter) Convert(style caps.Style, repStyle caps.ReplaceStyle, input string, join string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) string {
-	res := caps.DefaultConverter.Convert(style, repStyle, input, join, allowedSymbols, numberRules)
-	if style == caps.StyleLowerCamel && repStyle == caps.ReplaceStyleCamel && res == "id" {
+func (MyConverter) Convert(req caps.ConvertRequest) string {
+	res := caps.DefaultConverter.Convert(req)
+	if req.Style == caps.StyleLowerCamel && req.ReplaceStyle == caps.ReplaceStyleCamel && res == "id" {
 		return "_id"
 	}
 	return res

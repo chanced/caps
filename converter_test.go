@@ -42,7 +42,16 @@ func TestConverterConvert(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.input, func(t *testing.T) {
-			output := converter.Convert(test.style, test.repStyle, test.input, test.join, test.allowedSymbols, test.numberRules)
+			params := caps.ConvertRequest{
+				Style:          test.style,
+				ReplaceStyle:   test.repStyle,
+				Input:          string(test.input),
+				Join:           test.join,
+				AllowedSymbols: test.allowedSymbols,
+				NumberRules:    test.numberRules,
+			}
+
+			output := converter.Convert(params)
 			if output != test.expected {
 				t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
 			}
