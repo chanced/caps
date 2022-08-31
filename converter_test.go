@@ -85,7 +85,7 @@ func TestConverterTableOps(t *testing.T) {
 	// 	t.Errorf("expected \"TCP\", got \"%s\"", tcp.Screaming)
 	// }
 
-	// this just checks to see if we StdReplacer.Set will swap incase the user
+	// this just checks to see if we StdConverter.Set will swap incase the user
 	// flips the order of the strings
 
 	c.Set("WSS", "Wss")

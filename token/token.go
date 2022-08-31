@@ -1,3 +1,5 @@
+// Package token contains a Token data structure representing a string in slices
+// of runes in varous casings.
 package token
 
 import "unicode"

@@ -3,7 +3,7 @@ package caps
 // ReplaceStyle is used to indicate the case style the text should be transformed to
 // when seeking replacement text in a Converter.
 //
-// When a Replacer is configured, the expected input is:
+// When a Converter is configured, the expected input is:
 //
 //	caps.Replacement{ Camel: "Json", Screaming: "JSON" }
 //
@@ -43,15 +43,15 @@ type Opts struct {
 	// 	DefaultConverter
 	Converter Converter
 
-	// Styles overwrites the way words are replaced.
+	// ReplaceStyle overwrites the way words are replaced.
 	//
-	// A typical call to ToLowerCamel for "ServeJSON" with a Replacer that
+	// A typical call to ToLowerCamel for "ServeJSON" with a Converter that
 	// contains {"Json": "JSON"} would result in "serveJSON" by using the
-	// StyleScreaming variant. If ReplacementStyle was set to
-	// ReplaceStyleUpperCamel, on the call to ToLowerCamel then the result would
+	// ReplaceStyleScreaming variant. If ReplacementStyle was set to
+	// ReplaceStyleCamel, on the call to ToLowerCamel then the result would
 	// be "serveHttp".
 	//
-	// The default replacement style is dependent upon the target casing.
+	// The default replacement style is dependent upon the target Style.
 	ReplaceStyle ReplaceStyle
 	// NumberRules are used by the DefaultTokenizer to augment the standard
 	// rules for determining if a rune is part of a number.
