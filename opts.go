@@ -1,5 +1,7 @@
 package caps
 
+import "github.com/chanced/caps/token"
+
 // ReplaceStyle is used to indicate the case style the text should be transformed to
 // when seeking replacement text in a Converter.
 //
@@ -56,16 +58,17 @@ func (s Style) IsLowerCamel() bool {
 	return s == StyleLowerCamel
 }
 
-
-
 // Opts include configurable options for case conversion.
 //
 // See the documentation for the individual fields for more information.
 type Opts struct {
 	// Any characters within this string will be allowed in the output.
 	//
+	// This does not affect delimiters (e.g. '_', '-', '.') as they are added
+	// post-tokenization.
+	//
 	// Default:
-	// 	""
+	//  ""
 	AllowedSymbols string
 	// The Converter to use.
 	//
@@ -88,7 +91,7 @@ type Opts struct {
 	//
 	// Note, if you add special characters here, they must be present in the
 	// AllowedSymbols string for them to be part of the output.
-	NumberRules map[rune]func(index int, r rune, val []rune) bool
+	NumberRules token.NumberRules
 }
 
 // Deprecated: Use WithAllowedSymbols instead.
@@ -139,7 +142,7 @@ func WithReplaceStyleLower() Opts {
 }
 
 // WithNumberRules sets the NumberRules to use
-func WithNumberRules(rules map[rune]func(index int, r rune, val []rune) bool) Opts {
+func WithNumberRules(rules NumberRules) Opts {
 	return Opts{
 		NumberRules: rules,
 	}
@@ -162,7 +165,7 @@ func UseReplaceStyle(style ReplaceStyle) Opts {
 }
 
 // Deprecated: Use WithNumberRules instead.
-func UseNumberRules(rules map[rune]func(index int, r rune, val []rune) bool) Opts {
+func UseNumberRules(rules token.NumberRules) Opts {
 	return Opts{
 		NumberRules: rules,
 	}
@@ -184,7 +187,7 @@ func loadOpts(opts []Opts) Opts {
 		}
 		if len(opt.NumberRules) > 0 {
 			if result.NumberRules == nil {
-				result.NumberRules = make(map[rune]func(index int, r rune, val []rune) bool)
+				result.NumberRules = make(NumberRules)
 			}
 			for k, v := range opt.NumberRules {
 				result.NumberRules[k] = v

@@ -2,20 +2,22 @@
 package index
 
 import (
+	"strings"
+
 	"github.com/chanced/caps/token"
 )
 
 // IndexedReplacement is a node in an Index
 // created from a Replacement
 type IndexedReplacement struct {
-	Screaming token.Token
-	Camel     token.Token
-	Lower     token.Token
+	Screaming string
+	Camel     string
+	Lower     string
 }
 
 // IsEmpty reports whether or not ir is empty
 func (ir IndexedReplacement) IsEmpty() bool {
-	return ir.Screaming.IsEmpty()
+	return len(ir.Screaming) == 0
 }
 
 func (ir IndexedReplacement) HasValue() bool {
@@ -27,7 +29,7 @@ type Index struct {
 	value          IndexedReplacement
 	nodes          map[rune]*Index
 	lastMatch      IndexedReplacement
-	partialMatches []token.Token
+	partialMatches strings.Builder
 	caser          token.Caser
 }
 
@@ -56,35 +58,35 @@ func (idx Index) Value() IndexedReplacement {
 	return idx.value
 }
 
-func (idx Index) Contains(tok token.Token) bool {
-	_, ok := idx.Get(tok)
+func (idx Index) Contains(s string) bool {
+	_, ok := idx.Get(s)
 	return ok
 }
 
-func (idx Index) HasNode(tok token.Token) bool {
-	if tok.Len() == 0 {
-		return false
-	}
-	node := &idx
-	for _, r := range tok.Lower() {
-		if n, ok := node.nodes[r]; ok {
-			node = n
-		} else {
-			return false
-		}
-	}
-	return true
-}
+// func (idx Index) HasNode(s string) bool {
+// 	if len(s) == 0 {
+// 		return false
+// 	}
+// 	node := &idx
+// 	for _, r := range token.ToLower(idx.caser, s) {
+// 		if n, ok := node.nodes[r]; ok {
+// 			node = n
+// 		} else {
+// 			return false
+// 		}
+// 	}
+// 	return true
+// }
 
-func (idx Index) PartialMatches() []token.Token {
-	return idx.partialMatches
+func (idx Index) PartialMatches() string {
+	return idx.partialMatches.String()
 }
 
 func (idx Index) HasPartialMatches() bool {
-	return len(idx.partialMatches) > 0
+	return idx.partialMatches.Len() > 0
 }
 
-func (idx Index) HasMatch() bool {
+func (idx Index) HasMatched() bool {
 	return !idx.lastMatch.IsEmpty()
 }
 
@@ -102,14 +104,14 @@ func (idx Index) HasValue() bool {
 // If t is empty, the root node is returned.
 //
 // # If the Index does not contain the node, an empty Index is returned
-func (idx Index) Match(t token.Token) (Index, bool) {
+func (idx Index) Match(s string) (Index, bool) {
 	var ok bool
-	if t.IsEmpty() {
+	if len(s) == 0 {
 		return idx, false
 	}
 
 	next := &idx
-	for _, r := range t.Lower() {
+	for _, r := range token.ToLower(idx.caser, s) {
 		if next, ok = next.nodes[r]; !ok || next == nil {
 			return Index{
 				partialMatches: idx.partialMatches,
@@ -126,9 +128,9 @@ func (idx Index) Match(t token.Token) (Index, bool) {
 		}
 		if next.HasValue() {
 			idx.lastMatch = next.value
-			idx.partialMatches = nil
+			idx.partialMatches.Reset()
 		} else {
-			idx.partialMatches = append(idx.partialMatches, token.FromRune(idx.caser, r))
+			idx.partialMatches.WriteRune(r)
 		}
 	}
 	return idx, true
@@ -138,13 +140,13 @@ func (idx Index) Match(t token.Token) (Index, bool) {
 // if found.
 //
 // To GetForward a reversed value, use GetReverse.
-func (idx *Index) Get(t token.Token) (IndexedReplacement, bool) {
-	if t.Len() == 0 {
+func (idx *Index) Get(s string) (IndexedReplacement, bool) {
+	if len(s) == 0 {
 		return idx.value, idx.value.HasValue()
 	}
 	node := idx
 	var ok bool
-	for _, r := range t.Lower() {
+	for _, r := range token.ToLower(idx.caser, s) {
 		if node, ok = node.nodes[r]; !ok {
 			return IndexedReplacement{}, false
 		}
@@ -181,11 +183,11 @@ func (idx *Index) Values() []IndexedReplacement {
 //
 // If idx.IsReversed is true, the IndexedReplacement is inserted into the
 // Index with the key in reverse order (e.g. AnExample -> elpmaxena).
-func (idx *Index) Add(camel token.Token, screaming token.Token) bool {
+func (idx *Index) Add(camel string, screaming string) bool {
 	ir := IndexedReplacement{
 		Screaming: screaming,
 		Camel:     camel,
-		Lower:     token.FromString(idx.caser, camel.Lower()),
+		Lower:     token.ToLower(idx.caser, camel),
 	}
 	var exists bool
 	var er IndexedReplacement
@@ -200,10 +202,8 @@ func (idx *Index) Add(camel token.Token, screaming token.Token) bool {
 		idx.Delete(er.Screaming)
 		idx.Delete(er.Camel)
 	}
-
-	key := ir.Screaming.LowerRunes()
 	node := idx
-	for _, r := range key {
+	for _, r := range ir.Lower {
 		if _, ok = node.nodes[r]; !ok {
 			node.nodes[r] = &Index{
 				nodes: make(map[rune]*Index),
@@ -212,27 +212,33 @@ func (idx *Index) Add(camel token.Token, screaming token.Token) bool {
 		}
 		node = node.nodes[r]
 	}
+	skey := token.ToLower(idx.caser, ir.Screaming)
+	if ir.Lower != skey {
+		for _, r := range skey {
+			if _, ok = node.nodes[r]; !ok {
+				node.nodes[r] = &Index{
+					nodes: make(map[rune]*Index),
+					caser: idx.caser,
+				}
+			}
+			node = node.nodes[r]
+		}
+	}
+
 	node.value = ir
 
 	return exists
 }
 
-func (idx *Index) Delete(key token.Token) bool {
-	tokstr := key.String()
-	_ = tokstr
-	if key.IsEmpty() {
-		return false
-	}
+func (idx *Index) Delete(key string) bool {
 	node := idx
-	k := key.LowerRunes()
-	nodes := make([]*Index, len(k))
+
+	nodes := make([]*Index, len(key))
 	var ok bool
 	var i int
 	var r rune
 
-	for i, r = range k {
-		rstr := string(r)
-		_ = rstr
+	for i, r = range token.ToLower(idx.caser, key) {
 		nodes[i] = node
 		if node, ok = node.nodes[r]; !ok || node == nil {
 			return false
@@ -241,7 +247,8 @@ func (idx *Index) Delete(key token.Token) bool {
 	node.value = IndexedReplacement{}
 
 	child := node
-	for i := len(k) - 1; i >= 0; i-- {
+	k := []rune(key)
+	for i := len(key) - 1; i >= 0; i-- {
 		r = k[i]
 		rstr := string(r)
 		_ = rstr

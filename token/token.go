@@ -1,5 +1,4 @@
-// Package token contains a Token data structure representing a string in slices
-// of runes in varous casings.
+// Package token contains a funcs for working with a string as a token.
 package token
 
 import (
@@ -7,189 +6,134 @@ import (
 	"unicode"
 )
 
-// Token contains a slice of runes representing the raw value and value in
-// lowercase form.
-//
-// This is used for the
-type Token struct {
-	value []rune
-	// lower []rune
-	caser Caser
-	// upper []rune
-}
+type NumberRules map[rune]func(index int, r rune, val string) bool
 
 // Append appends all of o to t
-func Append(caser Caser, t Token, elems ...Token) Token {
+func Append(caser Caser, t string, elems ...string) string {
 	caser = CaserOrDefault(caser)
-	for _, e := range elems {
-		if e.Len() == 0 {
+	b := strings.Builder{}
+	b.WriteString(t)
+	for i, e := range elems {
+		if len(e) == 0 {
 			continue
 		}
-		if t.Len() > 0 {
-			// just incase the first rune is a Title
-			if unicode.IsTitle(e.value[0]) {
-				e.value = append([]rune{caser.ToUpper(e.value[0])}, e.value[1:]...)
+		b.Grow(len(e))
+		for y, r := range e {
+			if y == 0 && i == 0 && len(t) > 0 && unicode.IsTitle(r) {
+				b.WriteRune(caser.ToUpper(r))
+			} else {
+				b.WriteRune(r)
 			}
-			// e.upper = append([]rune{caser.ToUpper(e.upper[0])}, e.upper[1:]...)
-		}
-		t = Token{
-			value: append(t.value, e.value...),
-			// lower: append(t.lower, e.lower...),
-			caser: caser,
-			// upper: append(t.upper, e.upper...),
 		}
 	}
-	return t
+	return b.String()
 }
 
 // AppendRune append the rune to the current token.
-func AppendRune(caser Caser, t Token, r rune) Token {
+func AppendRune(caser Caser, t string, runes ...rune) string {
 	caser = CaserOrDefault(caser)
-	if unicode.IsTitle(r) {
-		r = caser.ToUpper(r)
+	b := strings.Builder{}
+	b.Grow(len(t) + len(runes))
+	b.WriteString(t)
+
+	for _, r := range runes {
+		if b.Len() > 0 && unicode.IsTitle(r) {
+			r = caser.ToUpper(r)
+		} else if b.Len() == 0 && unicode.IsUpper(r) {
+			r = caser.ToTitle(r)
+		}
+		b.WriteRune(r)
 	}
-	// upper := append(t.upper, caser.ToUpper(r))
-	// if t.Len() == 0 && len(upper) > 0 {
-	// 	upper[0] = caser.ToTitle(upper[0])
-	// }
-	return Token{
-		value: append(t.value, r),
-		// lower: append(t.lower, caser.ToLower(r)),
-		caser: caser,
-		// upper: upper,
-	}
+	return b.String()
 }
 
-func FromString[T ~string](caser Caser, value T) Token {
-	return FromRunes(caser, []rune(value))
-}
-
-func FromRune(caser Caser, value rune) Token {
+func ToLower(caser Caser, s string) string {
 	caser = CaserOrDefault(caser)
-	return Token{
-		value: []rune{value},
-		// lower: []rune{caser.ToLower(value)},
-		caser: caser,
-		// upper: []rune{caser.ToTitle(value)},
+	b := strings.Builder{}
+	b.Grow(len(s))
+	for _, r := range s {
+		b.WriteRune(caser.ToLower(r))
 	}
+	return b.String()
 }
 
-func FromRunes(caser Caser, value []rune) Token {
+func ToUpper(caser Caser, s string) string {
 	caser = CaserOrDefault(caser)
-	upper := make([]rune, len(value))
-	lower := make([]rune, len(value))
-	for i, r := range value {
+	b := strings.Builder{}
+	b.Grow(len(s))
+	for i, r := range s {
 		if i == 0 {
-			upper[i] = caser.ToTitle(r)
+			b.WriteRune(caser.ToTitle(r))
 		} else {
-			upper[i] = caser.ToUpper(r)
-		}
-		lower[i] = caser.ToLower(r)
-	}
-	return Token{
-		value: value,
-		// lower: lower,
-		caser: caser,
-		// upper: upper,
-	}
-}
-
-func (t Token) String() string {
-	return t.Value()
-}
-
-// Len returns the number of runes in the Part.
-func (t Token) Len() int {
-	return len(t.value)
-}
-
-func (t Token) Value() string {
-	return string(t.value)
-}
-
-func (t Token) Lower() string {
-	sb := strings.Builder{}
-	sb.Grow(t.Len())
-	for _, r := range t.value {
-		sb.WriteRune(t.caser.ToLower(r))
-	}
-	return sb.String()
-}
-
-func (t Token) Upper() string {
-	sb := strings.Builder{}
-	sb.Grow(t.Len())
-	for i, r := range t.value {
-		if i == 0 {
-			sb.WriteRune(t.caser.ToTitle(r))
-		} else {
-			sb.WriteRune(t.caser.ToUpper(r))
+			b.WriteRune(caser.ToUpper(r))
 		}
 	}
-	return sb.String()
+	return b.String()
 }
 
-func (t Token) IsEmpty() bool {
-	return t.Len() == 0
+func IsEmpty(s string) bool {
+	return len(s) == 0
 }
 
-func (t Token) UpperFirstLowerRest() string {
-	switch len(t.value) {
-	case 0:
+func FirstRune(s string) (rune, bool) {
+	for _, r := range s {
+		return r, true
+	}
+	return 0, false
+}
+
+func UpperFirstLowerRest(caser Caser, s string) string {
+	caser = CaserOrDefault(caser)
+	if len(s) == 0 {
 		return ""
-	case 1:
-		return string(t.caser.ToUpper(t.value[0]))
 	}
-	sb := strings.Builder{}
-	for i, r := range t.value {
+	b := strings.Builder{}
+	b.Grow(len(s))
+	for i, r := range s {
 		if i == 0 {
-			sb.WriteRune(t.caser.ToTitle(r))
+			b.WriteRune(caser.ToTitle(r))
 		} else {
-			sb.WriteRune(t.caser.ToLower(r))
+			b.WriteRune(caser.ToLower(r))
 		}
 	}
-	return sb.String()
+	return b.String()
 }
 
-func (t Token) UpperFirst() string {
-	switch len(t.value) {
-	case 0:
+func UpperFirst(caser Caser, s string) string {
+	caser = CaserOrDefault(caser)
+	if len(s) == 0 {
 		return ""
-	case 1:
-		return string(t.caser.ToTitle(t.Runes()[0]))
 	}
-	sb := strings.Builder{}
-	sb.Grow(t.Len())
-	for i, r := range t.value {
+	b := strings.Builder{}
+	b.Grow(len(s))
+	for i, r := range s {
 		if i == 0 {
-			sb.WriteRune(t.caser.ToTitle(r))
+			b.WriteRune(caser.ToTitle(r))
 		} else {
-			sb.WriteRune(t.value[i])
+			b.WriteRune(r)
 		}
 	}
-	return sb.String()
+	return b.String()
 }
 
-func (t Token) LowerFirst() string {
-	switch len(t.value) {
-	case 0:
+func LowerFirst(caser Caser, s string) string {
+	caser = CaserOrDefault(caser)
+	if len(s) == 0 {
 		return ""
-	case 1:
-		return string(t.caser.ToLower(t.Runes()[0]))
 	}
 	sb := strings.Builder{}
-	sb.Grow(t.Len())
-	for i, r := range t.value {
+	sb.Grow(len(s))
+	for i, r := range s {
 		if i == 0 {
-			sb.WriteRune(t.caser.ToLower(r))
+			sb.WriteRune(caser.ToLower(r))
 		} else {
-			sb.WriteRune(t.value[i])
+			sb.WriteRune(r)
 		}
 	}
 	return sb.String()
 }
 
-// IsNumber reports true if the Token is considered a valid number based on the
+// IsNumber reports true if the string is considered a valid number based on the
 // following rules:
 //
 // - If the Token is composed only of numbers
@@ -208,34 +152,19 @@ func (t Token) LowerFirst() string {
 //
 // - if additionalRules is not nil and the rune is present in the map, the
 // result of the provided func overrides the rules above
-func (t Token) IsNumber(additionalRules ...map[rune]func(index int, r rune, val []rune) bool) bool {
-	var rules map[rune]func(index int, r rune, val []rune) bool
-	if additionalRules != nil {
-		if len(additionalRules) == 1 {
-			rules = additionalRules[0]
-		} else {
-			rules = make(map[rune]func(index int, r rune, val []rune) bool)
-			for _, r := range additionalRules {
-				for k, v := range r {
-					if _, ok := rules[k]; ok {
-						rules[k] = v
-					}
-				}
-			}
-		}
-	}
+func IsNumber(s string, additionalRules NumberRules) bool {
 	isDec := false
 	var prev rune
 	e := -1
 
-	if len(t.value) == 0 {
+	if len(s) == 0 {
 		return false
 	}
 
-	for i, r := range t.value {
-		if rules != nil {
-			if fn, ok := rules[r]; ok {
-				if !fn(i, r, t.value) {
+	for i, r := range s {
+		if additionalRules != nil {
+			if fn, ok := additionalRules[r]; ok {
+				if !fn(i, r, s) {
 					return false
 				}
 				prev = r
@@ -253,10 +182,10 @@ func (t Token) IsNumber(additionalRules ...map[rune]func(index int, r rune, val 
 					return false
 				}
 			case '.':
-				if t.Len() == 1 {
+				if len(s) == 1 {
 					return false
 				}
-				if i == t.Len()-1 {
+				if i == len(s)-1 {
 					return false
 				}
 				if prev > 0 && !unicode.IsNumber(prev) && prev != '-' && prev != '+' {
@@ -270,7 +199,7 @@ func (t Token) IsNumber(additionalRules ...map[rune]func(index int, r rune, val 
 				if e != -1 {
 					return false
 				}
-				if i == len(t.value)-1 {
+				if i == len(s)-1 {
 					return false
 				}
 				e = i
@@ -284,111 +213,37 @@ func (t Token) IsNumber(additionalRules ...map[rune]func(index int, r rune, val 
 	return true
 }
 
-func (t Token) Reverse() Token {
-	r := Token{
-		value: make([]rune, len(t.value)),
-		// lower: make([]rune, len(t.lower)),
-		caser: t.caser,
+func Reverse(caser Caser, s string) string {
+	caser = CaserOrDefault(caser)
+	if len(s) == 0 {
+		return ""
 	}
-	x := 0
-	for i := t.Len() - 1; i >= 0; i-- {
-		x = t.Len() - 1 - i
-		r.value[x] = t.value[i]
-		// r.lower[x] = t.lower[i]
+	b := strings.Builder{}
+	b.Grow(len(s))
+	var r rune
+	runes := []rune(s)
 
-	}
-	return r
-}
-
-// Split returns the current token split into a slice of Tokens for each rune in
-// the list.
-func (t Token) Split() []Token {
-	result := make([]Token, t.Len())
-	for i, r := range t.value {
-		result[i] = Token{
-			value: []rune{r},
-			// lower: []rune{t.lower[i]},
-			caser: t.caser,
+	for i := len(runes) - 1; i >= 0; i-- {
+		r = runes[i]
+		switch {
+		case i == len(runes)-1 && unicode.IsUpper(r):
+			b.WriteRune(caser.ToTitle(r))
+		case i == 0 && unicode.IsTitle(r):
+			b.WriteRune(caser.ToUpper(r))
+		default:
+			b.WriteRune(r)
 		}
 	}
-	return result
-}
-
-func (t Token) LowerFirstRune() (rune, bool) {
-	if t.Len() == 0 {
-		return 0, false
-	}
-
-	return t.caser.ToLower(t.value[0]), true
-}
-
-func (t Token) FirstRune() (rune, bool) {
-	if t.Len() == 0 {
-		return 0, false
-	}
-	return t.value[0], true
-}
-
-func (t Token) ReverseSplit() []Token {
-	result := make([]Token, t.Len())
-	for i := t.Len() - 1; i >= 0; i-- {
-		result[t.Len()-1-i] = Token{
-			value: []rune{t.value[i]},
-			// lower: []rune{t.lower[i]},
-			caser: t.caser,
-		}
-	}
-	return result
-}
-
-func (t Token) LowerRunes() []rune {
-	result := make([]rune, t.Len())
-	for i, r := range t.value {
-		result[i] = t.caser.ToLower(r)
-	}
-	return result
-}
-
-func (t Token) UpperRunes() []rune {
-	u := make([]rune, len(t.value))
-	for i, r := range t.value {
-		u[i] = unicode.ToUpper(r)
-	}
-	return u
-}
-
-func (t Token) Runes() []rune {
-	return t.value
-}
-
-func (t Token) LowerReversedRunes() []rune {
-	res := make([]rune, len(t.value))
-	for i := t.Len() - 1; i >= 0; i-- {
-		res[t.Len()-1-i] = t.caser.ToLower(t.value[i])
-	}
-	return res
+	return b.String()
 }
 
 // HasLower returns true if any rune in
 // the token is a unicode lowercase letter.
-func (t Token) HasLower() bool {
-	for _, r := range t.value {
+func HasLower(s string) bool {
+	for _, r := range s {
 		if unicode.IsLower(r) {
 			return true
 		}
 	}
 	return false
-}
-
-func (t Token) Clone() Token {
-	val := make([]rune, len(t.value))
-
-	// }
-	copy(val, t.value)
-	return Token{
-		value: val,
-		// lower: lower,
-		caser: t.caser,
-		// upper: upper,
-	}
 }

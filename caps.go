@@ -1,48 +1,168 @@
 package caps
 
 import (
-	"sort"
 	"strings"
 	"unicode"
+
+	"github.com/chanced/caps/token"
 )
+
+type Caps struct {
+	caser          token.Caser
+	allowedSymbols string
+	converter      Converter
+	replaceStyle   ReplaceStyle
+	numberRules    token.NumberRules
+}
+
+// CapsOpts include configurable options for case conversion.
+//
+// See the documentation for the individual fields for more information.
+type CapsOpts struct {
+	// Any characters within this string will be allowed in the output.
+	//
+	// This does not affect delimiters (e.g. '_', '-', '.') as they are added
+	// post-tokenization.
+	//
+	// Default:
+	//  ""
+	AllowedSymbols string
+	// The Converter to use.
+	//
+	// Default:
+	// 	DefaultConverter
+	Converter Converter
+
+	// If not set, this will be DefaultReplacements.
+	Replacements []Replacement
+
+	// ReplaceStyle overwrites the way words are replaced.
+	//
+	// A typical call to ToLowerCamel for "ServeJSON" with a Converter that
+	// contains {"Json": "JSON"} would result in "serveJSON" by using the
+	// ReplaceStyleScreaming variant. If ReplacementStyle was set to
+	// ReplaceStyleCamel, on the call to ToLowerCamel then the result would
+	// be "serveHttp".
+	//
+	// The default replacement style is dependent upon the target Style.
+	ReplaceStyle ReplaceStyle
+	// NumberRules are used by the DefaultTokenizer to augment the standard
+	// rules for determining if a rune is part of a number.
+	//
+	// Note, if you add special characters here, they must be present in the
+	// AllowedSymbols string for them to be part of the output.
+	NumberRules token.NumberRules
+	// Special unicode case rules.
+	// See unicode.SpecialCase or token.Caser for more information.
+	//
+	// Default: token.DefaultCaser (which relies on the default unicode
+	// functions)
+	Caser token.Caser
+
+	// If not set, uses DefaultTokenizer
+	Tokenizer Tokenizer
+}
+
+func loadCapsOpts(opts []CapsOpts) CapsOpts {
+	result := CapsOpts{
+		AllowedSymbols: "",
+		ReplaceStyle:   ReplaceStyleScreaming,
+	}
+
+	for _, opt := range opts {
+		result.AllowedSymbols += opt.AllowedSymbols
+		if opt.Converter != nil {
+			result.Converter = opt.Converter
+		}
+		if opt.ReplaceStyle != ReplaceStyleNotSpecified {
+			result.ReplaceStyle = opt.ReplaceStyle
+		}
+		if len(opt.NumberRules) > 0 {
+			if result.NumberRules == nil {
+				result.NumberRules = make(NumberRules)
+			}
+			for k, v := range opt.NumberRules {
+				result.NumberRules[k] = v
+			}
+		}
+		if opt.Replacements != nil {
+			result.Replacements = append(result.Replacements, opt.Replacements...)
+		}
+		if opt.Caser != nil {
+			result.Caser = opt.Caser
+		}
+		if opt.Tokenizer != nil {
+			result.Tokenizer = opt.Tokenizer
+		}
+	}
+	if result.Caser == nil {
+		result.Caser = token.DefaultCaser
+	}
+	if result.Replacements == nil {
+		result.Replacements = DefaultReplacements
+	}
+	if result.Tokenizer == nil {
+		result.Tokenizer = NewTokenizer(DEFAULT_DELIMITERS, result.Caser)
+	}
+	if result.Converter == nil {
+		result.Converter = NewConverter(result.Replacements, result.Tokenizer, result.Caser)
+	}
+
+	return result
+}
+
+// New returns a new Caps instance with the provided options.
+//
+// if caser is nil, token.DefaultCaser is used (which relies on the default
+// unicode functions)
+func New(options ...CapsOpts) Caps {
+	opts := loadCapsOpts(options)
+
+	return Caps{
+		caser:          opts.Caser,
+		allowedSymbols: opts.AllowedSymbols,
+		converter:      opts.Converter,
+		replaceStyle:   opts.ReplaceStyle,
+		numberRules:    opts.NumberRules,
+	}
+}
+
+func (c Caps) ReplaceStyle() ReplaceStyle {
+	return c.replaceStyle
+}
+
+func (c Caps) NumberRules() token.NumberRules {
+	return c.numberRules
+}
+
+// AllowedSymbols is
+func (c Caps) AllowedSymbols() string {
+	return c.allowedSymbols
+}
 
 // UpperFirst converts the first rune of str to unicode upper case.
 //
 // This method does not support special cases (such as Turkish and Azeri)
-func UpperFirst[T ~string](str T) T {
-	runes := []rune(str)
-	if len(runes) == 0 {
-		return ""
-	}
-	runes[0] = unicode.ToTitle(runes[0])
-	return T(runes)
+func (c Caps) UpperFirst(str string) string {
+	return token.UpperFirst(c.caser, str)
 }
 
 // LowerFirst converts the first rune of str to lowercase.
-func LowerFirst[T ~string](str T) T {
-	runes := []rune(str)
-	switch len(runes) {
-	case 0:
-		return ""
-	case 1:
-		return T(unicode.ToLower(runes[0]))
-	default:
-		runes[0] = unicode.ToLower(runes[0])
-		return T(runes)
-	}
+func (c Caps) LowerFirst(str string) string {
+	return token.LowerFirst(c.caser, str)
 }
 
 // Without numbers returns the string with all numeric runes removed.
 //
 // It does not currently use any logic to determine if a rune (e.g. '.')
 // is part of a number. This may change in the future.
-func WithoutNumbers[T ~string](s T) T {
-	return T(strings.Map(func(r rune) rune {
+func (c Caps) WithoutNumbers(s string) string {
+	return strings.Map(func(r rune) rune {
 		if unicode.IsDigit(r) {
 			return -1
 		}
 		return r
-	}, string(s)))
+	}, string(s))
 }
 
 // ToCamel transforms the case of str into Camel Case (e.g. AnExampleString) using
@@ -55,16 +175,15 @@ func WithoutNumbers[T ~string](s T) T {
 //
 //	caps.ToCamel("This is [an] {example}${id32}.") // ThisIsAnExampleID32
 //	caps.ToCamel("AN_EXAMPLE_STRING", ) // AnExampleString
-func ToCamel[T ~string](str T, options ...Opts) T {
-	opts := loadOpts(options)
-	return T(opts.Converter.Convert(ConvertRequest{
+func (c Caps) ToCamel(str string) string {
+	return c.converter.Convert(ConvertRequest{
 		Style:          StyleCamel,
-		ReplaceStyle:   opts.ReplaceStyle,
-		Input:          string(str),
+		ReplaceStyle:   c.replaceStyle,
+		Input:          str,
 		Join:           "",
-		AllowedSymbols: []rune(opts.AllowedSymbols),
-		NumberRules:    opts.NumberRules,
-	}))
+		AllowedSymbols: c.allowedSymbols,
+		NumberRules:    c.numberRules,
+	})
 }
 
 // ToLowerCamel transforms the case of str into Lower Camel Case (e.g. anExampleString) using
@@ -76,25 +195,23 @@ func ToCamel[T ~string](str T, options ...Opts) T {
 // ReplaceStyleCamel would result in "someJson".
 //
 //	caps.ToLowerCamel("This is [an] {example}${id32}.") // thisIsAnExampleID32
-func ToLowerCamel[T ~string](str T, options ...Opts) T {
-	opts := loadOpts(options)
-
-	return T(opts.Converter.Convert(ConvertRequest{
+func (c Caps) ToLowerCamel(str string) string {
+	return c.converter.Convert(ConvertRequest{
 		Style:          StyleLowerCamel,
-		ReplaceStyle:   opts.ReplaceStyle,
-		Input:          string(str),
+		ReplaceStyle:   c.replaceStyle,
+		Input:          str,
 		Join:           "",
-		AllowedSymbols: []rune(opts.AllowedSymbols),
-		NumberRules:    opts.NumberRules,
-	}))
+		AllowedSymbols: c.allowedSymbols,
+		NumberRules:    c.numberRules,
+	})
 }
 
 // ToSnake transforms the case of str into Lower Snake Case (e.g. an_example_string) using
 // either the provided Converter or the DefaultConverter otherwise.
 //
 //	caps.ToSnake("This is [an] {example}${id32}.") // this_is_an_example_id_32
-func ToSnake[T ~string](str T, options ...Opts) T {
-	return ToDelimited(str, '_', true, options...)
+func (c Caps) ToSnake(str string) string {
+	return c.ToDelimited(str, '_', true)
 }
 
 // ToScreamingSnake transforms the case of str into Screaming Snake Case (e.g.
@@ -102,16 +219,16 @@ func ToSnake[T ~string](str T, options ...Opts) T {
 // DefaultConverter otherwise.
 //
 //	caps.ToScreamingSnake("This is [an] {example}${id32}.") // THIS_IS_AN_EXAMPLE_ID_32
-func ToScreamingSnake[T ~string](str T, options ...Opts) T {
-	return ToDelimited(str, '_', false, options...)
+func (c Caps) ToScreamingSnake(str string) string {
+	return ToDelimited(str, '_', false)
 }
 
 // ToKebab transforms the case of str into Lower Kebab Case (e.g. an-example-string) using
 // either the provided Converter or the DefaultConverter otherwise.
 //
 //	caps.ToKebab("This is [an] {example}${id32}.") // this-is-an-example-id-32
-func ToKebab[T ~string](str T, options ...Opts) T {
-	return ToDelimited(str, '-', true, options...)
+func (c Caps) ToKebab(str string) string {
+	return ToDelimited(str, '-', true)
 }
 
 // ToScreamingKebab transforms the case of str into Screaming Kebab Snake (e.g.
@@ -119,16 +236,16 @@ func ToKebab[T ~string](str T, options ...Opts) T {
 // DefaultConverter otherwise.
 //
 //	caps.ToScreamingKebab("This is [an] {example}${id32}.") // THIS-IS-AN-EXAMPLE-ID-32
-func ToScreamingKebab[T ~string](str T, options ...Opts) T {
-	return ToDelimited(str, '-', false, options...)
+func (c Caps) ToScreamingKebab(str string) string {
+	return ToDelimited(str, '-', false)
 }
 
 // ToDotNotation transforms the case of str into Lower Dot Notation Case (e.g. an.example.string) using
 // either the provided Converter or the DefaultConverter otherwise.
 //
 //	caps.ToDotNotation("This is [an] {example}${id32}.") // this.is.an.example.id.32
-func ToDotNotation[T ~string](str T, options ...Opts) T {
-	return ToDelimited(str, '.', true, options...)
+func (c Caps) ToDotNotation(str string) string {
+	return ToDelimited(str, '.', true)
 }
 
 // ToScreamingDotNotation transforms the case of str into Screaming Kebab Case (e.g.
@@ -136,24 +253,23 @@ func ToDotNotation[T ~string](str T, options ...Opts) T {
 // DefaultConverter otherwise.
 //
 //	caps.ToScreamingDotNotation("This is [an] {example}${id32}.") // THIS.IS.AN.EXAMPLE.ID.32
-func ToScreamingDotNotation[T ~string](str T, options ...Opts) T {
-	return ToDelimited(str, '.', false, options...)
+func (c Caps) ToScreamingDotNotation(str string) string {
+	return ToDelimited(str, '.', false)
 }
 
 // ToTitle transforms the case of str into Title Case (e.g. An Example String) using
 // either the provided Converter or the DefaultConverter otherwise.
 //
 //	caps.ToTitle("This is [an] {example}${id32}.") // This Is An Example ID 32
-func ToTitle[T ~string](str T, options ...Opts) T {
-	opts := loadOpts(options)
-	return T(opts.Converter.Convert(ConvertRequest{
+func (c Caps) ToTitle(str string) string {
+	return c.converter.Convert(ConvertRequest{
 		Style:          StyleCamel,
-		ReplaceStyle:   opts.ReplaceStyle,
-		Input:          string(str),
+		ReplaceStyle:   c.replaceStyle,
+		Input:          str,
 		Join:           " ",
-		AllowedSymbols: []rune(opts.AllowedSymbols),
-		NumberRules:    opts.NumberRules,
-	}))
+		AllowedSymbols: c.allowedSymbols,
+		NumberRules:    c.numberRules,
+	})
 }
 
 // ToDelimited transforms the case of str into a string separated by delimiter,
@@ -168,8 +284,7 @@ func ToTitle[T ~string](str T, options ...Opts) T {
 //	caps.ToDelimited("This is [an] {example}${id}.#32", '.', true) // this.is.an.example.id.32
 //	caps.ToDelimited("This is [an] {example}${id}.break32", '.', false) // THIS.IS.AN.EXAMPLE.ID.BREAK.32
 //	caps.ToDelimited("This is [an] {example}${id}.v32", '.', true, caps.Opts{AllowedSymbols: "$"}) // this.is.an.example.$.id.v32
-func ToDelimited[T ~string](str T, delimiter rune, lowercase bool, options ...Opts) T {
-	opts := loadOpts(options)
+func (c Caps) ToDelimited(str string, delimiter rune, lowercase bool) string {
 	var style Style
 	var replacementStyle ReplaceStyle
 	if lowercase {
@@ -179,60 +294,12 @@ func ToDelimited[T ~string](str T, delimiter rune, lowercase bool, options ...Op
 		style = StyleScreaming
 		replacementStyle = ReplaceStyleScreaming
 	}
-	return T(opts.Converter.Convert(ConvertRequest{
+	return c.converter.Convert(ConvertRequest{
 		Style:          style,
 		ReplaceStyle:   replacementStyle,
-		Input:          string(str),
+		Input:          str,
 		Join:           string(delimiter),
-		AllowedSymbols: []rune(opts.AllowedSymbols),
-		NumberRules:    opts.NumberRules,
-	}))
-}
-
-// ToLower returns s with all Unicode letters mapped to their lower case.
-func ToLower[T ~string](str T) T {
-	return T(strings.ToLower((string(str))))
-}
-
-// ToUpper returns s with all Unicode letters mapped to their upper case.
-func ToUpper[T ~string](str T) T {
-	return T(strings.ToUpper((string(str))))
-}
-
-type runes []rune
-
-// Len implements sort.Interface
-func (r runes) Len() int {
-	return len(r)
-}
-
-// Less implements sort.Interface
-func (r runes) Less(i int, j int) bool {
-	return r[i] < r[j]
-}
-
-// Swap implements sort.Interface
-func (r runes) Swap(i int, j int) {
-	r[i], r[j] = r[j], r[i]
-}
-
-func (r runes) Contains(c rune) bool {
-	if len(r) == 0 {
-		return false
-	}
-	res := sort.Search(len(r), func(i int) bool {
-		return r[i] >= c
+		AllowedSymbols: c.allowedSymbols,
+		NumberRules:    c.numberRules,
 	})
-	return res > -1 && res < len(r) && r[res] == c
 }
-
-func newRunes(val []rune) runes {
-	if len(val) == 0 {
-		return nil
-	}
-	r := runes(val)
-	sort.Sort(r)
-	return r
-}
-
-var _ sort.Interface = (*runes)(nil)

@@ -37,11 +37,9 @@ type Caser interface {
 	ToTitle(r rune) rune
 }
 
-var unicodeCaser Caser = Unicode{}
-
 func CaserOrDefault(caser Caser) Caser {
 	if caser == nil {
-		return unicodeCaser
+		return DefaultCaser
 	}
 	return caser
 }

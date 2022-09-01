@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/chanced/caps"
+	"github.com/chanced/caps/token"
 )
 
 func TestConverterConvert(t *testing.T) {
@@ -17,7 +18,7 @@ func TestConverterConvert(t *testing.T) {
 		repStyle       caps.ReplaceStyle
 		allowedSymbols []rune
 		converter      caps.Converter
-		numberRules    map[rune]func(index int, r rune, val []rune) bool
+		numberRules    token.NumberRules
 	}{
 		{"An example string", "AnExampleString", "", caps.StyleCamel, caps.ReplaceStyleScreaming, nil, nil, nil},
 		{"An example string", "anExampleString", "", caps.StyleLowerCamel, caps.ReplaceStyleScreaming, nil, nil, nil},
@@ -47,7 +48,7 @@ func TestConverterConvert(t *testing.T) {
 				ReplaceStyle:   test.repStyle,
 				Input:          string(test.input),
 				Join:           test.join,
-				AllowedSymbols: test.allowedSymbols,
+				AllowedSymbols: string(test.allowedSymbols),
 				NumberRules:    test.numberRules,
 			}
 

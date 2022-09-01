@@ -42,8 +42,8 @@ type ConvertRequest struct {
 	ReplaceStyle   ReplaceStyle
 	Input          string
 	Join           string
-	AllowedSymbols []rune
-	NumberRules    map[rune]func(index int, r rune, val []rune) bool
+	AllowedSymbols string
+	NumberRules    map[rune]func(index int, r rune, val string) bool
 }
 
 // NewConverter creates a new Converter which is used to convert the input text to the desired output.
@@ -84,7 +84,7 @@ func (sc StdConverter) Index() index.Index {
 
 // Contains reports whether a key is in the Converter's replacement table.
 func (sc StdConverter) Contains(key string) bool {
-	return sc.index.Contains(token.FromString(sc.caser, key))
+	return sc.index.Contains(key)
 }
 
 // Replacements returns a slice of Replacement in the lookup trie.
@@ -93,8 +93,8 @@ func (sc StdConverter) Replacements() []Replacement {
 	res := make([]Replacement, len(indexedVals))
 	for i, v := range indexedVals {
 		res[i] = Replacement{
-			Camel:     v.Camel.Value(),
-			Screaming: v.Screaming.Value(),
+			Camel:     v.Camel,
+			Screaming: v.Screaming,
 		}
 	}
 	b := strings.Builder{}
@@ -103,7 +103,7 @@ func (sc StdConverter) Replacements() []Replacement {
 }
 
 func (sc *StdConverter) set(key, value string) {
-	sc.index.Add(token.FromString(sc.caser, key), token.FromString(sc.caser, value))
+	sc.index.Add(key, value)
 }
 
 // Set adds the key/value pair to the table.
@@ -123,135 +123,150 @@ func (sc *StdConverter) Set(key, value string) {
 
 // Remove deletes the key from the map. Either variant is sufficient.
 func (sc *StdConverter) Delete(key string) {
-	tok := token.FromString(sc.caser, key)
-	sc.index.Delete(tok)
+	sc.index.Delete(key)
+}
+
+func (StdConverter) writeIndexReplacement(b *strings.Builder, style Style, repStyle ReplaceStyle, join string, v index.IndexedReplacement) {
+	b.Grow(len(v.Camel) + len(join))
+	if len(join) > 0 && b.Len() > 0 {
+		b.WriteString(join)
+	}
+	b.WriteString(formatIndexedReplacement(style, repStyle, b.Len(), v))
+}
+
+func (sc StdConverter) writeToken(b *strings.Builder, style Style, join string, s string) {
+	b.Grow(len(s) + len(join))
+	if len(join) > 0 && b.Len() > 0 {
+		b.WriteString(join)
+	}
+	b.WriteString(FormatToken(sc.caser, style, b.Len(), s))
 }
 
 // Convert formats the string with the desired style.
 func (sc StdConverter) Convert(req ConvertRequest) string {
 	tokens := sc.tokenizer.Tokenize(req.Input, req.AllowedSymbols, req.NumberRules)
-	var parts []string
+	b := strings.Builder{}
 	var ok bool
 	var addedAsNumber bool
 	idx := sc.Index()
 	for i, tok := range tokens {
-		switch tok.Len() {
+		switch len(tok) {
 		case 0:
 			continue
 		case 1:
-
 			if idx, ok = idx.Match(tok); !ok {
 				if idx.LastMatch().HasValue() {
 					// appending the last match
-					parts = append(parts, formatIndexedReplacement(req.Style, req.ReplaceStyle, len(parts), idx.LastMatch()))
+					//  formatIndexedReplacement(req.Style, req.ReplaceStyle, b.Len(), idx.LastMatch()), req.Join
+					sc.writeIndexReplacement(&b, req.Style, req.ReplaceStyle, req.Join, idx.LastMatch())
 				}
 				if idx.HasPartialMatches() {
 					// checking to make sure it isn't a number
-					accum := token.Append(sc.caser, tok, idx.PartialMatches()...)
-					if accum.IsNumber() {
-						parts = append(parts, FormatToken(req.Style, len(parts), accum))
+					if token.IsNumber(token.Append(sc.caser, tok, idx.PartialMatches()), req.NumberRules) {
+						b.WriteString(FormatToken(sc.caser, req.Style, b.Len(), token.Append(sc.caser, tok, idx.PartialMatches())))
 						addedAsNumber = true
 					} else {
-						for _, partok := range idx.PartialMatches() {
-							parts = append(parts, FormatToken(req.Style, len(parts), partok))
+						for _, partok := range strings.Split(idx.PartialMatches(), "") {
+							sc.writeToken(&b, req.Style, req.Join, partok)
 						}
 						addedAsNumber = false
 					}
 				}
 				if !addedAsNumber {
-					parts = append(parts, FormatToken(req.Style, len(parts), tok))
+					sc.writeToken(&b, req.Style, req.Join, tok)
 				}
 				// resetting the index
 				idx = sc.Index()
 			}
 		default:
-			if idx.HasMatch() {
-				parts = append(parts, formatIndexedReplacement(req.Style, req.ReplaceStyle, len(parts), idx.LastMatch()))
+			if idx.HasMatched() {
+				sc.writeIndexReplacement(&b, req.Style, req.ReplaceStyle, req.Join, idx.LastMatch())
 			}
 			if idx.HasPartialMatches() {
-				for _, partok := range idx.PartialMatches() {
-					parts = append(parts, FormatToken(req.Style, len(parts), partok))
+				for _, partok := range strings.Split(idx.PartialMatches(), "") {
+					sc.writeToken(&b, req.Style, req.Join, partok)
 				}
 			}
-			if idx.HasMatch() || idx.HasPartialMatches() {
+			if idx.HasMatched() || idx.HasPartialMatches() {
 				// resetting index
 				idx = sc.Index()
 			}
 			if rep, ok := idx.Get(tok); ok {
-				parts = append(parts, formatIndexedReplacement(req.Style, req.ReplaceStyle, len(parts), rep))
+				sc.writeIndexReplacement(&b, req.Style, req.ReplaceStyle, req.Join, rep)
 			} else if isNextTokenNumber(tokens, i) {
 				if idx, ok = idx.Match(tok); !ok {
-					parts = append(parts, FormatToken(req.Style, len(parts), tok))
+					sc.writeToken(&b, req.Style, req.Join, tok)
 					idx = sc.Index()
 				}
 			} else {
-				parts = append(parts, FormatToken(req.Style, len(parts), tok))
+				sc.writeToken(&b, req.Style, req.Join, tok)
+				// parts = append(parts, FormatToken(sc.caser, req.Style, len(parts), tok))
 			}
 		}
 	}
-	result := strings.Builder{}
-	result.Grow(len(req.Input))
-
-	shouldWriteDelimiter := false
-	if idx.HasMatch() {
-		parts = append(parts, formatIndexedReplacement(req.Style, req.ReplaceStyle, len(parts), idx.LastMatch()))
+	if idx.HasMatched() {
+		sc.writeIndexReplacement(&b, req.Style, req.ReplaceStyle, req.Join, idx.LastMatch())
+		// parts = append(parts, formatIndexedReplacement(req.Style, req.ReplaceStyle, len(parts), idx.LastMatch()))
 	}
 
 	if idx.HasPartialMatches() {
-		for _, partok := range idx.PartialMatches() {
-			parts = append(parts, FormatToken(req.Style, len(parts), partok))
+		for _, partok := range strings.Split(idx.PartialMatches(), "") {
+			sc.writeToken(&b, req.Style, req.Join, partok)
+			// parts = append(parts, FormatToken(sc.caser, req.Style, len(parts), partok))
 		}
 	}
-	for _, part := range parts {
-		if shouldWriteDelimiter {
-			result.WriteString(req.Join)
-		}
-		result.WriteString(part)
-		if !shouldWriteDelimiter {
-			shouldWriteDelimiter = len(part) > 0 && len(req.Join) > 0
-		}
-	}
+	// for _, part := range parts {
+	// 	if shouldWriteDelimiter {
+	// 		result.WriteString(req.Join)
+	// 	}
+	// 	result.WriteString(part)
+	// 	if !shouldWriteDelimiter {
+	// 		shouldWriteDelimiter = len(part) > 0 && len(req.Join) > 0
+	// 	}
+	// }
 
-	return result.String()
+	return b.String()
 }
 
-// FormatToken formats the token with the desired style.
-func FormatToken(style Style, index int, tok token.Token) string {
+// FormatToken formats the str with the desired style.
+func FormatToken(caser token.Caser, style Style, index int, tok string) string {
 	switch style {
 	case StyleCamel:
-		return string(tok.UpperFirstLowerRest())
+		return token.UpperFirstLowerRest(caser, tok)
 	case StyleLowerCamel:
 		if index == 0 {
-			return string(tok.Lower())
+			return token.ToLower(caser, tok)
 		}
-		return string(tok.UpperFirstLowerRest())
+		return token.UpperFirstLowerRest(caser, tok)
 	case StyleScreaming:
-		return tok.Upper()
+		return token.ToUpper(caser, tok)
 	case StyleLower:
-		return tok.Lower()
+		return token.ToLower(caser, tok)
 	}
-	return tok.String()
+	return tok
 }
 
 func formatIndexedReplacement(style Style, replaceStyle ReplaceStyle, index int, rep index.IndexedReplacement) string {
 	switch replaceStyle {
 	case ReplaceStyleCamel:
 		if index == 0 && style == StyleLowerCamel {
-			return rep.Camel.Lower()
+			return rep.Lower
 		}
-		return rep.Camel.String()
+		return rep.Camel
 	case ReplaceStyleScreaming:
-		return rep.Screaming.String()
+		return rep.Screaming
 	case ReplaceStyleLower:
-		return rep.Lower.String()
+		return rep.Lower
 	default:
-		return rep.Screaming.String()
+		return rep.Screaming
 	}
 }
 
-func isNextTokenNumber(tokens []token.Token, i int) bool {
+func isNextTokenNumber(tokens []string, i int) bool {
 	if i+1 < len(tokens) {
-		return unicode.IsNumber(tokens[i+1].Runes()[0])
+		if r, ok := token.FirstRune(tokens[i+1]); ok {
+			return unicode.IsNumber(r)
+		}
 	}
 	return false
 }

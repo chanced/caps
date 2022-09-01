@@ -53,6 +53,10 @@ func main() {
 	fmt.Println(caps.ToLowerCamel("SomeID", caps.WithReplaceStyleCamel()))
 	// Output:
 	// someId
+
+    // Alternatively:
+    c := caps.New()
+    fmt.Println()
 }
 ```
 
@@ -266,20 +270,50 @@ func main() {
 
 input: `"Example Uuid Test Case."`
 
+Using a `caps.Caps` instance:
+
 ```
-goos: darwin
-goarch: arm64
-pkg: github.com/chanced/caps
+BenchmarkCapsToTitle
+BenchmarkCapsToTitle-10                   	 1000000	      1007 ns/op	     288 B/op	      19 allocs/op
+BenchmarkCapsToCamel
+BenchmarkCapsToCamel-10                   	 1217474	       984.5 ns/op	     288 B/op	      19 allocs/op
+BenchmarkCapsToLowerCamel
+BenchmarkCapsToLowerCamel-10              	 1223340	       979.1 ns/op	     288 B/op	      19 allocs/op
+BenchmarkCapsToSnake
+BenchmarkCapsToSnake-10                   	 1205770	       996.5 ns/op	     288 B/op	      20 allocs/op
+BenchmarkCapsToScreamingSnake
+BenchmarkCapsToScreamingSnake-10          	 1000000	      1037 ns/op	     336 B/op	      21 allocs/op
+BenchmarkCapsToKebab
+BenchmarkCapsToKebab-10                   	 1000000	      1021 ns/op	     336 B/op	      21 allocs/op
+BenchmarkCapsToScreamingKebab
+BenchmarkCapsToScreamingKebab-10          	 1000000	      1052 ns/op	     336 B/op	      21 allocs/op
+BenchmarkCapsToDotNotation
+BenchmarkCapsToDotNotation-10             	 1000000	      1019 ns/op	     336 B/op	      21 allocs/op
+BenchmarkCapsToScreamingDotNotation
+BenchmarkCapsToScreamingDotNotation-10    	 1000000	      1032 ns/op	     336 B/op	      21 allocs/op
+```
+
+Using top-level functions:
+
+```
 BenchmarkToTitle
-BenchmarkToTitle-10             	  749170	      1595 ns/op	     728 B/op	      28 allocs/op
+BenchmarkToTitle-10                       	 1128897	      1051 ns/op	     336 B/op	      20 allocs/op
 BenchmarkToCamel
-BenchmarkToCamel-10             	  738326	      1592 ns/op	     728 B/op	      28 allocs/op
+BenchmarkToCamel-10                       	 1000000	      1030 ns/op	     336 B/op	      20 allocs/op
 BenchmarkToLowerCamel
-BenchmarkToLowerCamel-10        	  749995	      1566 ns/op	     728 B/op	      28 allocs/op
+BenchmarkToLowerCamel-10                  	 1000000	      1014 ns/op	     336 B/op	      20 allocs/op
 BenchmarkToSnake
-BenchmarkToSnake-10             	  733464	      1554 ns/op	     712 B/op	      29 allocs/op
+BenchmarkToSnake-10                       	 1000000	      1026 ns/op	     336 B/op	      21 allocs/op
 BenchmarkToScreamingSnake
-BenchmarkToScreamingSnake-10    	  742378	      1558 ns/op	     712 B/op	      29 allocs/op
+BenchmarkToScreamingSnake-10              	 1000000	      1042 ns/op	     336 B/op	      21 allocs/op
+BenchmarkToKebab
+BenchmarkToKebab-10                       	 1000000	      1021 ns/op	     336 B/op	      21 allocs/op
+BenchmarkToScreamingKebab
+BenchmarkToScreamingKebab-10              	 1000000	      1032 ns/op	     336 B/op	      21 allocs/op
+BenchmarkToDotNotation
+BenchmarkToDotNotation-10                 	 1000000	      1020 ns/op	     336 B/op	      21 allocs/op
+BenchmarkToScreamingDotNotation
+BenchmarkToScreamingDotNotation-10        	 1000000	      1033 ns/op	     336 B/op	      21 allocs/op
 ```
 
 ## License

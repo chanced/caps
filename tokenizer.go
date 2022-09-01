@@ -2,6 +2,7 @@ package caps
 
 import (
 	"sort"
+	"strings"
 	"unicode"
 
 	"github.com/chanced/caps/token"
@@ -15,9 +16,11 @@ const (
 // DefaultTokenizer is the default Tokenizer.
 var DefaultTokenizer StdTokenizer = NewTokenizer(DEFAULT_DELIMITERS, token.DefaultCaser)
 
+type NumberRules = token.NumberRules
+
 // Tokenizer is an interface satisfied by tyeps which can
 type Tokenizer interface {
-	Tokenize(value string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) []token.Token
+	Tokenize(value string, allowedSymbols string, numberRules NumberRules) []string
 }
 
 // NewTokenizer creates and returns a new TokenizerImpl which implements the
@@ -69,143 +72,149 @@ type StdTokenizer struct {
 //
 //	t := caps.token.Newizer("_")
 //	t.Tokenize("A_SCREAMING_SNAKECASE_VARIABLE", []rune{'_'}) -> ["A_SCREAMING_SNAKECASE_VARIABLE"]
-func (ti StdTokenizer) Tokenize(str string, allowedSymbols []rune, numberRules map[rune]func(index int, r rune, val []rune) bool) []token.Token {
-	tokens := []token.Token{}
-	pending := []token.Token{}
+func (ti StdTokenizer) Tokenize(str string, allowedSymbols string, numberRules NumberRules) []string {
+	tokens := []string{}
+	pending := []string{}
 	foundLower := false
-	current := token.Token{}
+	current := strings.Builder{}
 	prevNumber := false
 	allowed := newRunes(allowedSymbols)
 
 	for i, r := range str {
+		curStr := current.String()
+		_ = curStr
+		rStr := string(r)
+		_ = rStr
 		switch {
 		case unicode.IsUpper(r):
 			if foundLower && current.Len() > 0 {
-				tokens = append(tokens, current)
-				current = token.Token{}
+				tokens = append(tokens, current.String())
+				current.Reset()
 			}
-			current = token.AppendRune(ti.caser, current, r)
+			current.WriteRune(r)
 			prevNumber = false
 		case unicode.IsLower(r):
 			if !foundLower && current.Len() > 0 {
 				// we have to break up the pending first
 				for _, tok := range pending {
-					if tok.IsNumber(numberRules) {
+					if token.IsNumber(tok, numberRules) {
 						tokens = append(tokens, tok)
 					} else {
-						tokens = append(tokens, tok.Split()...)
+						tokens = append(tokens, strings.Split(tok, "")...)
 					}
 				}
 				// need to break up the current token if it isn't a number
 				if prevNumber {
-					tokens = append(tokens, current)
-					current = token.Token{}
+					tokens = append(tokens, current.String())
+					current.Reset()
 				} else {
-					split := current.Split()
+					split := strings.Split(current.String(), "")
 					// current becomes the last upper token before discovering the lowercase token
-					current = split[len(split)-1]
-
+					current.Reset()
+					current.WriteString(split[len(split)-1])
 					// all other tokens are added to the token list
 					tokens = append(tokens, split[:len(split)-1]...)
 				}
 			}
-			current = token.AppendRune(ti.caser, current, r)
+			current.WriteRune(r)
 			pending = nil
 			foundLower = true
 		case unicode.IsNumber(r):
-
 			// if adding the number onto current makes it a valid number
 			// then append this rune to current
-			if token.AppendRune(ti.caser, current, r).IsNumber(numberRules) {
-				current = token.AppendRune(ti.caser, current, r)
+			if token.IsNumber(token.AppendRune(ti.caser, current.String(), r), numberRules) {
+				current.WriteRune(r)
 			} else {
 				// otherwise it is not a number and so we add the current token
 				// to the token or pending list depending on whether or not we
 				// have found a lowercase rune
 				if current.Len() > 0 && foundLower {
-					tokens = append(tokens, current)
-					current = token.Token{}
+					tokens = append(tokens, current.String())
+					current.Reset()
 				} else if current.Len() > 0 { // otherwise, we have to push the current token into a pending state
-					pending = append(pending, current)
-					current = token.Token{}
+					pending = append(pending, current.String())
+					current.Reset()
 				}
-				current = token.AppendRune(ti.caser, current, r)
+				current.WriteRune(r)
 			}
 			prevNumber = true
 		default:
 			if allowed.Contains(r) {
 				if current.Len() > 0 {
-					if current.IsNumber(numberRules) {
+					if token.IsNumber(current.String(), numberRules) {
 						// this gets a bit tricky because we need to check if adding the
-						// rune to the current makes it a number. However, in all
+						// rune to current makes it a number. However, in all
 						// default cases, a non-numeric rune must be followed either by
 						// a number or an 'e' and a number. as such, we have to check if
 						// both this and the next rune (and possibly the rune after
 						// that) make it a number.
-						n := token.AppendRune(ti.caser, current, r)
+						n := token.AppendRune(ti.caser, current.String(), r)
 						runes := []rune(str)
-						if n.IsNumber(numberRules) {
-							current = n
+						if token.IsNumber(n, numberRules) {
+							current.Reset()
+							current.WriteString(n)
 						} else if i <= len(runes)-2 && (unicode.IsNumber(runes[i+1]) || unicode.IsLetter(runes[i+1])) || allowed.Contains(runes[i+1]) {
-							next := token.AppendRune(ti.caser, n, runes[i+1])
-							if next.IsNumber(numberRules) {
-								current = n
+							if token.IsNumber(token.AppendRune(ti.caser, n, runes[i+1]), numberRules) {
+								current.Reset()
+								current.WriteString(n)
 							} else {
 								if foundLower {
-									tokens = append(tokens, current)
-									current = token.FromRunes(ti.caser, []rune{r})
+									tokens = append(tokens, current.String())
 								} else {
-									pending = append(pending, current)
-									current = token.FromRunes(ti.caser, []rune{r})
+									pending = append(pending, current.String())
 								}
+								current.Reset()
+								current.WriteRune(r)
 							}
 						} else {
 							if foundLower {
-								tokens = append(tokens, current)
-								current = token.FromRunes(ti.caser, []rune{r})
+								tokens = append(tokens, current.String())
 							} else {
-								pending = append(pending, current)
-								current = token.FromRunes(ti.caser, []rune{r})
+								pending = append(pending, current.String())
 							}
+							current.Reset()
+							current.WriteRune(r)
 						}
 					} else {
-						current = token.AppendRune(ti.caser, current, r)
+						current.WriteRune(r)
 					}
 				} else {
-					current = token.AppendRune(ti.caser, current, r)
+					current.Reset()
+					current.WriteRune(r)
 				}
 			} else if ti.delimiters.Contains(r) || unicode.IsSpace(r) {
 				if current.Len() > 0 {
 					if foundLower {
-						tokens = append(tokens, current)
-						current = token.Token{}
+						tokens = append(tokens, current.String())
 					} else {
-						pending = append(pending, current)
-						current = token.Token{}
+						pending = append(pending, current.String())
 					}
+					current.Reset()
 				}
 			}
 		}
+		curStr = current.String()
+		_ = curStr
 	}
 	if current.Len() > 0 {
-		if current.IsNumber(numberRules) {
+		if token.IsNumber(current.String(), numberRules) {
 			if foundLower {
-				tokens = append(tokens, current)
+				tokens = append(tokens, current.String())
 			} else {
-				pending = append(pending, current)
+				pending = append(pending, current.String())
 			}
 		} else if !foundLower {
-			pending = append(pending, current)
+			pending = append(pending, current.String())
 		} else {
-			tokens = append(tokens, current)
+			tokens = append(tokens, current.String())
 		}
 	}
 	if foundLower {
 		for _, tok := range pending {
-			if tok.IsNumber(numberRules) {
+			if token.IsNumber(tok, numberRules) {
 				tokens = append(tokens, tok)
 			} else {
-				tokens = append(tokens, tok.Split()...)
+				tokens = append(tokens, strings.Split(tok, "")...)
 			}
 		}
 		return tokens
@@ -216,5 +225,43 @@ func (ti StdTokenizer) Tokenize(str string, allowedSymbols []rune, numberRules m
 
 // Deprecated: Use StdTokenizer.
 type TokenizerImpl = StdTokenizer
+
+type runes []rune
+
+// Len implements sort.Interface
+func (r runes) Len() int {
+	return len(r)
+}
+
+// Less implements sort.Interface
+func (r runes) Less(i int, j int) bool {
+	return r[i] < r[j]
+}
+
+// Swap implements sort.Interface
+func (r runes) Swap(i int, j int) {
+	r[i], r[j] = r[j], r[i]
+}
+
+func (r runes) Contains(c rune) bool {
+	if len(r) == 0 {
+		return false
+	}
+	res := sort.Search(len(r), func(i int) bool {
+		return r[i] >= c
+	})
+	return res > -1 && res < len(r) && r[res] == c
+}
+
+func newRunes(val string) runes {
+	if len(val) == 0 {
+		return nil
+	}
+	r := runes([]rune(val))
+	sort.Sort(r)
+	return r
+}
+
+var _ sort.Interface = (*runes)(nil)
 
 var _ Tokenizer = StdTokenizer{}
