@@ -97,11 +97,11 @@ uses the following rules:
 initialism replacements. Each `Replacement` is indexed in a trie (see
 [Index](https://github.com/chanced/caps/blob/main/index/index.go)).
 
--   Multi-rune `Token`s are searched independently unless followed by a number (e.g.
+-   Multi-rune tokens are searched independently unless followed by a number (e.g.
     `"ID"`, `"UTF8"`).
--   Sequences of single rune `Token`s (e.g.`["U", "U", "I", "D"]`) are
+-   Sequences of single rune tokens (e.g.`["U", "U", "I", "D"]`) are
     evaluated as a potential `Replacement` until a non-match is
-    found or the sequence is broken by a `Token` with more than one rune.
+    found or the sequence is broken by a token with more than one rune.
 
 ### Default replacements
 
