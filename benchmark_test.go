@@ -30,11 +30,11 @@ import (
 	"github.com/chanced/caps"
 )
 
-var testCase string = "Example Uuid Test Case."
+var testCase string = "Example Uuid."
 
 func BenchmarkToTitle(b *testing.B) {
 	var s string
-	expected := "Example UUID Test Case"
+	expected := "Example UUID"
 	for n := 0; n < b.N; n++ {
 		s = caps.ToTitle(testCase)
 	}
@@ -46,7 +46,7 @@ func BenchmarkToTitle(b *testing.B) {
 
 func BenchmarkToCamel(b *testing.B) {
 	var s string
-	expected := "ExampleUUIDTestCase"
+	expected := "ExampleUUID"
 	for n := 0; n < b.N; n++ {
 		s = caps.ToCamel(testCase)
 	}
@@ -58,7 +58,7 @@ func BenchmarkToCamel(b *testing.B) {
 
 func BenchmarkToLowerCamel(b *testing.B) {
 	var s string
-	expected := "exampleUUIDTestCase"
+	expected := "exampleUUID"
 	for n := 0; n < b.N; n++ {
 		s = caps.ToLowerCamel(testCase)
 	}
@@ -70,7 +70,7 @@ func BenchmarkToLowerCamel(b *testing.B) {
 
 func BenchmarkToSnake(b *testing.B) {
 	var s string
-	expected := "example_uuid_test_case"
+	expected := "example_uuid"
 	for n := 0; n < b.N; n++ {
 		s = caps.ToSnake(testCase)
 	}
@@ -82,7 +82,7 @@ func BenchmarkToSnake(b *testing.B) {
 
 func BenchmarkToScreamingSnake(b *testing.B) {
 	var s string
-	expected := "EXAMPLE_UUID_TEST_CASE"
+	expected := "EXAMPLE_UUID"
 	for n := 0; n < b.N; n++ {
 		s = caps.ToScreamingSnake(testCase)
 	}
@@ -94,7 +94,7 @@ func BenchmarkToScreamingSnake(b *testing.B) {
 
 func BenchmarkToKebab(b *testing.B) {
 	var s string
-	expected := "example-uuid-test-case"
+	expected := "example-uuid"
 	for n := 0; n < b.N; n++ {
 		s = caps.ToKebab(testCase)
 	}
@@ -106,7 +106,7 @@ func BenchmarkToKebab(b *testing.B) {
 
 func BenchmarkToScreamingKebab(b *testing.B) {
 	var s string
-	expected := "EXAMPLE-UUID-TEST-CASE"
+	expected := "EXAMPLE-UUID"
 	for n := 0; n < b.N; n++ {
 		s = caps.ToScreamingKebab(testCase)
 	}
@@ -118,7 +118,7 @@ func BenchmarkToScreamingKebab(b *testing.B) {
 
 func BenchmarkToDotNotation(b *testing.B) {
 	var s string
-	expected := "example.uuid.test.case"
+	expected := "example.uuid"
 	for n := 0; n < b.N; n++ {
 		s = caps.ToDotNotation(testCase)
 	}
@@ -130,7 +130,7 @@ func BenchmarkToDotNotation(b *testing.B) {
 
 func BenchmarkToScreamingDotNotation(b *testing.B) {
 	var s string
-	expected := "EXAMPLE.UUID.TEST.CASE"
+	expected := "EXAMPLE.UUID"
 	for n := 0; n < b.N; n++ {
 		s = caps.ToScreamingDotNotation(testCase)
 	}
@@ -150,7 +150,7 @@ var c caps.Caps = caps.New()
 
 func BenchmarkCapsToTitle(b *testing.B) {
 	var s string
-	expected := "Example UUID Test Case"
+	expected := "Example UUID"
 	for n := 0; n < b.N; n++ {
 		s = c.ToTitle(testCase)
 	}
@@ -162,7 +162,7 @@ func BenchmarkCapsToTitle(b *testing.B) {
 
 func BenchmarkCapsToCamel(b *testing.B) {
 	var s string
-	expected := "ExampleUUIDTestCase"
+	expected := "ExampleUUID"
 	for n := 0; n < b.N; n++ {
 		s = c.ToCamel(testCase)
 	}
@@ -174,7 +174,7 @@ func BenchmarkCapsToCamel(b *testing.B) {
 
 func BenchmarkCapsToLowerCamel(b *testing.B) {
 	var s string
-	expected := "exampleUUIDTestCase"
+	expected := "exampleUUID"
 	for n := 0; n < b.N; n++ {
 		s = c.ToLowerCamel(testCase)
 	}
@@ -186,7 +186,7 @@ func BenchmarkCapsToLowerCamel(b *testing.B) {
 
 func BenchmarkCapsToSnake(b *testing.B) {
 	var s string
-	expected := "example_uuid_test_case"
+	expected := "example_uuid"
 	for n := 0; n < b.N; n++ {
 		s = c.ToSnake(testCase)
 	}
@@ -198,7 +198,7 @@ func BenchmarkCapsToSnake(b *testing.B) {
 
 func BenchmarkCapsToScreamingSnake(b *testing.B) {
 	var s string
-	expected := "EXAMPLE_UUID_TEST_CASE"
+	expected := "EXAMPLE_UUID"
 	for n := 0; n < b.N; n++ {
 		s = c.ToScreamingSnake(testCase)
 	}
@@ -210,7 +210,7 @@ func BenchmarkCapsToScreamingSnake(b *testing.B) {
 
 func BenchmarkCapsToKebab(b *testing.B) {
 	var s string
-	expected := "example-uuid-test-case"
+	expected := "example-uuid"
 	for n := 0; n < b.N; n++ {
 		s = c.ToKebab(testCase)
 	}
@@ -222,7 +222,7 @@ func BenchmarkCapsToKebab(b *testing.B) {
 
 func BenchmarkCapsToScreamingKebab(b *testing.B) {
 	var s string
-	expected := "EXAMPLE-UUID-TEST-CASE"
+	expected := "EXAMPLE-UUID"
 	for n := 0; n < b.N; n++ {
 		s = c.ToScreamingKebab(testCase)
 	}
@@ -234,7 +234,7 @@ func BenchmarkCapsToScreamingKebab(b *testing.B) {
 
 func BenchmarkCapsToDotNotation(b *testing.B) {
 	var s string
-	expected := "example.uuid.test.case"
+	expected := "example.uuid"
 	for n := 0; n < b.N; n++ {
 		s = c.ToDotNotation(testCase)
 	}
@@ -246,7 +246,7 @@ func BenchmarkCapsToDotNotation(b *testing.B) {
 
 func BenchmarkCapsToScreamingDotNotation(b *testing.B) {
 	var s string
-	expected := "EXAMPLE.UUID.TEST.CASE"
+	expected := "EXAMPLE.UUID"
 	for n := 0; n < b.N; n++ {
 		s = c.ToScreamingDotNotation(testCase)
 	}
