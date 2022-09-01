@@ -40,31 +40,28 @@ The following case conversions are available:
 ```go
 package main
 import (
-    "fmt"
-    "github.com/chanced/caps"
+	"fmt"
+	"github.com/chanced/caps"
 )
 func main() {
-    fmt.Println(caps.ToCamel("http request"))
-    // Output:
-    // HTTPRequest
-    fmt.Println(caps.ToCamel("http request"))
-    // Output:
-    // HTTPRequest
-    fmt.Println(caps.ToLowerCamel("some_id"))
-    // Output:
-    // someID
-    fmt.Println(caps.ToLowerCamel("SomeID", caps.WithReplaceStyleCamel()))
-    // Output:
-    // someId
+	fmt.Println(caps.ToCamel("http request"))
+	// Output:
+	// HTTPRequest
+	fmt.Println(caps.ToLowerCamel("some_id"))
+	// Output:
+	// someID
+	fmt.Println(caps.ToLowerCamel("SomeID", caps.WithReplaceStyleCamel()))
+	// Output:
+	// someId
 
-    // Alternatively:
-    capsJS := caps.New(caps.CapsOpts{
-        AllowedSymbols: "$",
-        ReplaceStyle: caps.ReplaceStyleCamel
-    })
-    fmt.Println(capsJS.ToCamel("SomeID"))
-    // Output:
-    // someId
+	// Alternatively:
+	capsJS := caps.New(caps.CapsOpts{
+		AllowedSymbols: "$",
+		ReplaceStyle:   caps.ReplaceStyleCamel,
+	})
+	fmt.Println(capsJS.ToCamel("SomeID"))
+	// Output:
+	// someId
 }
 ```
 
