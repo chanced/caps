@@ -315,11 +315,11 @@ Using a `caps.Caps` instance:
 BenchmarkCapsToTitle
 BenchmarkCapsToTitle-10                   	 1000000	      1005 ns/op	     288 B/op	      19 allocs/op
 BenchmarkCapsToCamel
-BenchmarkCapsToCamel-10                   	 1214407	       995.0 ns/op	     288 B/op	      19 allocs/op
+BenchmarkCapsToCamel-10                   	 1214407	      995.0 ns/op	     288 B/op	      19 allocs/op
 BenchmarkCapsToLowerCamel
-BenchmarkCapsToLowerCamel-10              	 1219000	       980.1 ns/op	     288 B/op	      19 allocs/op
+BenchmarkCapsToLowerCamel-10              	 1219000	      980.1 ns/op	     288 B/op	      19 allocs/op
 BenchmarkCapsToSnake
-BenchmarkCapsToSnake-10                   	 1212786	       989.1 ns/op	     288 B/op	      19 allocs/op
+BenchmarkCapsToSnake-10                   	 1212786	      989.1 ns/op	     288 B/op	      19 allocs/op
 BenchmarkCapsToScreamingSnake
 BenchmarkCapsToScreamingSnake-10          	 1000000	      1027 ns/op	     336 B/op	      20 allocs/op
 BenchmarkCapsToKebab
