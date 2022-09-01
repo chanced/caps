@@ -144,7 +144,11 @@ func (sc StdConverter) writeToken(b *strings.Builder, style Style, join string, 
 func (sc StdConverter) Convert(req ConvertRequest) string {
 	tokens := sc.tokenizer.Tokenize(req.Input, req.AllowedSymbols, req.NumberRules)
 	b := strings.Builder{}
-	b.Grow(len(req.Input))
+	if len(req.Join) > 0 {
+		b.Grow(len(req.Input) + len(req.Join)*(len(tokens)-1))
+	} else {
+		b.Grow(len(req.Input))
+	}
 	var ok bool
 	var addedAsNumber bool
 	idx := sc.Index()
