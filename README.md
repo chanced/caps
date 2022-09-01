@@ -300,7 +300,7 @@ func main() {
 ## Benchmarks
 
 ```
-// input: "Example Uuid Test Case."
+input: "Example Uuid."
 ```
 
 ```
