@@ -334,7 +334,7 @@ BenchmarkCapsToScreamingDotNotation-10    	 2261966	       529.8 ns/op	     176 
 
 Using top-level functions:
 
-````
+```
 BenchmarkToTitle
 BenchmarkToTitle-10                       	 2180848	       536.8 ns/op	     176 B/op	      11 allocs/op
 BenchmarkToCamel
@@ -358,4 +358,3 @@ BenchmarkToScreamingDotNotation-10        	 2288790	       530.5 ns/op	     176 
 ## License
 
 MIT
-````
