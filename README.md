@@ -14,6 +14,8 @@ It has built in support for configurable initialism replacements (e.g. "Uuid" ->
 finally is modular in that each step in the case conversion process can be
 configured, augmented, or replaced.
 
+The API should be stabile as of v0.7.0
+
 ## Install
 
 ```
