@@ -76,19 +76,19 @@ uses the following rules:
 -   The following characters are considered word breaks `" _.!?:;$-(){}[]#@&+~"` unless present in `AllowedSymbols`
 -   Strings with all upper case characters are split by the above symbols or by
     numbers, unless the character is allowed in a number based on the following rules:
-    -   `'v'` or `'V'` followed by numbers
-    -   `'.'` before/after a number and only once
-    -   `'e'` or `'E'` if in the fractional part of a number and only once
-    -   `'-'`, `'+'` if at the start and followed by either a number or `'.'` and a
-        number or in the fractional part proceeded by `'e'` or `'E'`
+    -   'v' or 'V' followed by numbers
+    -   '.' before/after a number and only once
+    -   'e' or 'E' if in the fractional part of a number and only once
+    -   '-', '+' if at the start and followed by either a number or '.' and a
+        number or in the fractional part proceeded by 'e' or 'E'
     -   additional rules can be added through the number rules (e.g. `WithNumberRules`)
-    -   NOTE: If `'.'`, `'+'`, `'-'` are not in the `AllowedSymbols` they are
+    -   NOTE: If '.', '+', '-' are not in the `AllowedSymbols` they are
         considered breaks even for numbers
 -   When a string consists of both upper case and lower case letters, upper case
     letters are considered boundaries (e.g. `"ThisVar"` would be tokenized into `["This", "Var"]`)
 -   When mixed with lower and upper case characters, sequences of upper case are
     broken up into tokens (e.g. `"SomeID"` would be tokenized into `["Some", "I", "D"]`).
--   Replacement rules are then evaluated based on the `Token`s, which may
+-   Replacement rules are then evaluated based on the tokens, which may
     combine them based on the rules below.
 
 ## Replacements
