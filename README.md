@@ -40,36 +40,35 @@ The following case conversions are available:
 ```go
 package main
 import (
-	"fmt"
-	"github.com/chanced/caps"
+    "fmt"
+    "github.com/chanced/caps"
 )
 func main() {
-
     c := caps.New()
     fmt.Println(c.ToCamel("http request"))
-	// Output:
-	// HTTPRequest
+    // Output:
+    // HTTPRequest
     fmt.Println(c.ToCamel("http request"))
-	// Output:
-	// HTTPRequest
-	fmt.Println(c.ToLowerCamel("some_id"))
-	// Output:
-	// someID
-	fmt.Println(c.ToLowerCamel("SomeID", caps.WithReplaceStyleCamel()))
-	// Output:
-	// someId
+    // Output:
+    // HTTPRequest
+    fmt.Println(c.ToLowerCamel("some_id"))
+    // Output:
+    // someID
+    fmt.Println(c.ToLowerCamel("SomeID", caps.WithReplaceStyleCamel()))
+    // Output:
+    // someId
 
     // Alternatively:
 
     fmt.Println(caps.ToCamel("http request"))
-	// Output:
-	// HTTPRequest
-	fmt.Println(caps.ToLowerCamel("some_id"))
-	// Output:
-	// someID
-	fmt.Println(caps.ToLowerCamel("SomeID", caps.WithReplaceStyleCamel()))
-	// Output:
-	// someId
+    // Output:
+    // HTTPRequest
+    fmt.Println(caps.ToLowerCamel("some_id"))
+    // Output:
+    // someID
+    fmt.Println(caps.ToLowerCamel("SomeID", caps.WithReplaceStyleCamel()))
+    // Output:
+    // someId
 
 
 }
@@ -222,21 +221,21 @@ could be as simple as implementing the single `Convert` method, calling
 ```go
 package main
 import (
-	"fmt"
-	"github.com/chanced/caps"
+    "fmt"
+    "github.com/chanced/caps"
 )
 type MyConverter struct{}
 func (MyConverter) Convert(req caps.ConvertRequest) string {
-	res := caps.DefaultConverter.Convert(req)
-	if req.Style.IsLowerCamel() && req.ReplaceStyle.IsCamel() && res == "id" {
-		return "_id"
-	}
-	return res
+    res := caps.DefaultConverter.Convert(req)
+    if req.Style.IsLowerCamel() && req.ReplaceStyle.IsCamel() && res == "id" {
+        return "_id"
+    }
+    return res
 }
 func main() {
-	fmt.Println(caps.ToLowerCamel("ID", caps.WithReplaceStyleCamel(), caps.WithConverter(MyConverter{})))
-	// Output:
-	// _id
+    fmt.Println(caps.ToLowerCamel("ID", caps.WithReplaceStyleCamel(), caps.WithConverter(MyConverter{})))
+    // Output:
+    // _id
 }
 ```
 
@@ -289,46 +288,46 @@ Using a `caps.Caps` instance:
 
 ```
 BenchmarkCapsToTitle
-BenchmarkCapsToTitle-10                   	 1000000	      1007 ns/op	     288 B/op	      19 allocs/op
+BenchmarkCapsToTitle-10                        1000000          1007 ns/op         288 B/op          19 allocs/op
 BenchmarkCapsToCamel
-BenchmarkCapsToCamel-10                   	 1217474	       984.5 ns/op	     288 B/op	      19 allocs/op
+BenchmarkCapsToCamel-10                        1217474           984.5 ns/op         288 B/op          19 allocs/op
 BenchmarkCapsToLowerCamel
-BenchmarkCapsToLowerCamel-10              	 1223340	       979.1 ns/op	     288 B/op	      19 allocs/op
+BenchmarkCapsToLowerCamel-10                   1223340           979.1 ns/op         288 B/op          19 allocs/op
 BenchmarkCapsToSnake
-BenchmarkCapsToSnake-10                   	 1205770	       996.5 ns/op	     288 B/op	      20 allocs/op
+BenchmarkCapsToSnake-10                        1205770           996.5 ns/op         288 B/op          20 allocs/op
 BenchmarkCapsToScreamingSnake
-BenchmarkCapsToScreamingSnake-10          	 1000000	      1037 ns/op	     336 B/op	      21 allocs/op
+BenchmarkCapsToScreamingSnake-10               1000000          1037 ns/op         336 B/op          21 allocs/op
 BenchmarkCapsToKebab
-BenchmarkCapsToKebab-10                   	 1000000	      1021 ns/op	     336 B/op	      21 allocs/op
+BenchmarkCapsToKebab-10                        1000000          1021 ns/op         336 B/op          21 allocs/op
 BenchmarkCapsToScreamingKebab
-BenchmarkCapsToScreamingKebab-10          	 1000000	      1052 ns/op	     336 B/op	      21 allocs/op
+BenchmarkCapsToScreamingKebab-10               1000000          1052 ns/op         336 B/op          21 allocs/op
 BenchmarkCapsToDotNotation
-BenchmarkCapsToDotNotation-10             	 1000000	      1019 ns/op	     336 B/op	      21 allocs/op
+BenchmarkCapsToDotNotation-10                  1000000          1019 ns/op         336 B/op          21 allocs/op
 BenchmarkCapsToScreamingDotNotation
-BenchmarkCapsToScreamingDotNotation-10    	 1000000	      1032 ns/op	     336 B/op	      21 allocs/op
+BenchmarkCapsToScreamingDotNotation-10         1000000          1032 ns/op         336 B/op          21 allocs/op
 ```
 
 Using top-level functions:
 
 ```
 BenchmarkToTitle
-BenchmarkToTitle-10                       	 1128897	      1051 ns/op	     336 B/op	      20 allocs/op
+BenchmarkToTitle-10                            1128897          1051 ns/op         336 B/op          20 allocs/op
 BenchmarkToCamel
-BenchmarkToCamel-10                       	 1000000	      1030 ns/op	     336 B/op	      20 allocs/op
+BenchmarkToCamel-10                            1000000          1030 ns/op         336 B/op          20 allocs/op
 BenchmarkToLowerCamel
-BenchmarkToLowerCamel-10                  	 1000000	      1014 ns/op	     336 B/op	      20 allocs/op
+BenchmarkToLowerCamel-10                       1000000          1014 ns/op         336 B/op          20 allocs/op
 BenchmarkToSnake
-BenchmarkToSnake-10                       	 1000000	      1026 ns/op	     336 B/op	      21 allocs/op
+BenchmarkToSnake-10                            1000000          1026 ns/op         336 B/op          21 allocs/op
 BenchmarkToScreamingSnake
-BenchmarkToScreamingSnake-10              	 1000000	      1042 ns/op	     336 B/op	      21 allocs/op
+BenchmarkToScreamingSnake-10                   1000000          1042 ns/op         336 B/op          21 allocs/op
 BenchmarkToKebab
-BenchmarkToKebab-10                       	 1000000	      1021 ns/op	     336 B/op	      21 allocs/op
+BenchmarkToKebab-10                            1000000          1021 ns/op         336 B/op          21 allocs/op
 BenchmarkToScreamingKebab
-BenchmarkToScreamingKebab-10              	 1000000	      1032 ns/op	     336 B/op	      21 allocs/op
+BenchmarkToScreamingKebab-10                   1000000          1032 ns/op         336 B/op          21 allocs/op
 BenchmarkToDotNotation
-BenchmarkToDotNotation-10                 	 1000000	      1020 ns/op	     336 B/op	      21 allocs/op
+BenchmarkToDotNotation-10                      1000000          1020 ns/op         336 B/op          21 allocs/op
 BenchmarkToScreamingDotNotation
-BenchmarkToScreamingDotNotation-10        	 1000000	      1033 ns/op	     336 B/op	      21 allocs/op
+BenchmarkToScreamingDotNotation-10             1000000          1033 ns/op         336 B/op          21 allocs/op
 ```
 
 ## License
