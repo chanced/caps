@@ -32,120 +32,6 @@ import (
 
 var testCase string = "Example Uuid."
 
-func BenchmarkToTitle(b *testing.B) {
-	var s string
-	expected := "Example UUID"
-	for n := 0; n < b.N; n++ {
-		s = caps.ToTitle(testCase)
-	}
-
-	if expected != s {
-		b.Fatalf("Expected %s, got %s", expected, s)
-	}
-}
-
-func BenchmarkToCamel(b *testing.B) {
-	var s string
-	expected := "ExampleUUID"
-	for n := 0; n < b.N; n++ {
-		s = caps.ToCamel(testCase)
-	}
-
-	if expected != s {
-		b.Fatalf("Expected %s, got %s", expected, s)
-	}
-}
-
-func BenchmarkToLowerCamel(b *testing.B) {
-	var s string
-	expected := "exampleUUID"
-	for n := 0; n < b.N; n++ {
-		s = caps.ToLowerCamel(testCase)
-	}
-
-	if expected != s {
-		b.Fatalf("Expected %s, got %s", expected, s)
-	}
-}
-
-func BenchmarkToSnake(b *testing.B) {
-	var s string
-	expected := "example_uuid"
-	for n := 0; n < b.N; n++ {
-		s = caps.ToSnake(testCase)
-	}
-
-	if expected != s {
-		b.Fatalf("Expected %s, got %s", expected, s)
-	}
-}
-
-func BenchmarkToScreamingSnake(b *testing.B) {
-	var s string
-	expected := "EXAMPLE_UUID"
-	for n := 0; n < b.N; n++ {
-		s = caps.ToScreamingSnake(testCase)
-	}
-
-	if expected != s {
-		b.Fatalf("Expected %s, got %s", expected, s)
-	}
-}
-
-func BenchmarkToKebab(b *testing.B) {
-	var s string
-	expected := "example-uuid"
-	for n := 0; n < b.N; n++ {
-		s = caps.ToKebab(testCase)
-	}
-
-	if expected != s {
-		b.Fatalf("Expected %s, got %s", expected, s)
-	}
-}
-
-func BenchmarkToScreamingKebab(b *testing.B) {
-	var s string
-	expected := "EXAMPLE-UUID"
-	for n := 0; n < b.N; n++ {
-		s = caps.ToScreamingKebab(testCase)
-	}
-
-	if expected != s {
-		b.Fatalf("Expected %s, got %s", expected, s)
-	}
-}
-
-func BenchmarkToDotNotation(b *testing.B) {
-	var s string
-	expected := "example.uuid"
-	for n := 0; n < b.N; n++ {
-		s = caps.ToDotNotation(testCase)
-	}
-
-	if expected != s {
-		b.Fatalf("Expected %s, got %s", expected, s)
-	}
-}
-
-func BenchmarkToScreamingDotNotation(b *testing.B) {
-	var s string
-	expected := "EXAMPLE.UUID"
-	for n := 0; n < b.N; n++ {
-		s = caps.ToScreamingDotNotation(testCase)
-	}
-
-	if expected != s {
-		b.Fatalf("Expected %s, got %s", expected, s)
-	}
-}
-
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------
-// 							Instance benchmark
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------
-
 var c caps.Caps = caps.New()
 
 func BenchmarkCapsToTitle(b *testing.B) {
@@ -249,6 +135,120 @@ func BenchmarkCapsToScreamingDotNotation(b *testing.B) {
 	expected := "EXAMPLE.UUID"
 	for n := 0; n < b.N; n++ {
 		s = c.ToScreamingDotNotation(testCase)
+	}
+
+	if expected != s {
+		b.Fatalf("Expected %s, got %s", expected, s)
+	}
+}
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// 							Func benchmark
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+
+func BenchmarkToTitle(b *testing.B) {
+	var s string
+	expected := "Example UUID"
+	for n := 0; n < b.N; n++ {
+		s = caps.ToTitle(testCase)
+	}
+
+	if expected != s {
+		b.Fatalf("Expected %s, got %s", expected, s)
+	}
+}
+
+func BenchmarkToCamel(b *testing.B) {
+	var s string
+	expected := "ExampleUUID"
+	for n := 0; n < b.N; n++ {
+		s = caps.ToCamel(testCase)
+	}
+
+	if expected != s {
+		b.Fatalf("Expected %s, got %s", expected, s)
+	}
+}
+
+func BenchmarkToLowerCamel(b *testing.B) {
+	var s string
+	expected := "exampleUUID"
+	for n := 0; n < b.N; n++ {
+		s = caps.ToLowerCamel(testCase)
+	}
+
+	if expected != s {
+		b.Fatalf("Expected %s, got %s", expected, s)
+	}
+}
+
+func BenchmarkToSnake(b *testing.B) {
+	var s string
+	expected := "example_uuid"
+	for n := 0; n < b.N; n++ {
+		s = caps.ToSnake(testCase)
+	}
+
+	if expected != s {
+		b.Fatalf("Expected %s, got %s", expected, s)
+	}
+}
+
+func BenchmarkToScreamingSnake(b *testing.B) {
+	var s string
+	expected := "EXAMPLE_UUID"
+	for n := 0; n < b.N; n++ {
+		s = caps.ToScreamingSnake(testCase)
+	}
+
+	if expected != s {
+		b.Fatalf("Expected %s, got %s", expected, s)
+	}
+}
+
+func BenchmarkToKebab(b *testing.B) {
+	var s string
+	expected := "example-uuid"
+	for n := 0; n < b.N; n++ {
+		s = caps.ToKebab(testCase)
+	}
+
+	if expected != s {
+		b.Fatalf("Expected %s, got %s", expected, s)
+	}
+}
+
+func BenchmarkToScreamingKebab(b *testing.B) {
+	var s string
+	expected := "EXAMPLE-UUID"
+	for n := 0; n < b.N; n++ {
+		s = caps.ToScreamingKebab(testCase)
+	}
+
+	if expected != s {
+		b.Fatalf("Expected %s, got %s", expected, s)
+	}
+}
+
+func BenchmarkToDotNotation(b *testing.B) {
+	var s string
+	expected := "example.uuid"
+	for n := 0; n < b.N; n++ {
+		s = caps.ToDotNotation(testCase)
+	}
+
+	if expected != s {
+		b.Fatalf("Expected %s, got %s", expected, s)
+	}
+}
+
+func BenchmarkToScreamingDotNotation(b *testing.B) {
+	var s string
+	expected := "EXAMPLE.UUID"
+	for n := 0; n < b.N; n++ {
+		s = caps.ToScreamingDotNotation(testCase)
 	}
 
 	if expected != s {

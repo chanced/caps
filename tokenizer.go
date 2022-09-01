@@ -97,8 +97,18 @@ type StdTokenizer struct {
 //	t := caps.token.Newizer("_")
 //	t.Tokenize("A_SCREAMING_SNAKECASE_VARIABLE", []rune{'_'}) -> ["A_SCREAMING_SNAKECASE_VARIABLE"]
 func (ti StdTokenizer) Tokenize(str string, allowedSymbols string, numberRules NumberRules) []string {
-	tokens := []string{}
-	pending := []string{}
+	var tokens []string
+	var pending []string
+
+	switch {
+	case len(str) == 0:
+		return nil
+	case len(str) < 6:
+		tokens = make([]string, 0, 4)
+	default:
+		tokens = make([]string, 0, 8)
+	}
+
 	foundLower := false
 	current := strings.Builder{}
 	prevNumber := false
@@ -152,6 +162,7 @@ func (ti StdTokenizer) Tokenize(str string, allowedSymbols string, numberRules N
 					tokens = append(tokens, current.String())
 					current.Reset()
 				} else if current.Len() > 0 { // otherwise, we have to push the current token into a pending state
+
 					pending = append(pending, current.String())
 					current.Reset()
 				}
