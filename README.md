@@ -264,6 +264,8 @@ func main() {
 
 ## Benchmarks
 
+input: `"Example Uuid Test Case."`
+
 ```
 goos: darwin
 goarch: arm64
