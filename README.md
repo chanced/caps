@@ -271,15 +271,15 @@ goos: darwin
 goarch: arm64
 pkg: github.com/chanced/caps
 BenchmarkToTitle
-BenchmarkToTitle-10             	  564849	      2095 ns/op	    1008 B/op	      35 allocs/op
+BenchmarkToTitle-10             	  749170	      1595 ns/op	     728 B/op	      28 allocs/op
 BenchmarkToCamel
-BenchmarkToCamel-10             	  561631	      2081 ns/op	    1008 B/op	      35 allocs/op
+BenchmarkToCamel-10             	  738326	      1592 ns/op	     728 B/op	      28 allocs/op
 BenchmarkToLowerCamel
-BenchmarkToLowerCamel-10        	  577017	      2040 ns/op	    1016 B/op	      35 allocs/op
+BenchmarkToLowerCamel-10        	  749995	      1566 ns/op	     728 B/op	      28 allocs/op
 BenchmarkToSnake
-BenchmarkToSnake-10             	  560956	      2083 ns/op	    1024 B/op	      36 allocs/op
+BenchmarkToSnake-10             	  733464	      1554 ns/op	     712 B/op	      29 allocs/op
 BenchmarkToScreamingSnake
-BenchmarkToScreamingSnake-10    	  563330	      2105 ns/op	    1008 B/op	      36 allocs/op
+BenchmarkToScreamingSnake-10    	  742378	      1558 ns/op	     712 B/op	      29 allocs/op
 ```
 
 ## License

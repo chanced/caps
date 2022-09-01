@@ -13,7 +13,7 @@ import (
 // This is used for the
 type Token struct {
 	value []rune
-	lower []rune
+	// lower []rune
 	caser Caser
 	// upper []rune
 }
@@ -34,7 +34,7 @@ func Append(caser Caser, t Token, elems ...Token) Token {
 		}
 		t = Token{
 			value: append(t.value, e.value...),
-			lower: append(t.lower, e.lower...),
+			// lower: append(t.lower, e.lower...),
 			caser: caser,
 			// upper: append(t.upper, e.upper...),
 		}
@@ -54,7 +54,7 @@ func AppendRune(caser Caser, t Token, r rune) Token {
 	// }
 	return Token{
 		value: append(t.value, r),
-		lower: append(t.lower, caser.ToLower(r)),
+		// lower: append(t.lower, caser.ToLower(r)),
 		caser: caser,
 		// upper: upper,
 	}
@@ -68,7 +68,7 @@ func FromRune(caser Caser, value rune) Token {
 	caser = CaserOrDefault(caser)
 	return Token{
 		value: []rune{value},
-		lower: []rune{caser.ToLower(value)},
+		// lower: []rune{caser.ToLower(value)},
 		caser: caser,
 		// upper: []rune{caser.ToTitle(value)},
 	}
@@ -88,7 +88,7 @@ func FromRunes(caser Caser, value []rune) Token {
 	}
 	return Token{
 		value: value,
-		lower: lower,
+		// lower: lower,
 		caser: caser,
 		// upper: upper,
 	}
@@ -108,7 +108,12 @@ func (t Token) Value() string {
 }
 
 func (t Token) Lower() string {
-	return string(t.lower)
+	sb := strings.Builder{}
+	sb.Grow(t.Len())
+	for _, r := range t.value {
+		sb.WriteRune(t.caser.ToLower(r))
+	}
+	return sb.String()
 }
 
 func (t Token) Upper() string {
@@ -146,21 +151,20 @@ func (t Token) UpperFirstLowerRest() string {
 	return sb.String()
 }
 
-func (t Token) UpperFirst(caser Caser) string {
-	caser = CaserOrDefault(caser)
+func (t Token) UpperFirst() string {
 	switch len(t.value) {
 	case 0:
 		return ""
 	case 1:
-		return string(caser.ToTitle(t.Runes()[0]))
+		return string(t.caser.ToTitle(t.Runes()[0]))
 	}
 	sb := strings.Builder{}
 	sb.Grow(t.Len())
 	for i, r := range t.value {
 		if i == 0 {
-			sb.WriteRune(caser.ToTitle(r))
+			sb.WriteRune(t.caser.ToTitle(r))
 		} else {
-			sb.WriteRune(caser.ToLower(r))
+			sb.WriteRune(t.value[i])
 		}
 	}
 	return sb.String()
@@ -171,16 +175,18 @@ func (t Token) LowerFirst() string {
 	case 0:
 		return ""
 	case 1:
-		return string(t.lower)
-	default:
-		sb := strings.Builder{}
-		sb.Grow(t.Len())
-		sb.WriteRune(t.lower[0])
-		for _, r := range t.value[1:] {
-			sb.WriteRune(r)
-		}
-		return sb.String()
+		return string(t.caser.ToLower(t.Runes()[0]))
 	}
+	sb := strings.Builder{}
+	sb.Grow(t.Len())
+	for i, r := range t.value {
+		if i == 0 {
+			sb.WriteRune(t.caser.ToLower(r))
+		} else {
+			sb.WriteRune(t.value[i])
+		}
+	}
+	return sb.String()
 }
 
 // IsNumber reports true if the Token is considered a valid number based on the
@@ -281,14 +287,14 @@ func (t Token) IsNumber(additionalRules ...map[rune]func(index int, r rune, val 
 func (t Token) Reverse() Token {
 	r := Token{
 		value: make([]rune, len(t.value)),
-		lower: make([]rune, len(t.lower)),
+		// lower: make([]rune, len(t.lower)),
 		caser: t.caser,
 	}
 	x := 0
 	for i := t.Len() - 1; i >= 0; i-- {
 		x = t.Len() - 1 - i
 		r.value[x] = t.value[i]
-		r.lower[x] = t.lower[i]
+		// r.lower[x] = t.lower[i]
 
 	}
 	return r
@@ -301,18 +307,19 @@ func (t Token) Split() []Token {
 	for i, r := range t.value {
 		result[i] = Token{
 			value: []rune{r},
-			lower: []rune{t.lower[i]},
+			// lower: []rune{t.lower[i]},
 			caser: t.caser,
 		}
 	}
 	return result
 }
 
-func (t Token) FirstLowerRune() (rune, bool) {
+func (t Token) LowerFirstRune() (rune, bool) {
 	if t.Len() == 0 {
 		return 0, false
 	}
-	return t.lower[0], true
+
+	return t.caser.ToLower(t.value[0]), true
 }
 
 func (t Token) FirstRune() (rune, bool) {
@@ -327,7 +334,7 @@ func (t Token) ReverseSplit() []Token {
 	for i := t.Len() - 1; i >= 0; i-- {
 		result[t.Len()-1-i] = Token{
 			value: []rune{t.value[i]},
-			lower: []rune{t.lower[i]},
+			// lower: []rune{t.lower[i]},
 			caser: t.caser,
 		}
 	}
@@ -335,7 +342,11 @@ func (t Token) ReverseSplit() []Token {
 }
 
 func (t Token) LowerRunes() []rune {
-	return t.lower
+	result := make([]rune, t.Len())
+	for i, r := range t.value {
+		result[i] = t.caser.ToLower(r)
+	}
+	return result
 }
 
 func (t Token) UpperRunes() []rune {
@@ -351,9 +362,9 @@ func (t Token) Runes() []rune {
 }
 
 func (t Token) LowerReversedRunes() []rune {
-	res := make([]rune, len(t.lower))
+	res := make([]rune, len(t.value))
 	for i := t.Len() - 1; i >= 0; i-- {
-		res[t.Len()-1-i] = t.lower[i]
+		res[t.Len()-1-i] = t.caser.ToLower(t.value[i])
 	}
 	return res
 }
@@ -361,7 +372,7 @@ func (t Token) LowerReversedRunes() []rune {
 // HasLower returns true if any rune in
 // the token is a unicode lowercase letter.
 func (t Token) HasLower() bool {
-	for _, r := range t.lower {
+	for _, r := range t.value {
 		if unicode.IsLower(r) {
 			return true
 		}
@@ -371,16 +382,12 @@ func (t Token) HasLower() bool {
 
 func (t Token) Clone() Token {
 	val := make([]rune, len(t.value))
-	lower := make([]rune, len(t.lower))
-	// upper := make([]rune, len(t.upper))
-	for i, v := range t.value {
-		val[i] = v
-		lower[i] = t.lower[i]
-		// upper[i] = t.upper[i]
-	}
+
+	// }
+	copy(val, t.value)
 	return Token{
 		value: val,
-		lower: lower,
+		// lower: lower,
 		caser: t.caser,
 		// upper: upper,
 	}
