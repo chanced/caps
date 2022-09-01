@@ -63,9 +63,9 @@ func ExampleToScreamingDotNotation() {
 }
 
 func ExampleToDelimited() {
-	fmt.Println(caps.ToDelimited("This is [an] {example}${id}.#32", '.', true))
-	fmt.Println(caps.ToDelimited("This is [an] {example}${id}.break32", '.', false))
-	fmt.Println(caps.ToDelimited("This is [an] {example}${id}.v32", '.', true, caps.Opts{AllowedSymbols: "$"}))
+	fmt.Println(caps.ToDelimited("This is [an] {example}${id}.#32", ".", true))
+	fmt.Println(caps.ToDelimited("This is [an] {example}${id}.break32", ".", false))
+	fmt.Println(caps.ToDelimited("This is [an] {example}${id}.v32", ".", true, caps.Opts{AllowedSymbols: "$"}))
 
 	// Output:
 	// this.is.an.example.id.32

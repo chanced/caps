@@ -93,7 +93,7 @@ func ToLowerCamel[T ~string](str T, options ...Opts) T {
 //
 //	caps.ToSnake("This is [an] {example}${id32}.") // this_is_an_example_id_32
 func ToSnake[T ~string](str T, options ...Opts) T {
-	return ToDelimited(str, '_', true, options...)
+	return ToDelimited(str, "_", true, options...)
 }
 
 // ToScreamingSnake transforms the case of str into Screaming Snake Case (e.g.
@@ -102,7 +102,7 @@ func ToSnake[T ~string](str T, options ...Opts) T {
 //
 //	caps.ToScreamingSnake("This is [an] {example}${id32}.") // THIS_IS_AN_EXAMPLE_ID_32
 func ToScreamingSnake[T ~string](str T, options ...Opts) T {
-	return ToDelimited(str, '_', false, options...)
+	return ToDelimited(str, "_", false, options...)
 }
 
 // ToKebab transforms the case of str into Lower Kebab Case (e.g. an-example-string) using
@@ -110,7 +110,7 @@ func ToScreamingSnake[T ~string](str T, options ...Opts) T {
 //
 //	caps.ToKebab("This is [an] {example}${id32}.") // this-is-an-example-id-32
 func ToKebab[T ~string](str T, options ...Opts) T {
-	return ToDelimited(str, '-', true, options...)
+	return ToDelimited(str, "-", true, options...)
 }
 
 // ToScreamingKebab transforms the case of str into Screaming Kebab Snake (e.g.
@@ -119,7 +119,7 @@ func ToKebab[T ~string](str T, options ...Opts) T {
 //
 //	caps.ToScreamingKebab("This is [an] {example}${id32}.") // THIS-IS-AN-EXAMPLE-ID-32
 func ToScreamingKebab[T ~string](str T, options ...Opts) T {
-	return ToDelimited(str, '-', false, options...)
+	return ToDelimited(str, "-", false, options...)
 }
 
 // ToDotNotation transforms the case of str into Lower Dot Notation Case (e.g. an.example.string) using
@@ -127,7 +127,7 @@ func ToScreamingKebab[T ~string](str T, options ...Opts) T {
 //
 //	caps.ToDotNotation("This is [an] {example}${id32}.") // this.is.an.example.id.32
 func ToDotNotation[T ~string](str T, options ...Opts) T {
-	return ToDelimited(str, '.', true, options...)
+	return ToDelimited(str, ".", true, options...)
 }
 
 // ToScreamingDotNotation transforms the case of str into Screaming Kebab Case (e.g.
@@ -136,7 +136,7 @@ func ToDotNotation[T ~string](str T, options ...Opts) T {
 //
 //	caps.ToScreamingDotNotation("This is [an] {example}${id32}.") // THIS.IS.AN.EXAMPLE.ID.32
 func ToScreamingDotNotation[T ~string](str T, options ...Opts) T {
-	return ToDelimited(str, '.', false, options...)
+	return ToDelimited(str, ".", false, options...)
 }
 
 // ToTitle transforms the case of str into Title Case (e.g. An Example String) using
@@ -164,10 +164,10 @@ func ToTitle[T ~string](str T, options ...Opts) T {
 //
 // # Example
 //
-//	caps.ToDelimited("This is [an] {example}${id}.#32", '.', true) // this.is.an.example.id.32
-//	caps.ToDelimited("This is [an] {example}${id}.break32", '.', false) // THIS.IS.AN.EXAMPLE.ID.BREAK.32
-//	caps.ToDelimited("This is [an] {example}${id}.v32", '.', true, caps.Opts{AllowedSymbols: "$"}) // this.is.an.example.$.id.v32
-func ToDelimited[T ~string](str T, delimiter rune, lowercase bool, options ...Opts) T {
+//	caps.ToDelimited("This is [an] {example}${id}.#32", ".", true) // this.is.an.example.id.32
+//	caps.ToDelimited("This is [an] {example}${id}.break32", ".", false) // THIS.IS.AN.EXAMPLE.ID.BREAK.32
+//	caps.ToDelimited("This is [an] {example}${id}.v32", ".", true, caps.Opts{AllowedSymbols: "$"}) // this.is.an.example.$.id.v32
+func ToDelimited[T ~string](str T, delimiter string, lowercase bool, options ...Opts) T {
 	opts := loadOpts(options)
 	var style Style
 	var replacementStyle ReplaceStyle

@@ -112,7 +112,7 @@ func (t Text) ToTitle(opts ...caps.Opts) Text {
 // using either the provided Converter or the DefaultConverter otherwise.
 //
 // If lowercase is false, the output will be all uppercase.
-func (t Text) ToDelimited(delimiter rune, lowercase bool, opts ...caps.Opts) Text {
+func (t Text) ToDelimited(delimiter string, lowercase bool, opts ...caps.Opts) Text {
 	return caps.ToDelimited(t, delimiter, lowercase, opts...)
 }
 

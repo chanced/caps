@@ -21,7 +21,7 @@ type Caps struct {
 type CapsOpts struct {
 	// Any characters within this string will be allowed in the output.
 	//
-	// This does not affect delimiters (e.g. '_', '-', '.') as they are added
+	// This does not affect delimiters (e.g. "_", "-", ".") as they are added
 	// post-tokenization.
 	//
 	// Default:
@@ -30,7 +30,7 @@ type CapsOpts struct {
 	// The Converter to use.
 	//
 	// Default:
-	// 	DefaultConverter
+	// 	A StdConverter with the Replacements, Caser, and Tokenizer.
 	Converter Converter
 
 	// If not set, this will be DefaultReplacements.
@@ -59,7 +59,7 @@ type CapsOpts struct {
 	// functions)
 	Caser token.Caser
 
-	// If not set, uses DefaultTokenizer
+	// If not set, uses StdTokenizer with the provided delimiters and token.Caser.
 	Tokenizer Tokenizer
 }
 
@@ -154,7 +154,7 @@ func (c Caps) LowerFirst(str string) string {
 
 // Without numbers returns the string with all numeric runes removed.
 //
-// It does not currently use any logic to determine if a rune (e.g. '.')
+// It does not currently use any logic to determine if a rune (e.g. ".")
 // is part of a number. This may change in the future.
 func (c Caps) WithoutNumbers(s string) string {
 	return strings.Map(func(r rune) rune {
@@ -211,7 +211,7 @@ func (c Caps) ToLowerCamel(str string) string {
 //
 //	caps.ToSnake("This is [an] {example}${id32}.") // this_is_an_example_id_32
 func (c Caps) ToSnake(str string) string {
-	return c.ToDelimited(str, '_', true)
+	return c.ToDelimited(str, "_", true)
 }
 
 // ToScreamingSnake transforms the case of str into Screaming Snake Case (e.g.
@@ -220,7 +220,7 @@ func (c Caps) ToSnake(str string) string {
 //
 //	caps.ToScreamingSnake("This is [an] {example}${id32}.") // THIS_IS_AN_EXAMPLE_ID_32
 func (c Caps) ToScreamingSnake(str string) string {
-	return ToDelimited(str, '_', false)
+	return ToDelimited(str, "_", false)
 }
 
 // ToKebab transforms the case of str into Lower Kebab Case (e.g. an-example-string) using
@@ -228,7 +228,7 @@ func (c Caps) ToScreamingSnake(str string) string {
 //
 //	caps.ToKebab("This is [an] {example}${id32}.") // this-is-an-example-id-32
 func (c Caps) ToKebab(str string) string {
-	return ToDelimited(str, '-', true)
+	return ToDelimited(str, "-", true)
 }
 
 // ToScreamingKebab transforms the case of str into Screaming Kebab Snake (e.g.
@@ -237,7 +237,7 @@ func (c Caps) ToKebab(str string) string {
 //
 //	caps.ToScreamingKebab("This is [an] {example}${id32}.") // THIS-IS-AN-EXAMPLE-ID-32
 func (c Caps) ToScreamingKebab(str string) string {
-	return ToDelimited(str, '-', false)
+	return ToDelimited(str, "-", false)
 }
 
 // ToDotNotation transforms the case of str into Lower Dot Notation Case (e.g. an.example.string) using
@@ -245,7 +245,7 @@ func (c Caps) ToScreamingKebab(str string) string {
 //
 //	caps.ToDotNotation("This is [an] {example}${id32}.") // this.is.an.example.id.32
 func (c Caps) ToDotNotation(str string) string {
-	return ToDelimited(str, '.', true)
+	return ToDelimited(str, ".", true)
 }
 
 // ToScreamingDotNotation transforms the case of str into Screaming Kebab Case (e.g.
@@ -254,7 +254,7 @@ func (c Caps) ToDotNotation(str string) string {
 //
 //	caps.ToScreamingDotNotation("This is [an] {example}${id32}.") // THIS.IS.AN.EXAMPLE.ID.32
 func (c Caps) ToScreamingDotNotation(str string) string {
-	return ToDelimited(str, '.', false)
+	return ToDelimited(str, ".", false)
 }
 
 // ToTitle transforms the case of str into Title Case (e.g. An Example String) using
@@ -281,10 +281,10 @@ func (c Caps) ToTitle(str string) string {
 //
 // # Example
 //
-//	caps.ToDelimited("This is [an] {example}${id}.#32", '.', true) // this.is.an.example.id.32
-//	caps.ToDelimited("This is [an] {example}${id}.break32", '.', false) // THIS.IS.AN.EXAMPLE.ID.BREAK.32
-//	caps.ToDelimited("This is [an] {example}${id}.v32", '.', true, caps.Opts{AllowedSymbols: "$"}) // this.is.an.example.$.id.v32
-func (c Caps) ToDelimited(str string, delimiter rune, lowercase bool) string {
+//	caps.ToDelimited("This is [an] {example}${id}.#32", ".", true) // this.is.an.example.id.32
+//	caps.ToDelimited("This is [an] {example}${id}.break32", ".", false) // THIS.IS.AN.EXAMPLE.ID.BREAK.32
+//	caps.ToDelimited("This is [an] {example}${id}.v32", ".", true, caps.Opts{AllowedSymbols: "$"}) // this.is.an.example.$.id.v32
+func (c Caps) ToDelimited(str string, delimiter string, lowercase bool) string {
 	var style Style
 	var replacementStyle ReplaceStyle
 	if lowercase {
@@ -298,7 +298,7 @@ func (c Caps) ToDelimited(str string, delimiter rune, lowercase bool) string {
 		Style:          style,
 		ReplaceStyle:   replacementStyle,
 		Input:          str,
-		Join:           string(delimiter),
+		Join:           delimiter,
 		AllowedSymbols: c.allowedSymbols,
 		NumberRules:    c.numberRules,
 	})
