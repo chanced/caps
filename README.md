@@ -262,6 +262,24 @@ func main() {
 
 [go playground link](https://go.dev/play/p/aKfuU5eZJgp)
 
+## Benchmarks
+
+```
+goos: darwin
+goarch: arm64
+pkg: github.com/chanced/caps
+BenchmarkToTitle
+BenchmarkToTitle-10             	  473949	      2524 ns/op	    1304 B/op	      49 allocs/op
+BenchmarkToCamel
+BenchmarkToCamel-10             	  460965	      2524 ns/op	    1304 B/op	      49 allocs/op
+BenchmarkToLowerCamel
+BenchmarkToLowerCamel-10        	  457768	      2510 ns/op	    1272 B/op	      48 allocs/op
+BenchmarkToSnake
+BenchmarkToSnake-10             	  474894	      2475 ns/op	    1248 B/op	      47 allocs/op
+BenchmarkToScreamingSnake
+BenchmarkToScreamingSnake-10    	  466288	      2486 ns/op	    1248 B/op	      47 allocs/op
+```
+
 ## License
 
 MIT
