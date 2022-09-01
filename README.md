@@ -5,7 +5,7 @@
 [![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/gomods/athens.svg)](https://github.com/chanced/caps)
 ![Build Status](https://github.com/chanced/caps/actions/workflows/main.yaml/badge.svg)
 
-caps is a unicode aware, case conversion library for Go with zero depencies. It
+caps is a unicode aware, case conversion library for Go. It
 was built with the following priorites in mind: configurability, consistency,
 correctness, ergonomic, and reasonable performance; in that order.
 
