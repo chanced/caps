@@ -303,7 +303,6 @@ input: `"Example Uuid Test Case."`
 goos: darwin
 goarch: arm64
 pkg: github.com/chanced/caps
-BenchmarkToTitle
 ```
 
 Using a `caps.Caps` instance:
