@@ -44,7 +44,24 @@ import (
 	"github.com/chanced/caps"
 )
 func main() {
-	fmt.Println(caps.ToCamel("http request"))
+
+    c := caps.New()
+    fmt.Println(c.ToCamel("http request"))
+	// Output:
+	// HTTPRequest
+    fmt.Println(c.ToCamel("http request"))
+	// Output:
+	// HTTPRequest
+	fmt.Println(c.ToLowerCamel("some_id"))
+	// Output:
+	// someID
+	fmt.Println(c.ToLowerCamel("SomeID", caps.WithReplaceStyleCamel()))
+	// Output:
+	// someId
+
+    // Alternatively:
+
+    fmt.Println(caps.ToCamel("http request"))
 	// Output:
 	// HTTPRequest
 	fmt.Println(caps.ToLowerCamel("some_id"))
@@ -54,9 +71,7 @@ func main() {
 	// Output:
 	// someId
 
-    // Alternatively:
-    c := caps.New()
-    fmt.Println()
+
 }
 ```
 
