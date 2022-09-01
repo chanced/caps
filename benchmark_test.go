@@ -250,7 +250,19 @@ func BenchmarkToScreamingDotNotation(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		s = caps.ToScreamingDotNotation(testCase)
 	}
+	if expected != s {
+		b.Fatalf("Expected %s, got %s", expected, s)
+	}
+}
 
+var longerTestCase string = "Example Uuid Test Case."
+
+func BenchmarkWithLongerInput(b *testing.B) {
+	expected := "ExampleUUIDTestCase"
+	var s string
+	for n := 0; n < b.N; n++ {
+		s = caps.ToCamel(longerTestCase)
+	}
 	if expected != s {
 		b.Fatalf("Expected %s, got %s", expected, s)
 	}
