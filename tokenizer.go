@@ -105,10 +105,6 @@ func (ti StdTokenizer) Tokenize(str string, allowedSymbols string, numberRules N
 	allowed := newRunes(allowedSymbols)
 
 	for i, r := range str {
-		curStr := current.String()
-		_ = curStr
-		rStr := string(r)
-		_ = rStr
 		switch {
 		case unicode.IsUpper(r):
 			if foundLower && current.Len() > 0 {
@@ -217,8 +213,6 @@ func (ti StdTokenizer) Tokenize(str string, allowedSymbols string, numberRules N
 				}
 			}
 		}
-		curStr = current.String()
-		_ = curStr
 	}
 	if current.Len() > 0 {
 		if token.IsNumber(current.String(), numberRules) {

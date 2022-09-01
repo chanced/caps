@@ -274,8 +274,6 @@ func (idx *Index) Delete(key string) bool {
 	k := []rune(key)
 	for i := len(key) - 1; i >= 0; i-- {
 		r = k[i]
-		rstr := string(r)
-		_ = rstr
 		child = node
 		node = nodes[i]
 		if child.value.IsEmpty() && len(child.nodes) == 0 {
