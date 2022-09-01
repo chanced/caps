@@ -127,7 +127,6 @@ func (sc *StdConverter) Delete(key string) {
 }
 
 func (StdConverter) writeIndexReplacement(b *strings.Builder, style Style, repStyle ReplaceStyle, join string, v index.IndexedReplacement) {
-	b.Grow(len(v.Camel) + len(join))
 	if len(join) > 0 && b.Len() > 0 {
 		b.WriteString(join)
 	}
@@ -135,7 +134,6 @@ func (StdConverter) writeIndexReplacement(b *strings.Builder, style Style, repSt
 }
 
 func (sc StdConverter) writeToken(b *strings.Builder, style Style, join string, s string) {
-	b.Grow(len(s) + len(join))
 	if len(join) > 0 && b.Len() > 0 {
 		b.WriteString(join)
 	}
@@ -146,6 +144,7 @@ func (sc StdConverter) writeToken(b *strings.Builder, style Style, join string, 
 func (sc StdConverter) Convert(req ConvertRequest) string {
 	tokens := sc.tokenizer.Tokenize(req.Input, req.AllowedSymbols, req.NumberRules)
 	b := strings.Builder{}
+	b.Grow(len(req.Input))
 	var ok bool
 	var addedAsNumber bool
 	idx := sc.Index()
