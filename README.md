@@ -10,18 +10,12 @@ caps is a unicode aware, case conversion library for Go. It
 was built with the following priorites in mind: configurability, consistency,
 correctness, ergonomic, and reasonable performance; in that order.
 
-It has built in support for configurable initialism replacements (e.g. "Uuid" ->
-"UUID"), can support special case unicode (e.g. Turkish, Azeri, ...), and
-finally is modular in that each step in the case conversion process can be
+The library has built in support for configurable initialism replacements (e.g.
+"Uuid" -> "UUID"), can support special case unicode (e.g. Turkish, Azeri, ...),
+and finally is modular in that each step in the case conversion process can be
 configured, augmented, or replaced.
 
 The API should be stable as of v0.7.0.
-
-## Install
-
-```
-go get github.com/chanced/caps
-```
 
 ## Supported Case Conversions
 
@@ -37,6 +31,12 @@ The following case conversions are available:
 -   Screaming Dot Notation Case (e.g. DOT.NOTATION.CASE)
 -   Title Case (e.g. Title Case)
 -   Other deliminations
+
+## Install
+
+```
+go get github.com/chanced/caps
+```
 
 ## Example
 
@@ -157,7 +157,7 @@ options. See below.
 ### Using caps.Caps
 
 This is likely your best option. You can create and utilize an instance of
-`caps.Caps` which as all of the conversions as methods:
+`caps.Caps` which has all of the conversions as methods:
 
 ```go
 package main
