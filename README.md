@@ -159,23 +159,28 @@ This is likely your best option. You can create and utilize an instance of
 `caps.Caps` which as all of the conversions as methods:
 
 ```go
-    package main
-    import (
-        "fmt"
-        "github.com/chanced/caps"
-        "github.com/chanced/caps/token"
-    )
+package main
 
-    c := caps.New(caps.CapsOpts{
-        Replacements: []caps.Replacement{
-            {"Ex", "EX" },
-            // ... your replacements
-        },
-    })
-    c.ToLower("some ex")
-    // Output:
-    // SomeEX
+import (
+	"fmt"
+
+	"github.com/chanced/caps"
+)
+
+func main() {
+	c := caps.New(caps.CapsOpts{
+		Replacements: []caps.Replacement{
+			{"Ex", "EX"},
+			// ... your replacements
+		},
+	})
+	fmt.Println(c.ToCamel("some ex"))
+	// Output:
+	// SomeEX
+}
 ```
+
+[go playground link](https://go.dev/play/p/QBJSq39sMCZ)
 
 ### Creating isolated `caps.StdConverter` instances
 
