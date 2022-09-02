@@ -6,7 +6,7 @@
 ![Build Status](https://img.shields.io/github/workflow/status/chanced/caps/Build?style=flat-square)
 [![Latest Version](https://img.shields.io/github/v/tag/chanced/caps.svg?sort=semver&style=flat-square&label=version&color=blue)](https://img.shields.io/github/v/tag/chanced/caps.svg?sort=semver&style=flat-square&label=version&color=blue)
 
-caps is a unicode aware, case conversion library for Go. It
+caps is a unicode aware, string case conversion library for Go. It
 was built with the following priorites in mind: configurability, consistency,
 correctness, ergonomic, and reasonable performance; in that order.
 
@@ -90,8 +90,8 @@ uses the following rules:
 -   When a string consists of both upper case and lower case letters, upper case
     letters are considered boundaries (e.g. `"ThisVar"` would be tokenized into `["This", "Var"]`)
 -   When mixed with lower and upper case characters, sequences of upper case are
-    broken up into tokens (e.g. `"SomeID"` would be tokenized into `["Some", "I", "D"]`).
--   Replacement rules are then evaluated based on the tokens, which may
+    broken up into token strings (e.g. `"SomeID"` would be tokenized into `["Some", "I", "D"]`).
+-   Replacement rules are then evaluated based on the token strings, which may
     combine them based on the rules below.
 
 ## Replacements
@@ -100,11 +100,11 @@ uses the following rules:
 initialism replacements. Each `Replacement` is indexed in a trie (see
 [Index](https://github.com/chanced/caps/blob/main/index/index.go)).
 
--   Multi-rune tokens are searched independently unless followed by a number (e.g.
+-   Multi-rune token strings are searched independently unless followed by a number (e.g.
     `"ID"`, `"UTF8"`).
--   Sequences of single rune tokens (e.g.`["U", "U", "I", "D"]`) are
+-   Sequences of single rune token (e.g.`["U", "U", "I", "D"]`) are
     evaluated as a potential `Replacement` until a non-match is
-    found or the sequence is broken by a token with more than one rune.
+    found or the sequence is broken by a token string with more than one rune.
 
 ### Default replacements
 
