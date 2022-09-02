@@ -6,7 +6,7 @@
 ![Build Status](https://img.shields.io/github/workflow/status/chanced/caps/Build?style=flat-square)
 [![Latest Version](https://img.shields.io/github/v/tag/chanced/caps.svg?sort=semver&style=flat-square&label=version&color=blue)](https://img.shields.io/github/v/tag/chanced/caps.svg?sort=semver&style=flat-square&label=version&color=blue)
 
-caps is a unicode aware, string case conversion library for Go. It
+caps is a unicode aware, case conversion library for Go. It
 was built with the following priorites in mind: configurability, consistency,
 correctness, ergonomic, and reasonable performance; in that order.
 
