@@ -10,9 +10,9 @@ caps is a unicode aware, case conversion library for Go. It
 was built with the following priorites in mind: configurability, consistency,
 correctness, ergonomic, and reasonable performance; in that order.
 
-The library has built in support for configurable initialism replacements (e.g.
-"Uuid" -> "UUID"), can support special case unicode (e.g. Turkish, Azeri, ...),
-and finally is modular in that each step in the case conversion process can be
+The library has built in configurable initialism replacements (e.g. "Uuid" ->
+"UUID"), can support special case unicode (e.g. Turkish, Azeri, ...), and
+finally is modular in that each step in the case conversion process can be
 configured, augmented, or replaced.
 
 The API should be stable as of v0.7.0.
