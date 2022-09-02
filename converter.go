@@ -157,11 +157,45 @@ func (StdConverter) writeIndexReplacement(b *strings.Builder, style Style, repSt
 	b.WriteString(formatIndexedReplacement(style, repStyle, b.Len(), v))
 }
 
-func (sc StdConverter) writeToken(b *strings.Builder, style Style, join string, s string) {
+func (sc StdConverter) writeToken(b *strings.Builder, style Style, join string, tok string) {
 	if len(join) > 0 && b.Len() > 0 {
 		b.WriteString(join)
 	}
-	b.WriteString(FormatToken(sc.caser, style, b.Len(), s))
+	switch style {
+	case StyleCamel:
+		token.WriteUpperFirstLowerRest(b, sc.caser, tok)
+	case StyleLowerCamel:
+		if b.Len() == 0 {
+			token.WriteLower(b, sc.caser, tok)
+		} else {
+			token.WriteUpperFirstLowerRest(b, sc.caser, tok)
+		}
+	case StyleScreaming:
+		token.WriteUpper(b, sc.caser, tok)
+	case StyleLower:
+		token.WriteLower(b, sc.caser, tok)
+	default:
+		b.WriteString(tok)
+	}
+}
+
+func (sc StdConverter) writeReplaceSplit(b *strings.Builder, style Style, join string, s string) {
+	switch style {
+	case StyleCamel:
+		token.WriteSplitUpper(b, sc.caser, join, s)
+	case StyleLowerCamel:
+		if b.Len() == 0 {
+			token.WriteSplitLowerFirstUpperRest(b, sc.caser, join, s)
+		} else {
+			token.WriteSplitUpper(b, sc.caser, join, s)
+		}
+	case StyleScreaming:
+		token.WriteSplitUpper(b, sc.caser, join, s)
+	case StyleLower:
+		token.WriteSplitLower(b, sc.caser, join, s)
+	default:
+		token.WriteSplitUpper(b, sc.caser, join, s)
+	}
 }
 
 // Convert formats the string with the desired style.
@@ -193,9 +227,7 @@ func (sc StdConverter) Convert(req ConvertRequest) string {
 						b.WriteString(FormatToken(sc.caser, req.Style, b.Len(), token.Append(sc.caser, tok, idx.PartialMatches())))
 						addedAsNumber = true
 					} else {
-						for _, partok := range strings.Split(idx.PartialMatches(), "") {
-							sc.writeToken(&b, req.Style, req.Join, partok)
-						}
+						sc.writeReplaceSplit(&b, req.Style, req.Join, idx.PartialMatches())
 						addedAsNumber = false
 					}
 				}
@@ -210,9 +242,7 @@ func (sc StdConverter) Convert(req ConvertRequest) string {
 				sc.writeIndexReplacement(&b, req.Style, req.ReplaceStyle, req.Join, idx.LastMatch())
 			}
 			if idx.HasPartialMatches() {
-				for _, partok := range strings.Split(idx.PartialMatches(), "") {
-					sc.writeToken(&b, req.Style, req.Join, partok)
-				}
+				sc.writeReplaceSplit(&b, req.Style, req.Join, idx.PartialMatches())
 			}
 			if idx.HasMatched() || idx.HasPartialMatches() {
 				// resetting index
@@ -227,7 +257,6 @@ func (sc StdConverter) Convert(req ConvertRequest) string {
 				}
 			} else {
 				sc.writeToken(&b, req.Style, req.Join, tok)
-				// parts = append(parts, FormatToken(sc.caser, req.Style, len(parts), tok))
 			}
 		}
 	}
@@ -237,10 +266,7 @@ func (sc StdConverter) Convert(req ConvertRequest) string {
 	}
 
 	if idx.HasPartialMatches() {
-		for _, partok := range strings.Split(idx.PartialMatches(), "") {
-			sc.writeToken(&b, req.Style, req.Join, partok)
-			// parts = append(parts, FormatToken(sc.caser, req.Style, len(parts), partok))
-		}
+		sc.writeReplaceSplit(&b, req.Style, req.Join, idx.PartialMatches())
 	}
 	// for _, part := range parts {
 	// 	if shouldWriteDelimiter {

@@ -179,7 +179,7 @@ func (ti StdTokenizer) Tokenize(str string, allowedSymbols string, numberRules N
 						// a number or an 'e' and a number. as such, we have to check if
 						// both this and the next rune (and possibly the rune after
 						// that) make it a number.
-						n := token.AppendRune(ti.caser, current.String(), r)
+						n := token.WriteRune(&current, ti.caser, r)
 						runes := []rune(str)
 						if token.IsNumber(n, numberRules) {
 							current.Reset()
