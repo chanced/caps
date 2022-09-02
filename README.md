@@ -1,10 +1,10 @@
 # caps is a case conversion library
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/chanced/caps.svg)](https://pkg.go.dev/github.com/chanced/caps)
-[![GoReportCard](https://goreportcard.com/badge/github.com/chanced/caps)](https://goreportcard.com/report/github.com/chanced/caps)
-[![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/gomods/athens.svg)](https://github.com/chanced/caps)
-![Build Status](https://github.com/chanced/caps/actions/workflows/main.yaml/badge.svg)
-[![Latest Version](https://img.shields.io/github/v/tag/chanced/caps.svg?sort=semver&color=informational)](https://img.shields.io/github/v/tag/chanced/caps.svg?sort=semver&color=informational)
+[![GoReportCard](https://goreportcard.com/badge/github.com/chanced/caps?style=for-the-badge)](https://goreportcard.com/report/github.com/chanced/caps)
+[![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/gomods/athens.svg?style=for-the-badge)](https://github.com/chanced/caps)
+![Build Status](https://img.shields.io/github/workflow/status/chanced/caps/Build?style=for-the-badge)
+[![Latest Version](https://img.shields.io/github/v/tag/chanced/caps.svg?sort=semver&style=for-the-badge)](https://img.shields.io/github/v/tag/chanced/caps.svg?sort=semver&color=informational)
 
 caps is a unicode aware, case conversion library for Go. It
 was built with the following priorites in mind: configurability, consistency,
