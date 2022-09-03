@@ -215,6 +215,9 @@ func (sc StdConverter) writeReplaceSplit(b *strings.Builder, style Style, join s
 func (sc StdConverter) Convert(req ConvertRequest) string {
 	tokens := sc.tokenizer.Tokenize(req.Input, req.AllowedSymbols, req.NumberRules)
 	b := strings.Builder{}
+	if len(tokens) == 0 {
+		return ""
+	}
 	if len(req.Join) > 0 {
 		b.Grow(len(req.Input) + len(req.Join)*(len(tokens)-1))
 	} else {
