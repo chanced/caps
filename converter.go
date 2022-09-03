@@ -150,11 +150,24 @@ func (sc *StdConverter) Delete(key string) {
 	sc.index.Delete(key)
 }
 
-func (StdConverter) writeIndexReplacement(b *strings.Builder, style Style, repStyle ReplaceStyle, join string, v index.IndexedReplacement) {
+func (StdConverter) writeIndexReplacement(b *strings.Builder, style Style, repStyle ReplaceStyle, join string, rep index.IndexedReplacement) {
 	if len(join) > 0 && b.Len() > 0 {
 		b.WriteString(join)
 	}
-	b.WriteString(formatIndexedReplacement(style, repStyle, b.Len(), v))
+	switch repStyle {
+	case ReplaceStyleCamel:
+		if b.Len() == 0 && style == StyleLowerCamel {
+			b.WriteString(rep.Lower)
+		} else {
+			b.WriteString(rep.Camel)
+		}
+	case ReplaceStyleScreaming:
+		b.WriteString(rep.Screaming)
+	case ReplaceStyleLower:
+		b.WriteString(rep.Lower)
+	default:
+		b.WriteString(rep.Screaming)
+	}
 }
 
 func (sc StdConverter) writeToken(b *strings.Builder, style Style, join string, tok string) {
@@ -297,22 +310,6 @@ func FormatToken(caser token.Caser, style Style, index int, tok string) string {
 		return token.ToLower(caser, tok)
 	}
 	return tok
-}
-
-func formatIndexedReplacement(style Style, replaceStyle ReplaceStyle, index int, rep index.IndexedReplacement) string {
-	switch replaceStyle {
-	case ReplaceStyleCamel:
-		if index == 0 && style == StyleLowerCamel {
-			return rep.Lower
-		}
-		return rep.Camel
-	case ReplaceStyleScreaming:
-		return rep.Screaming
-	case ReplaceStyleLower:
-		return rep.Lower
-	default:
-		return rep.Screaming
-	}
 }
 
 func isNextTokenNumber(tokens []string, i int) bool {

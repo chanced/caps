@@ -90,8 +90,8 @@ uses the following rules:
 -   When a string consists of both upper case and lower case letters, upper case
     letters are considered boundaries (e.g. `"ThisVar"` would be tokenized into `["This", "Var"]`)
 -   When mixed with lower and upper case characters, sequences of upper case are
-    broken up into tokens (e.g. `"SomeID"` would be tokenized into `["Some", "I", "D"]`).
--   Replacement rules are then evaluated based on the tokens, which may
+    broken up into token strings (e.g. `"SomeID"` would be tokenized into `["Some", "I", "D"]`).
+-   Replacement rules are then evaluated based on the token strings, which may
     combine them based on the rules below.
 
 ## Replacements
@@ -100,11 +100,11 @@ uses the following rules:
 initialism replacements. Each `Replacement` is indexed in a trie (see
 [Index](https://github.com/chanced/caps/blob/main/index/index.go)).
 
--   Multi-rune tokens are searched independently unless followed by a number (e.g.
+-   Multi-rune token strings are searched independently unless followed by a number (e.g.
     `"ID"`, `"UTF8"`).
--   Sequences of single rune tokens (e.g.`["U", "U", "I", "D"]`) are
+-   Sequences of single rune token (e.g.`["U", "U", "I", "D"]`) are
     evaluated as a potential `Replacement` until a non-match is
-    found or the sequence is broken by a token with more than one rune.
+    found or the sequence is broken by a token string with more than one rune.
 
 ### Default replacements
 
@@ -319,46 +319,46 @@ Using a `caps.Caps` instance:
 
 ```
 BenchmarkCapsToTitle
-BenchmarkCapsToTitle-10                   	 2418796	       473.9 ns/op	     208 B/op	       9 allocs/op
+BenchmarkCapsToTitle-10                   	 2403448	       479.4 ns/op	     200 B/op	       8 allocs/op
 BenchmarkCapsToCamel
-BenchmarkCapsToCamel-10                   	 2572858	       466.4 ns/op	     208 B/op	       9 allocs/op
+BenchmarkCapsToCamel-10                   	 2539750	       480.0 ns/op	     200 B/op	       8 allocs/op
 BenchmarkCapsToLowerCamel
-BenchmarkCapsToLowerCamel-10              	 2607831	       458.1 ns/op	     208 B/op	       9 allocs/op
+BenchmarkCapsToLowerCamel-10              	 2508121	       475.2 ns/op	     200 B/op	       8 allocs/op
 BenchmarkCapsToSnake
-BenchmarkCapsToSnake-10                   	 2567318	       466.2 ns/op	     208 B/op	       9 allocs/op
+BenchmarkCapsToSnake-10                   	 2429792	       480.2 ns/op	     200 B/op	       8 allocs/op
 BenchmarkCapsToScreamingSnake
-BenchmarkCapsToScreamingSnake-10          	 2380708	       504.7 ns/op	     256 B/op	      10 allocs/op
+BenchmarkCapsToScreamingSnake-10          	 2286919	       526.1 ns/op	     248 B/op	       9 allocs/op
 BenchmarkCapsToKebab
-BenchmarkCapsToKebab-10                   	 2408059	       501.0 ns/op	     256 B/op	      10 allocs/op
+BenchmarkCapsToKebab-10                   	 2310957	       523.9 ns/op	     248 B/op	       9 allocs/op
 BenchmarkCapsToScreamingKebab
-BenchmarkCapsToScreamingKebab-10          	 2383544	       500.0 ns/op	     256 B/op	      10 allocs/op
+BenchmarkCapsToScreamingKebab-10          	 2271721	       531.7 ns/op	     248 B/op	       9 allocs/op
 BenchmarkCapsToDotNotation
-BenchmarkCapsToDotNotation-10             	 2418474	       495.8 ns/op	     256 B/op	      10 allocs/op
+BenchmarkCapsToDotNotation-10             	 2296261	       525.1 ns/op	     248 B/op	       9 allocs/op
 BenchmarkCapsToScreamingDotNotation
-BenchmarkCapsToScreamingDotNotation-10    	 2375731	       504.0 ns/op	     256 B/op	      10 allocs/op
+BenchmarkCapsToScreamingDotNotation-10    	 2254635	       520.5 ns/op	     248 B/op	       9 allocs/op
 ```
 
 Using top-level functions:
 
 ```
 BenchmarkToTitle
-BenchmarkToTitle-10                       	 2349061	       505.8 ns/op	     256 B/op	      10 allocs/op
+BenchmarkToTitle-10                       	 2314471	       521.9 ns/op	     248 B/op	       9 allocs/op
 BenchmarkToCamel
-BenchmarkToCamel-10                       	 2406518	       503.7 ns/op	     256 B/op	      10 allocs/op
+BenchmarkToCamel-10                       	 2331896	       519.4 ns/op	     248 B/op	       9 allocs/op
 BenchmarkToLowerCamel
-BenchmarkToLowerCamel-10                  	 2391112	       503.9 ns/op	     256 B/op	      10 allocs/op
+BenchmarkToLowerCamel-10                  	 2374000	       507.9 ns/op	     248 B/op	       9 allocs/op
 BenchmarkToSnake
-BenchmarkToSnake-10                       	 2392641	       503.3 ns/op	     256 B/op	      10 allocs/op
+BenchmarkToSnake-10                       	 2351070	       518.1 ns/op	     248 B/op	       9 allocs/op
 BenchmarkToScreamingSnake
-BenchmarkToScreamingSnake-10              	 2311863	       517.7 ns/op	     256 B/op	      10 allocs/op
+BenchmarkToScreamingSnake-10              	 2304526	       518.6 ns/op	     248 B/op	       9 allocs/op
 BenchmarkToKebab
-BenchmarkToKebab-10                       	 2390890	       503.5 ns/op	     256 B/op	      10 allocs/op
+BenchmarkToKebab-10                       	 2341650	       517.6 ns/op	     248 B/op	       9 allocs/op
 BenchmarkToScreamingKebab
-BenchmarkToScreamingKebab-10              	 2313615	       519.0 ns/op	     256 B/op	      10 allocs/op
+BenchmarkToScreamingKebab-10              	 2312778	       524.7 ns/op	     248 B/op	       9 allocs/op
 BenchmarkToDotNotation
-BenchmarkToDotNotation-10                 	 2344407	       510.3 ns/op	     256 B/op	      10 allocs/op
+BenchmarkToDotNotation-10                 	 2339952	       514.9 ns/op	     248 B/op	       9 allocs/op
 BenchmarkToScreamingDotNotation
-BenchmarkToScreamingDotNotation-10        	 2294145	       521.2 ns/op	     256 B/op	      10 allocs/op
+BenchmarkToScreamingDotNotation-10        	 2309564	       523.8 ns/op	     248 B/op	       9 allocs/op
 ```
 
 ## License

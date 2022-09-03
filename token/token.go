@@ -66,14 +66,14 @@ func WriteUpperFirstLowerRest(b *strings.Builder, caser Caser, s string) {
 	}
 }
 
-func WriteSplitLowerFirstUpperRest(b *strings.Builder, caser Caser, s string, sep string) {
+func WriteSplitLowerFirstUpperRest(b *strings.Builder, caser Caser, sep string, s string) {
 	for i, r := range s {
-		if b.Len() > 0 && len(sep) > 0 {
-			b.WriteString(sep)
-		}
-		if i == 0 {
+		switch {
+		case i == 0 && b.Len() == 0:
 			b.WriteRune(caser.ToLower(r))
-		} else {
+		case b.Len() > 0 && len(sep) > 0:
+			b.WriteString(sep)
+		case i > 0 && b.Len() > 0:
 			b.WriteRune(caser.ToUpper(r))
 		}
 	}
