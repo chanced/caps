@@ -301,6 +301,12 @@ func main() {
 }
 ```
 
+## text.Text
+
+The `text` package contains a single `Text` type which has all of the case conversions and relevant functions from strings as methods.
+
+It does not currently have tests.
+
 [go playground link](https://go.dev/play/p/aKfuU5eZJgp)
 
 ## Benchmarks
