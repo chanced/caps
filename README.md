@@ -1,10 +1,10 @@
 # caps is a case conversion library
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/chanced/caps.svg)](https://pkg.go.dev/github.com/chanced/caps)
+[![Latest Version](https://img.shields.io/github/v/tag/chanced/caps.svg?sort=semver&style=flat-square&label=version&color=blue)](https://img.shields.io/github/v/tag/chanced/caps.svg?sort=semver&style=flat-square&label=version&color=blue)
+![Build Status](https://img.shields.io/github/workflow/status/chanced/caps/Build?style=flat-square)
 [![GoReportCard](https://goreportcard.com/badge/github.com/chanced/caps?style=flat-square)](https://goreportcard.com/report/github.com/chanced/caps)
 [![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/gomods/athens.svg?style=flat-square&label=go)](https://github.com/chanced/caps)
-![Build Status](https://img.shields.io/github/workflow/status/chanced/caps/Build?style=flat-square)
-[![Latest Version](https://img.shields.io/github/v/tag/chanced/caps.svg?sort=semver&style=flat-square&label=version&color=blue)](https://img.shields.io/github/v/tag/chanced/caps.svg?sort=semver&style=flat-square&label=version&color=blue)
 
 caps is a unicode aware, case conversion library for Go. It
 was built with the following priorites in mind: configurability, consistency,
