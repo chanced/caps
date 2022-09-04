@@ -137,6 +137,14 @@ func TestWriteSplitLower(t *testing.T) {
 	}
 }
 
+func TestWrite(t *testing.T) {}
+
+func TestWriteUpper(t *testing.T) {}
+
+func TestWriteLower(t *testing.T) {}
+
+func TestWriteRune(t *testing.T) {}
+
 func TestWriteSplitUpper(t *testing.T) {
 	tests := []struct {
 		in  string
@@ -472,19 +480,6 @@ func TestIsNumber(t *testing.T) {
 					t.Errorf("expected \"%s\" to not be a number", test.value)
 				}
 			}
-			// if test.rules != nil {
-			// 	var rules []map[rune]func(index int, r rune, val string) bool
-			// 	for k, v := range test.rules {
-			// 		rules = append(rules, map[rune]func(index int, r rune, val string) bool{k: v})
-			// 	}
-			// 	if token.IsNumber(test.value, rules) != test.expected {
-			// 		if test.expected {
-			// 			t.Errorf("expected \"%s\" to be a number", test.value)
-			// 		} else {
-			// 			t.Errorf("expected \"%s\" to not be a number", test.value)
-			// 		}
-			// 	}
-			// }
 		})
 	}
 }
