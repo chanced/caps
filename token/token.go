@@ -68,13 +68,17 @@ func WriteUpperFirstLowerRest(b *strings.Builder, caser Caser, s string) {
 
 func WriteSplitLowerFirstUpperRest(b *strings.Builder, caser Caser, sep string, s string) {
 	for i, r := range s {
-		switch {
-		case i == 0 && b.Len() == 0:
+		if i == 0 && b.Len() == 0 {
 			b.WriteRune(caser.ToLower(r))
-		case b.Len() > 0 && len(sep) > 0:
-			b.WriteString(sep)
-		case i > 0 && b.Len() > 0:
-			b.WriteRune(caser.ToUpper(r))
+		} else if b.Len() > 0 {
+			if len(sep) > 0 {
+				b.WriteString(sep)
+			}
+			if i == 0 {
+				b.WriteRune(caser.ToLower(r))
+			} else {
+				b.WriteRune(caser.ToUpper(r))
+			}
 		}
 	}
 }
@@ -112,7 +116,6 @@ func Write(b *strings.Builder, caser Caser, elems ...string) {
 		if len(e) == 0 {
 			continue
 		}
-		b.Grow(len(e))
 		for y, r := range e {
 			if y == 0 && i == 0 && b.Len() > 0 && unicode.IsTitle(r) {
 				b.WriteRune(caser.ToUpper(r))

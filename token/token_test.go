@@ -32,6 +32,146 @@ import (
 	"github.com/chanced/caps/token"
 )
 
+func TestWriteUpperFirstLowerRest(t *testing.T) {
+	tests := []struct {
+		in  string
+		cur string
+		out string
+	}{
+		{"", "", ""},
+		{"a", "", "A"},
+		{"A", "", "A"},
+		{"abc", "", "Abc"},
+		{"Abc", "", "Abc"},
+		{"aBc", "", "Abc"},
+		{"aBC", "", "Abc"},
+		{"aBCD", "", "Abcd"},
+		{"", "z", "z"},
+		{"a", "z", "zA"},
+		{"A", "z", "zA"},
+		{"abc", "z", "zAbc"},
+		{"Abc", "z", "zAbc"},
+		{"aBc", "z", "zAbc"},
+		{"aBC", "z", "zAbc"},
+		{"aBCD", "z", "zAbcd"},
+	}
+	for _, test := range tests {
+		t.Run(test.in, func(t *testing.T) {
+			var b strings.Builder
+			b.WriteString(test.cur)
+			token.WriteUpperFirstLowerRest(&b, token.DefaultCaser, test.in)
+			if b.String() != test.out {
+				t.Errorf("expected %s, got %s", test.out, b.String())
+			}
+		})
+	}
+}
+
+func TestWriteSplitLowerFirstUpperRest(t *testing.T) {
+	tests := []struct {
+		in  string
+		cur string
+		out string
+	}{
+		{"", "", ""},
+		{"a", "", "a"},
+		{"aa", "", "a-A"},
+		{"aBC", "", "a-B-C"},
+		{"aBC", "", "a-B-C"},
+		{"aBc", "", "a-B-C"},
+		{"aBC", "", "a-B-C"},
+		{"aBCD", "", "a-B-C-D"},
+		{"", "z", "z"},
+		{"a", "z", "z-a"},
+		{"aa", "z", "z-a-A"},
+		{"aBC", "z", "z-a-B-C"},
+		{"aBC", "z", "z-a-B-C"},
+		{"aBc", "z", "z-a-B-C"},
+		{"aBC", "z", "z-a-B-C"},
+		{"aBCD", "z", "z-a-B-C-D"},
+	}
+	for _, test := range tests {
+		t.Run(test.in, func(t *testing.T) {
+			var b strings.Builder
+			b.WriteString(test.cur)
+			token.WriteSplitLowerFirstUpperRest(&b, token.DefaultCaser, "-", test.in)
+			if b.String() != test.out {
+				t.Errorf("expected %s, got %s", test.out, b.String())
+			}
+		})
+	}
+}
+
+func TestWriteSplitLower(t *testing.T) {
+	tests := []struct {
+		in  string
+		cur string
+		out string
+	}{
+		{"", "", ""},
+		{"a", "", "a"},
+		{"aa", "", "a-a"},
+		{"aBC", "", "a-b-c"},
+		{"aBC", "", "a-b-c"},
+		{"aBc", "", "a-b-c"},
+		{"aBC", "", "a-b-c"},
+		{"aBCD", "", "a-b-c-d"},
+		{"", "z", "z"},
+		{"a", "z", "z-a"},
+		{"aa", "z", "z-a-a"},
+		{"aBC", "z", "z-a-b-c"},
+		{"aBC", "z", "z-a-b-c"},
+		{"aBc", "z", "z-a-b-c"},
+		{"aBC", "z", "z-a-b-c"},
+		{"aBCD", "z", "z-a-b-c-d"},
+	}
+	for _, test := range tests {
+		t.Run(test.in, func(t *testing.T) {
+			var b strings.Builder
+			b.WriteString(test.cur)
+			token.WriteSplitLower(&b, token.DefaultCaser, "-", test.in)
+			if b.String() != test.out {
+				t.Errorf("expected %s, got %s", test.out, b.String())
+			}
+		})
+	}
+}
+
+func TestWriteSplitUpper(t *testing.T) {
+	tests := []struct {
+		in  string
+		cur string
+		out string
+	}{
+		{"", "", ""},
+		{"a", "", "A"},
+		{"aa", "", "A-A"},
+		{"aBC", "", "A-B-C"},
+		{"aBC", "", "A-B-C"},
+		{"aBc", "", "A-B-C"},
+		{"aBC", "", "A-B-C"},
+		{"aBCD", "", "A-B-C-D"},
+		{"", "z", "z"},
+		{"a", "z", "z-A"},
+		{"aa", "z", "z-A-A"},
+		{"aBC", "z", "z-A-B-C"},
+		{"aBC", "z", "z-A-B-C"},
+		{"aBc", "z", "z-A-B-C"},
+		{"aBC", "z", "z-A-B-C"},
+		{"aBCD", "z", "z-A-B-C-D"},
+	}
+	for _, test := range tests {
+		t.Run(test.in, func(t *testing.T) {
+			var b strings.Builder
+			b.WriteString(test.cur)
+			token.WriteSplitUpper(&b, token.DefaultCaser, "-", test.in)
+			if b.String() != test.out {
+				t.Errorf("expected %s, got %s", test.out, b.String())
+			}
+		})
+	}
+}
+
 func TestToLower(t *testing.T) {
 	strs := []string{"ABC", "abc", "", "a", "!!", "Abc"}
 

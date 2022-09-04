@@ -164,6 +164,10 @@ func (c Caps) AllowedSymbols() string {
 	return c.allowedSymbols
 }
 
+func (c Caps) Converter() Converter {
+	return c.converter
+}
+
 // UpperFirst converts the first rune of str to unicode upper case.
 //
 // This method does not support special cases (such as Turkish and Azeri)
@@ -244,7 +248,7 @@ func (c Caps) ToSnake(str string) string {
 //
 //	caps.ToScreamingSnake("This is [an] {example}${id32}.") // THIS_IS_AN_EXAMPLE_ID_32
 func (c Caps) ToScreamingSnake(str string) string {
-	return ToDelimited(str, "_", false)
+	return c.ToDelimited(str, "_", false)
 }
 
 // ToKebab transforms the case of str into Lower Kebab Case (e.g. an-example-string) using
@@ -252,7 +256,7 @@ func (c Caps) ToScreamingSnake(str string) string {
 //
 //	caps.ToKebab("This is [an] {example}${id32}.") // this-is-an-example-id-32
 func (c Caps) ToKebab(str string) string {
-	return ToDelimited(str, "-", true)
+	return c.ToDelimited(str, "-", true)
 }
 
 // ToScreamingKebab transforms the case of str into Screaming Kebab Snake (e.g.
@@ -261,7 +265,7 @@ func (c Caps) ToKebab(str string) string {
 //
 //	caps.ToScreamingKebab("This is [an] {example}${id32}.") // THIS-IS-AN-EXAMPLE-ID-32
 func (c Caps) ToScreamingKebab(str string) string {
-	return ToDelimited(str, "-", false)
+	return c.ToDelimited(str, "-", false)
 }
 
 // ToDotNotation transforms the case of str into Lower Dot Notation Case (e.g. an.example.string) using
@@ -269,7 +273,7 @@ func (c Caps) ToScreamingKebab(str string) string {
 //
 //	caps.ToDotNotation("This is [an] {example}${id32}.") // this.is.an.example.id.32
 func (c Caps) ToDotNotation(str string) string {
-	return ToDelimited(str, ".", true)
+	return c.ToDelimited(str, ".", true)
 }
 
 // ToScreamingDotNotation transforms the case of str into Screaming Kebab Case (e.g.
@@ -278,7 +282,7 @@ func (c Caps) ToDotNotation(str string) string {
 //
 //	caps.ToScreamingDotNotation("This is [an] {example}${id32}.") // THIS.IS.AN.EXAMPLE.ID.32
 func (c Caps) ToScreamingDotNotation(str string) string {
-	return ToDelimited(str, ".", false)
+	return c.ToDelimited(str, ".", false)
 }
 
 // ToTitle transforms the case of str into Title Case (e.g. An Example String) using
