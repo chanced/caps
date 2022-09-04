@@ -326,8 +326,9 @@ func main() {
 	// hello
 	// world
 }
-[go playground link](https://go.dev/play/p/MOYKz4ySpAv)
 ```
+
+[go playground link](https://go.dev/play/p/MOYKz4ySpAv)
 
 ## Benchmarks
 
