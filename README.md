@@ -301,6 +301,8 @@ func main() {
 }
 ```
 
+[go playground link](https://go.dev/play/p/aKfuU5eZJgp)
+
 ## text.Text
 
 The `text` package contains a single `Text` type which has all of the case conversions and relevant functions from strings as methods.
@@ -324,10 +326,8 @@ func main() {
 	// hello
 	// world
 }
-
+[go playground link](https://go.dev/play/p/MOYKz4ySpAv)
 ```
-
-[go playground link](https://go.dev/play/p/aKfuU5eZJgp)
 
 ## Benchmarks
 
