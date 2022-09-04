@@ -148,3 +148,17 @@ func TestCustomConverter(t *testing.T) {
 		t.Errorf("expected _id, got %s", res)
 	}
 }
+
+func TestConverterReplacements(t *testing.T) {
+	c := caps.NewConverter([]caps.Replacement{{"Id", "ID"}}, caps.DefaultTokenizer, nil)
+	r := c.Replacements()
+	if len(r) != 1 {
+		t.Errorf("expected 1 replacement, got %d", len(r))
+	}
+	if r[0].Camel != "Id" {
+		t.Errorf("expected Id, got %s", r[0].Camel)
+	}
+	if r[0].Screaming != "ID" {
+		t.Errorf("expected ID, got %s", r[0].Screaming)
+	}
+}

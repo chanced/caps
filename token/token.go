@@ -32,7 +32,7 @@ import (
 
 type NumberRules map[rune]func(index int, r rune, val string) bool
 
-// Append appends all of o to t
+// Append appends all of elems to t
 func Append(caser Caser, t string, elems ...string) string {
 	caser = CaserOrDefault(caser)
 	b := strings.Builder{}
@@ -51,6 +51,103 @@ func Append(caser Caser, t string, elems ...string) string {
 		}
 	}
 	return b.String()
+}
+
+func WriteUpperFirstLowerRest(b *strings.Builder, caser Caser, s string) {
+	for i, r := range s {
+		switch {
+		case i == 0 && b.Len() == 0:
+			b.WriteRune(caser.ToTitle(r))
+		case i == 0 && b.Len() > 0:
+			b.WriteRune(caser.ToUpper(r))
+		default:
+			b.WriteRune(caser.ToLower(r))
+		}
+	}
+}
+
+func WriteSplitLowerFirstUpperRest(b *strings.Builder, caser Caser, sep string, s string) {
+	for i, r := range s {
+		if i == 0 && b.Len() == 0 {
+			b.WriteRune(caser.ToLower(r))
+		} else if b.Len() > 0 {
+			if len(sep) > 0 {
+				b.WriteString(sep)
+			}
+			if i == 0 {
+				b.WriteRune(caser.ToLower(r))
+			} else {
+				b.WriteRune(caser.ToUpper(r))
+			}
+		}
+	}
+}
+
+func WriteSplitLower(b *strings.Builder, caser Caser, sep string, elems ...string) {
+	for _, s := range elems {
+		for _, r := range s {
+			if b.Len() > 0 && len(sep) > 0 {
+				b.WriteString(sep)
+			}
+			b.WriteRune(caser.ToLower(r))
+		}
+	}
+}
+
+func WriteSplitUpper(b *strings.Builder, caser Caser, sep string, elems ...string) {
+	for _, s := range elems {
+		for i, r := range s {
+			if b.Len() > 0 && len(sep) > 0 {
+				b.WriteString(sep)
+			}
+			if i == 0 && b.Len() == 0 {
+				b.WriteRune(caser.ToTitle(r))
+			} else {
+				b.WriteRune(caser.ToUpper(r))
+			}
+		}
+	}
+}
+
+// Write writes e to b
+func Write(b *strings.Builder, caser Caser, e string) {
+	caser = CaserOrDefault(caser)
+	if len(e) == 0 {
+		return
+	}
+	for y, r := range e {
+		if y == 0 && b.Len() > 0 && unicode.IsTitle(r) {
+			b.WriteRune(caser.ToUpper(r))
+		} else {
+			b.WriteRune(r)
+		}
+	}
+}
+
+func WriteUpper(b *strings.Builder, caser Caser, s string) {
+	for _, r := range s {
+		if b.Len() == 0 {
+			b.WriteRune(caser.ToTitle(r))
+		} else {
+			b.WriteRune(caser.ToUpper(r))
+		}
+	}
+}
+
+func WriteLower(b *strings.Builder, caser Caser, s string) {
+	for _, r := range s {
+		b.WriteRune(caser.ToLower(r))
+	}
+}
+
+// WriteRune writes the runes to the b.
+func WriteRune(b *strings.Builder, caser Caser, r rune) {
+	if b.Len() > 0 && unicode.IsTitle(r) {
+		r = caser.ToUpper(r)
+	} else if b.Len() == 0 && unicode.IsUpper(r) {
+		r = caser.ToTitle(r)
+	}
+	b.WriteRune(r)
 }
 
 // AppendRune append the rune to the current token.

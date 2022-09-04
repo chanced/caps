@@ -44,6 +44,18 @@ const (
 	ReplaceStyleLower                     // Text should be replaced with the lowercase variant (e.g. "json").
 )
 
+func (rs ReplaceStyle) String() string {
+	switch rs {
+	case ReplaceStyleCamel:
+		return "ReplaceStyleCamel"
+	case ReplaceStyleScreaming:
+		return "ReplacestyleScreaming"
+	case ReplaceStyleLower:
+		return "ReplaceStyleLower"
+	}
+	return "ReplaceStyleNotSpecified"
+}
+
 func (rs ReplaceStyle) IsCamel() bool {
 	return rs == ReplaceStyleCamel
 }
@@ -65,6 +77,20 @@ const (
 	StyleCamel              // The output should be camel case (e.g. "AnExample")
 	StyleLowerCamel         // The output should be lower camel case (e.g. "anExample")
 )
+
+func (s Style) String() string {
+	switch s {
+	case StyleLower:
+		return "StyleLower"
+	case StyleScreaming:
+		return "StyleScreaming"
+	case StyleCamel:
+		return "StyleCamel"
+	case StyleLowerCamel:
+		return "StyleLowerCamel"
+	}
+	return "StyleNotSpecified"
+}
 
 func (s Style) IsLower() bool {
 	return s == StyleLower
@@ -118,13 +144,6 @@ type Opts struct {
 	NumberRules token.NumberRules
 }
 
-// Deprecated: Use WithAllowedSymbols instead.
-func UseAllowedSymbols(symbols string) Opts {
-	return Opts{
-		AllowedSymbols: symbols,
-	}
-}
-
 // WithConverter sets the Converter to use
 func WithConverter(converter Converter) Opts {
 	return Opts{
@@ -172,6 +191,13 @@ func WithNumberRules(rules NumberRules) Opts {
 	}
 }
 
+// WithAllowedSymbols sets the AllowedSymbols to use
+func WithAllowedSymbols(symbols string) Opts {
+	return Opts{
+		AllowedSymbols: symbols,
+	}
+}
+
 // UseConverter sets the Converter to use
 //
 // Deprecated: Use WithConverter instead.
@@ -192,6 +218,13 @@ func UseReplaceStyle(style ReplaceStyle) Opts {
 func UseNumberRules(rules token.NumberRules) Opts {
 	return Opts{
 		NumberRules: rules,
+	}
+}
+
+// Deprecated: Use WithAllowedSymbols instead.
+func UseAllowedSymbols(symbols string) Opts {
+	return Opts{
+		AllowedSymbols: symbols,
 	}
 }
 

@@ -319,46 +319,48 @@ Using a `caps.Caps` instance:
 
 ```
 BenchmarkCapsToTitle
-BenchmarkCapsToTitle-10                   	 2418796	       473.9 ns/op	     208 B/op	       9 allocs/op
+BenchmarkCapsToTitle-10                   	 2488982	       470.2 ns/op	     200 B/op	       8 allocs/op
 BenchmarkCapsToCamel
-BenchmarkCapsToCamel-10                   	 2572858	       466.4 ns/op	     208 B/op	       9 allocs/op
+BenchmarkCapsToCamel-10                   	 2474846	       467.8 ns/op	     200 B/op	       8 allocs/op
 BenchmarkCapsToLowerCamel
-BenchmarkCapsToLowerCamel-10              	 2607831	       458.1 ns/op	     208 B/op	       9 allocs/op
+BenchmarkCapsToLowerCamel-10              	 2650843	       451.0 ns/op	     200 B/op	       8 allocs/op
 BenchmarkCapsToSnake
-BenchmarkCapsToSnake-10                   	 2567318	       466.2 ns/op	     208 B/op	       9 allocs/op
+BenchmarkCapsToSnake-10                   	 2619945	       456.9 ns/op	     200 B/op	       8 allocs/op
 BenchmarkCapsToScreamingSnake
-BenchmarkCapsToScreamingSnake-10          	 2380708	       504.7 ns/op	     256 B/op	      10 allocs/op
+BenchmarkCapsToScreamingSnake-10          	 2591302	       461.9 ns/op	     200 B/op	       8 allocs/op
 BenchmarkCapsToKebab
-BenchmarkCapsToKebab-10                   	 2408059	       501.0 ns/op	     256 B/op	      10 allocs/op
+BenchmarkCapsToKebab-10                   	 2621020	       457.0 ns/op	     200 B/op	       8 allocs/op
 BenchmarkCapsToScreamingKebab
-BenchmarkCapsToScreamingKebab-10          	 2383544	       500.0 ns/op	     256 B/op	      10 allocs/op
+BenchmarkCapsToScreamingKebab-10          	 2593428	       466.3 ns/op	     200 B/op	       8 allocs/op
 BenchmarkCapsToDotNotation
-BenchmarkCapsToDotNotation-10             	 2418474	       495.8 ns/op	     256 B/op	      10 allocs/op
+BenchmarkCapsToDotNotation-10             	 2575178	       463.0 ns/op	     200 B/op	       8 allocs/op
 BenchmarkCapsToScreamingDotNotation
-BenchmarkCapsToScreamingDotNotation-10    	 2375731	       504.0 ns/op	     256 B/op	      10 allocs/op
+BenchmarkCapsToScreamingDotNotation-10    	 2526782	       472.8 ns/op	     200 B/op	       8 allocs/op
 ```
 
 Using top-level functions:
 
 ```
 BenchmarkToTitle
-BenchmarkToTitle-10                       	 2349061	       505.8 ns/op	     256 B/op	      10 allocs/op
+BenchmarkToTitle-10                       	 2375107	       506.0 ns/op	     248 B/op	       9 allocs/op
 BenchmarkToCamel
-BenchmarkToCamel-10                       	 2406518	       503.7 ns/op	     256 B/op	      10 allocs/op
+BenchmarkToCamel-10                       	 2374930	       501.1 ns/op	     248 B/op	       9 allocs/op
 BenchmarkToLowerCamel
-BenchmarkToLowerCamel-10                  	 2391112	       503.9 ns/op	     256 B/op	      10 allocs/op
+BenchmarkToLowerCamel-10                  	 2373976	       495.3 ns/op	     248 B/op	       9 allocs/op
 BenchmarkToSnake
-BenchmarkToSnake-10                       	 2392641	       503.3 ns/op	     256 B/op	      10 allocs/op
+BenchmarkToSnake-10                       	 2370608	       518.8 ns/op	     248 B/op	       9 allocs/op
 BenchmarkToScreamingSnake
-BenchmarkToScreamingSnake-10              	 2311863	       517.7 ns/op	     256 B/op	      10 allocs/op
+BenchmarkToScreamingSnake-10              	 2339785	       500.4 ns/op	     248 B/op	       9 allocs/op
 BenchmarkToKebab
-BenchmarkToKebab-10                       	 2390890	       503.5 ns/op	     256 B/op	      10 allocs/op
+BenchmarkToKebab-10                       	 2424816	       502.7 ns/op	     248 B/op	       9 allocs/op
 BenchmarkToScreamingKebab
-BenchmarkToScreamingKebab-10              	 2313615	       519.0 ns/op	     256 B/op	      10 allocs/op
+BenchmarkToScreamingKebab-10              	 2371681	       510.4 ns/op	     248 B/op	       9 allocs/op
 BenchmarkToDotNotation
-BenchmarkToDotNotation-10                 	 2344407	       510.3 ns/op	     256 B/op	      10 allocs/op
+BenchmarkToDotNotation-10                 	 2367168	       512.4 ns/op	     248 B/op	       9 allocs/op
 BenchmarkToScreamingDotNotation
-BenchmarkToScreamingDotNotation-10        	 2294145	       521.2 ns/op	     256 B/op	      10 allocs/op
+BenchmarkToScreamingDotNotation-10        	 2295390	       509.7 ns/op	     248 B/op	       9 allocs/op
+BenchmarkWithLongerInput
+BenchmarkWithLongerInput-10               	 1476777	       817.1 ns/op	     280 B/op	      13 allocs/op
 ```
 
 ## License
