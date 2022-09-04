@@ -359,8 +359,6 @@ BenchmarkToDotNotation
 BenchmarkToDotNotation-10                 	 2367168	       512.4 ns/op	     248 B/op	       9 allocs/op
 BenchmarkToScreamingDotNotation
 BenchmarkToScreamingDotNotation-10        	 2295390	       509.7 ns/op	     248 B/op	       9 allocs/op
-BenchmarkWithLongerInput
-BenchmarkWithLongerInput-10               	 1476777	       817.1 ns/op	     280 B/op	      13 allocs/op
 ```
 
 ## License
