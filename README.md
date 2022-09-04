@@ -307,6 +307,26 @@ The `text` package contains a single `Text` type which has all of the case conve
 
 It does not currently have tests.
 
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/chanced/caps/text"
+)
+
+func main() {
+	t := text.Text("Hello World")
+	for _, p := range t.ToKebab().Split("-") {
+		fmt.Println(p)
+	}
+	// Output:
+	// hello
+	// world
+}
+
+```
+
 [go playground link](https://go.dev/play/p/aKfuU5eZJgp)
 
 ## Benchmarks
