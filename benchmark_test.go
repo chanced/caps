@@ -267,3 +267,16 @@ func BenchmarkWithLongerInput(b *testing.B) {
 		b.Fatalf("Expected %s, got %s", expected, s)
 	}
 }
+
+var shorterTestCase string = "Example"
+
+func BenchmarkWithShorterInput(b *testing.B) {
+	expected := "Example"
+	var s string
+	for n := 0; n < b.N; n++ {
+		s = c.ToCamel(shorterTestCase)
+	}
+	if expected != s {
+		b.Fatalf("Expected %s, got %s", expected, s)
+	}
+}
