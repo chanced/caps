@@ -60,7 +60,7 @@ func main() {
 	// someId
 
 	// Alternatively:
-	capsJS := caps.New(caps.CapsOpts{
+	capsJS := caps.New(caps.Config{
 		AllowedSymbols: "$",
 		ReplaceStyle:   caps.ReplaceStyleCamel,
 	})
@@ -171,7 +171,7 @@ import (
 )
 
 func main() {
-	c := caps.New(caps.CapsOpts{
+	c := caps.New(caps.Config{
 		Replacements: []caps.Replacement{
 			{"Ex", "EX"},
 			// ... your replacements
