@@ -11,6 +11,22 @@ caps is a unicode aware, case conversion library for Go. It
 was built with the following priorites in mind: configurability, consistency,
 correctness, ergonomic, and reasonable performance; in that order.
 
+-   [Supported Case Conversions](#supported-case-conversions)
+-   [Install](#install)
+-   [Example](#example)
+-   [Word boundaries](#word-boundaries)
+-   [Replacements](#replacements)
+    -   [Default replacements](#default-replacements)
+-   [Customizing the `Converter`](#customizing-the-converter)
+    -   [Using caps.Caps](#using-capscaps)
+    -   [Creating isolated `caps.StdConverter` instances](#creating-isolated-capsstdconverter-instances)
+    -   [Modifying the `caps.DefaultConverter` global](#modifying-the-capsdefaultconverter-global)
+    -   [Creating a custom `caps.Converter`](#creating-a-custom-capsconverter)
+-   [Support for special case unicode (e.g. Turkish, Azeri)](#support-for-special-case-unicode-eg-turkish-azeri)
+-   [text.Text](#texttext)
+-   [Benchmarks](#benchmarks)
+-   [License](#license)
+
 ## Supported Case Conversions
 
 The following case conversions are available:
