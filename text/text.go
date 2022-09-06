@@ -36,6 +36,33 @@ import (
 	"github.com/chanced/caps/token"
 )
 
+type Texts []Text
+
+func (t Texts) Len() int {
+	return len(t)
+}
+
+// TotalLen returns the sum len of each Text in t.
+func (t Texts) TotalLen() int {
+	var l int
+	for _, v := range t {
+		l += len(v)
+	}
+	return l
+}
+
+func (t Texts) Join(sep string) Text {
+	var b strings.Builder
+	b.Grow(t.TotalLen() + len(sep)*(len(t)-1))
+	for i, v := range t {
+		if i > 0 && len(sep) > 0 {
+			b.WriteString(sep)
+		}
+		b.WriteString(v.String())
+	}
+	return Text(b.String())
+}
+
 type Text string
 
 func (t Text) String() string {
@@ -291,7 +318,7 @@ func (t Text) Count(substr string) int {
 // Fields splits the Text t around each instance of one or more consecutive
 // white space characters, as defined by unicode.IsSpace, returning a slice of
 // substrings of t or an empty slice if t contains only white space.
-func (t Text) Fields() []Text {
+func (t Text) Fields() Texts {
 	return collect(strings.Fields(string(t)))
 }
 
@@ -301,7 +328,7 @@ func (t Text) Fields() []Text {
 
 // FieldsFunc makes no guarantees about the order in which it calls f(c)
 // and assumes that f always returns the same value for a given c.
-func (t Text) FieldsFunc(f func(rune) bool) []Text {
+func (t Text) FieldsFunc(f func(rune) bool) Texts {
 	return collect(strings.FieldsFunc(string(t), f))
 }
 
@@ -385,7 +412,7 @@ func (t Text) Repeat(count int) Text {
 //
 // If sep is empty, Split splits after each UTF-8 sequence. If both t
 // and sep are empty, Split returns an empty slice.
-func (t Text) Split(sep string) []Text {
+func (t Text) Split(sep string) Texts {
 	return collect(strings.Split(string(t), sep))
 }
 
@@ -399,7 +426,7 @@ func (t Text) Split(sep string) []Text {
 // both t and sep are empty, SplitAfter returns an empty slice.
 //
 // It is equivalent to SplitAfterN with a count of -1.
-func (t Text) SplitAfter(sep string) []Text {
+func (t Text) SplitAfter(sep string) Texts {
 	return collect(strings.SplitAfter(string(t), sep))
 }
 
@@ -414,7 +441,7 @@ func (t Text) SplitAfter(sep string) []Text {
 //
 // Edge cases for t and sep (for example, empty strings) are handled
 // as described in the documentation for SplitAfter.
-func (t Text) SplitAfterN(sep string, n int) []Text {
+func (t Text) SplitAfterN(sep string, n int) Texts {
 	return collect(strings.SplitAfterN(string(t), sep, n))
 }
 
@@ -431,7 +458,7 @@ func (t Text) SplitAfterN(sep string, n int) []Text {
 // as described in the documentation for Split.
 //
 // To split around the first instance of a separator, see Cut.
-func (t Text) SplitN(sep string, n int) []Text {
+func (t Text) SplitN(sep string, n int) Texts {
 	return collect(strings.SplitN(string(t), sep, n))
 }
 
@@ -459,7 +486,7 @@ func (t Text) ToValidUTF8(replacement string) Text {
 	return Text(strings.ToValidUTF8(string(t), replacement))
 }
 
-func collect(slice []string) []Text {
+func collect(slice []string) Texts {
 	res := make([]Text, len(slice))
 	for i, v := range slice {
 		res[i] = Text(v)
