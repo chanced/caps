@@ -236,8 +236,11 @@ func (idx *Index) Add(camel string, screaming string) bool {
 		}
 		node = node.nodes[r]
 	}
+	node.value = ir
+
 	skey := token.ToLower(idx.caser, ir.Screaming)
 	if ir.Lower != skey {
+		node = idx
 		for _, r := range skey {
 			if _, ok = node.nodes[r]; !ok {
 				node.nodes[r] = &Index{
@@ -247,9 +250,9 @@ func (idx *Index) Add(camel string, screaming string) bool {
 			}
 			node = node.nodes[r]
 		}
-	}
+		node.value = ir
 
-	node.value = ir
+	}
 
 	return exists
 }
