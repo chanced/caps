@@ -137,13 +137,69 @@ func TestWriteSplitLower(t *testing.T) {
 	}
 }
 
-func TestWrite(t *testing.T) {}
+func TestWrite(t *testing.T) {
+	t.Run("empty string", func(t *testing.T) {
+		sb := strings.Builder{}
+		token.Write(&sb, token.DefaultCaser, "")
+		if sb.String() != "" {
+			t.Errorf("expected empty string, got %s", sb.String())
+		}
+	})
+	t.Run("Dz", func(t *testing.T) {
+		sb := strings.Builder{}
+		token.Write(&sb, token.DefaultCaser, "ǲ")
+		token.Write(&sb, token.DefaultCaser, "ǲ")
+		if sb.String() != "ǲǱ" {
+			t.Errorf("expected ǲǱ, got %s", sb.String())
+		}
+	})
+}
 
-func TestWriteUpper(t *testing.T) {}
+func TestWriteUpper(t *testing.T) {
+	t.Run("empty string", func(t *testing.T) {
+		sb := strings.Builder{}
+		token.WriteUpper(&sb, token.DefaultCaser, "")
+		if sb.String() != "" {
+			t.Errorf("expected empty string, got %s", sb.String())
+		}
+	})
+	t.Run("Dz", func(t *testing.T) {
+		sb := strings.Builder{}
+		token.WriteUpper(&sb, token.DefaultCaser, "ǲ")
+		token.WriteUpper(&sb, token.DefaultCaser, "ǲ")
+		if sb.String() != "ǲǱ" {
+			t.Errorf("expected ǲǱ, got %s", sb.String())
+		}
+	})
+}
 
-func TestWriteLower(t *testing.T) {}
+func TestWriteLower(t *testing.T) {
+	t.Run("empty string", func(t *testing.T) {
+		sb := strings.Builder{}
+		token.WriteLower(&sb, token.DefaultCaser, "")
+		if sb.String() != "" {
+			t.Errorf("expected empty string, got %s", sb.String())
+		}
+	})
+	t.Run("Dz", func(t *testing.T) {
+		sb := strings.Builder{}
+		token.WriteLower(&sb, token.DefaultCaser, "ABC")
+		if sb.String() != "abc" {
+			t.Errorf("expected abc, got %s", sb.String())
+		}
+	})
+}
 
-func TestWriteRune(t *testing.T) {}
+func TestWriteRune(t *testing.T) {
+	t.Run("Dz", func(t *testing.T) {
+		sb := strings.Builder{}
+		token.WriteRune(&sb, token.DefaultCaser, 'Ǳ')
+		token.WriteRune(&sb, token.DefaultCaser, 'ǲ')
+		if sb.String() != "ǲǱ" {
+			t.Errorf("expected ǲǱ, got %s", sb.String())
+		}
+	})
+}
 
 func TestWriteSplitUpper(t *testing.T) {
 	tests := []struct {
@@ -365,12 +421,10 @@ func TestAppend(t *testing.T) {
 	var res string
 	titleDZ := unicode.ToTitle('ǳ')
 	upperDZ := unicode.ToUpper('ǳ')
+
 	if unicode.IsTitle(upperDZ) {
 		t.Error("expected upperDZ to not be title")
 	}
-	// fmt.Println("is title to upperDZ", unicode.IsTitle(upperDZ))
-	// fmt.Println("is title to titleDZ", unicode.IsTitle(titleDZ))
-	// fmt.Println("is title to titleDZ after ToUpper", unicode.IsTitle(unicode.ToUpper(titleDZ)))
 	titleDZStr := string(titleDZ)
 	res = token.Append(nil, titleDZStr, titleDZStr)
 	if []rune(res)[0] != titleDZ {
