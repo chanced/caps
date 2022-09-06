@@ -32,6 +32,10 @@ import (
 	"github.com/chanced/caps/token"
 )
 
+var canadian caps.NumberRules = caps.NumberRules{
+	'$': func(i int, r rune, v string) bool { return i == len(v)-1 },
+}
+
 func TestTokenizer(t *testing.T) {
 	tests := []struct {
 		value          string
@@ -56,6 +60,13 @@ func TestTokenizer(t *testing.T) {
 		{"#123", []string{"123"}, "", nil},                                                       // 14
 		{"#123.456", []string{"123.456"}, ".", nil},                                              // 15
 		{"UTF8", []string{"UTF", "8"}, "", nil},                                                  // 16
+		{"a_123_number", []string{"a", "123", "number"}, "", nil},                                // 17
+		{"a_123_123_number", []string{"a", "123", "123", "number"}, "", nil},                     // 18
+		{"123_123", []string{"123", "123"}, "", nil},                                             // 19
+		{"123_123_number", []string{"123", "123", "number"}, "", nil},                            // 19
+		{"123$", []string{"123$"}, "$", canadian},                                                // 20
+		{"123!", []string{"123", "!"}, "!", canadian},                                            // 21
+		{"a_123!", []string{"a", "123", "!"}, "!", canadian},                                     // 22
 	}
 
 	for i, test := range tests {
@@ -65,6 +76,9 @@ func TestTokenizer(t *testing.T) {
 			if len(tokens) != len(test.expected) {
 				t.Logf("expected: %+v, got: %+v", test.expected, tokens)
 				t.Errorf("expected %d tokens, got %d", len(test.expected), len(tokens))
+				for _, tok := range tokens {
+					t.Logf("token: \"%+v\"", tok)
+				}
 			} else {
 				for i, token := range tokens {
 					if token != test.expected[i] {
