@@ -49,7 +49,7 @@ func (rs ReplaceStyle) String() string {
 	case ReplaceStyleCamel:
 		return "ReplaceStyleCamel"
 	case ReplaceStyleScreaming:
-		return "ReplacestyleScreaming"
+		return "ReplaceStyleScreaming"
 	case ReplaceStyleLower:
 		return "ReplaceStyleLower"
 	}
