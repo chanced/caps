@@ -59,6 +59,39 @@ func TestClone(t *testing.T) {
 	}
 }
 
+func TestValues(t *testing.T) {
+	idx := index.New(nil)
+	idx.Add("Cat", "CAT")
+	idx.Add("Dog", "DOG")
+	idx.Add("Wolf", "WOLF")
+	idx.Add("Dogfish", "DOGFISH")
+
+	vals := idx.Values()
+
+	if len(vals) != 4 {
+		t.Error("expected 4 values, got", len(vals))
+	}
+	seen := map[string]bool{
+		"Cat":     false,
+		"Dog":     false,
+		"Wolf":    false,
+		"Dogfish": false,
+	}
+	for _, val := range vals {
+		switch val.Camel {
+		case "Cat", "Dog", "Wolf", "Dogfish":
+			seen[val.Camel] = true
+		default:
+			t.Error("unexpected value", val)
+		}
+	}
+	for k, v := range seen {
+		if !v {
+			t.Errorf("%s not in values", k)
+		}
+	}
+}
+
 func TestMatch(t *testing.T) {
 	idx := index.New(nil)
 	idx.Add("Abcd", "ABCD")
