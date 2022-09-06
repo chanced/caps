@@ -198,35 +198,35 @@ func WithAllowedSymbols(symbols string) Opts {
 	}
 }
 
-// UseConverter sets the Converter to use
-//
-// Deprecated: Use WithConverter instead.
-func UseConverter(converter Converter) Opts {
-	return Opts{
-		Converter: converter,
-	}
-}
+// // UseConverter sets the Converter to use
+// //
+// // Deprecated: Use WithConverter instead.
+// func UseConverter(converter Converter) Opts {
+// 	return Opts{
+// 		Converter: converter,
+// 	}
+// }
 
-// Deprecated: Use WithReplaceStyle instead.
-func UseReplaceStyle(style ReplaceStyle) Opts {
-	return Opts{
-		ReplaceStyle: style,
-	}
-}
+// // Deprecated: Use WithReplaceStyle instead.
+// func UseReplaceStyle(style ReplaceStyle) Opts {
+// 	return Opts{
+// 		ReplaceStyle: style,
+// 	}
+// }
 
-// Deprecated: Use WithNumberRules instead.
-func UseNumberRules(rules token.NumberRules) Opts {
-	return Opts{
-		NumberRules: rules,
-	}
-}
+// // Deprecated: Use WithNumberRules instead.
+// func UseNumberRules(rules token.NumberRules) Opts {
+// 	return Opts{
+// 		NumberRules: rules,
+// 	}
+// }
 
-// Deprecated: Use WithAllowedSymbols instead.
-func UseAllowedSymbols(symbols string) Opts {
-	return Opts{
-		AllowedSymbols: symbols,
-	}
-}
+// // Deprecated: Use WithAllowedSymbols instead.
+// func UseAllowedSymbols(symbols string) Opts {
+// 	return Opts{
+// 		AllowedSymbols: symbols,
+// 	}
+// }
 
 func loadOpts(opts []Opts) Opts {
 	result := Opts{

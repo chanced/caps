@@ -25,6 +25,7 @@
 package index_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/chanced/caps/index"
@@ -59,10 +60,44 @@ func TestClone(t *testing.T) {
 	}
 }
 
+func TestValues(t *testing.T) {
+	idx := index.New(nil)
+	idx.Add("Cat", "CAT")
+	idx.Add("Dog", "DOG")
+	idx.Add("Wolf", "WOLF")
+	idx.Add("Dogfish", "DOGFISH")
+	vals := idx.Values()
+
+	if len(vals) != 4 {
+		t.Error("expected 4 values, got", len(vals))
+	}
+	seen := map[string]bool{
+		"Cat":     false,
+		"Dog":     false,
+		"Wolf":    false,
+		"Dogfish": false,
+	}
+	for _, val := range vals {
+		switch val.Camel {
+		case "Cat", "Dog", "Wolf", "Dogfish":
+			seen[val.Camel] = true
+		default:
+			t.Error("unexpected value", val)
+		}
+	}
+	for k, v := range seen {
+		if !v {
+			t.Errorf("%s not in values", k)
+		}
+	}
+}
+
 func TestMatch(t *testing.T) {
 	idx := index.New(nil)
 	idx.Add("Abcd", "ABCD")
-
+	if _, ok := idx.Match(""); ok {
+		t.Error("expected empty string to not match")
+	}
 	m, ok := idx.Match("abc")
 	if !ok {
 		t.Error("expected match for abc")
@@ -86,7 +121,43 @@ func TestMatch(t *testing.T) {
 	}
 }
 
-func TestAddMatchGet(t *testing.T) {
+func TestAdd(t *testing.T) {
+	idx := index.New(nil)
+	idx.Add("Abcd", "ABCD")
+	if !idx.Contains("abcd") {
+		t.Error("expected Abcd to be in index")
+	}
+
+	if _, ok := idx.Get(""); ok {
+		t.Error("expected empty string to not be in index")
+	}
+
+	if _, ok := idx.Get("abcd"); !ok {
+		t.Error("expected ABCD to be in index")
+	}
+	idx.Add("Abcd", "ABCD2")
+
+	if !idx.Contains("abcd2") {
+		t.Error("expected abcd2 to be in index")
+	}
+	if !idx.Contains("ABCD") {
+		t.Error("expected ABCD to be in index")
+	}
+
+	idx.Add("Abcd2", "ABCD2")
+	if v2, ok := idx.Get("abcd2"); ok {
+		if v2.Camel != "Abcd2" {
+			t.Error("expected Abcd2")
+		}
+	} else {
+		t.Error("expected abcd2")
+	}
+	if idx.Contains("abcd") {
+		t.Error("expected abcd to be deleted")
+	}
+}
+
+func TestHasPartialMatches(t *testing.T) {
 	idx := index.New(nil)
 
 	tests := []struct {
@@ -106,26 +177,42 @@ func TestAddMatchGet(t *testing.T) {
 			}
 			ts := test.camel[:i]
 			if i == len(test.camel)-1 {
-				idx, hasMatch := idx.Match(ts)
+				subidx, hasMatch := idx.Match(ts)
+
 				if !hasMatch {
 					t.Error("expected match for", ts)
 				}
-				if !idx.HasMatched() {
+				if !subidx.HasMatched() {
 					t.Error("expected match for", ts)
 				}
-				_, ok := idx.Get(ts)
+				_, ok := subidx.Get(ts)
 				if !ok {
 					t.Error("expected get result for for", ts)
 				}
 				break
 			}
-			idx, hasMatch := idx.Match(ts)
+			sub, hasMatch := idx.Match(ts)
 			if !hasMatch {
 				t.Error("expected match for", ts)
 			}
-			if !idx.HasPartialMatches() {
+			if !sub.HasPartialMatches() {
 				t.Error("expected", ts, "to be in index")
 			}
+
+		}
+		x, ok := idx.Match(test.camel)
+		if !ok {
+			t.Error("expected match for", test.camel)
+		}
+		v := x.Value()
+		if v.Camel != test.camel {
+			t.Error("expected", test.camel, "got", v.Camel)
+		}
+		if v.Screaming != test.screaming {
+			t.Error("expected", test.screaming, "got", v.Screaming)
+		}
+		if v.Lower != strings.ToLower(test.camel) {
+			t.Error("expected", strings.ToLower(test.camel), "got", v.Lower)
 		}
 
 	}
@@ -144,6 +231,10 @@ func TestDelete(t *testing.T) {
 	}
 	for _, test := range tests {
 		idx.Add(test.camel, test.screaming)
+	}
+
+	if ok := idx.Delete("json_doesnotexist"); ok {
+		t.Error("expected delete to fail")
 	}
 
 	for i := len(tests) - 1; i >= 0; i-- {

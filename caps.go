@@ -39,10 +39,13 @@ type Caps struct {
 	numberRules    token.NumberRules
 }
 
-// CapsOpts include configurable options for case conversion.
+// Deprecated: Use Config
+type CapsOpts = Config
+
+// Config include configurable options for case conversion.
 //
 // See the documentation for the individual fields for more information.
-type CapsOpts struct {
+type Config struct {
 	// Any characters within this string will be allowed in the output.
 	//
 	// This does not affect delimiters (e.g. "_", "-", ".") as they are added
@@ -87,8 +90,8 @@ type CapsOpts struct {
 	Tokenizer Tokenizer
 }
 
-func loadCapsOpts(opts []CapsOpts) CapsOpts {
-	result := CapsOpts{
+func loadCapsOpts(opts []Config) Config {
+	result := Config{
 		AllowedSymbols: "",
 		ReplaceStyle:   ReplaceStyleScreaming,
 	}
@@ -139,7 +142,7 @@ func loadCapsOpts(opts []CapsOpts) CapsOpts {
 //
 // if caser is nil, token.DefaultCaser is used (which relies on the default
 // unicode functions)
-func New(options ...CapsOpts) Caps {
+func New(options ...Config) Caps {
 	opts := loadCapsOpts(options)
 
 	return Caps{

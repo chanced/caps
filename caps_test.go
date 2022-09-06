@@ -390,7 +390,7 @@ func TestCapsAccessors(t *testing.T) {
 			t.Errorf("expected %s, got %s", caps.ReplaceStyleScreaming, rs)
 		}
 
-		c = caps.New(caps.CapsOpts{
+		c = caps.New(caps.Config{
 			ReplaceStyle: caps.ReplaceStyleLower,
 		})
 
@@ -406,7 +406,7 @@ func TestCapsAccessors(t *testing.T) {
 			t.Errorf("expected nil, got %v", nr)
 		}
 
-		c = caps.New(caps.CapsOpts{
+		c = caps.New(caps.Config{
 			NumberRules: usd,
 		})
 		if len(c.NumberRules()) != 1 || c.NumberRules()['$'] == nil {
@@ -419,7 +419,7 @@ func TestCapsAccessors(t *testing.T) {
 		if as != "" {
 			t.Errorf("expected \"\", got %v", as)
 		}
-		c = caps.New(caps.CapsOpts{
+		c = caps.New(caps.Config{
 			AllowedSymbols: "$",
 		})
 		if c.AllowedSymbols() != "$" {
@@ -570,8 +570,8 @@ func loadOpts(opts Opts) caps.Opts {
 	return result
 }
 
-func (o Opts) toCapsOpts() caps.CapsOpts {
-	capopts := caps.CapsOpts{}
+func (o Opts) toCapsOpts() caps.Config {
+	capopts := caps.Config{}
 	opts := loadOpts(o)
 	capopts.AllowedSymbols = opts.AllowedSymbols
 	capopts.NumberRules = opts.NumberRules
