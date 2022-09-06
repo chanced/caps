@@ -314,9 +314,12 @@ func main() {
 
 [go playground link](https://go.dev/play/p/aKfuU5eZJgp)
 
-## text.Text
+## text pkg
 
-The `text` package contains a single `Text` type which has all of the case conversions and relevant functions from strings as methods.
+The `text` package contains two types:
+
+-   `Text` which has all of the case conversions and relevant functions from strings as methods.
+-   `Texts` which is a slice of Text
 
 It does not currently have tests.
 
