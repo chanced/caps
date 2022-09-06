@@ -133,6 +133,7 @@ func (ti StdTokenizer) Tokenize(str string, allowedSymbols string, numberRules N
 						tokens = append(tokens, strings.Split(tok, "")...)
 					}
 				}
+				pending = nil
 				// need to break up the current token if it isn't a number
 				if prevNumber {
 					tokens = append(tokens, current.String())
@@ -146,6 +147,7 @@ func (ti StdTokenizer) Tokenize(str string, allowedSymbols string, numberRules N
 					tokens = append(tokens, split[:len(split)-1]...)
 				}
 			}
+			tokens = append(tokens, pending...)
 			current.WriteRune(r)
 			pending = nil
 			foundLower = true
@@ -180,11 +182,12 @@ func (ti StdTokenizer) Tokenize(str string, allowedSymbols string, numberRules N
 						// both this and the next rune (and possibly the rune after
 						// that) make it a number.
 						n := token.AppendRune(ti.caser, current.String(), r)
+
 						runes := []rune(str)
 						if token.IsNumber(n, numberRules) {
 							current.Reset()
 							current.WriteString(n)
-						} else if i <= len(runes)-2 && (unicode.IsNumber(runes[i+1]) || unicode.IsLetter(runes[i+1])) || allowed.Contains(runes[i+1]) {
+						} else if i < len(runes)-1 && canCheckNext(runes[i+1], allowed) {
 							if token.IsNumber(token.AppendRune(ti.caser, n, runes[i+1]), numberRules) {
 								current.Reset()
 								current.WriteString(n)
@@ -216,6 +219,7 @@ func (ti StdTokenizer) Tokenize(str string, allowedSymbols string, numberRules N
 			} else if ti.delimiters.Contains(r) || unicode.IsSpace(r) {
 				if current.Len() > 0 {
 					if foundLower {
+						tokens = append(tokens, pending...)
 						tokens = append(tokens, current.String())
 					} else {
 						pending = append(pending, current.String())
@@ -289,6 +293,10 @@ func newRunes(val string) runes {
 	r := runes([]rune(val))
 	sort.Sort(r)
 	return r
+}
+
+func canCheckNext(r rune, allowed runes) bool {
+	return unicode.IsNumber(r) || unicode.IsLetter(r) || allowed.Contains(r)
 }
 
 var _ sort.Interface = (*runes)(nil)
