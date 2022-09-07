@@ -39,15 +39,15 @@ import (
 
 type Texts []Text
 
-// Less implements sort.Interface
+// Less reports whether the element with index i
+// must sort before the element with index j.
 func (t Texts) Less(i int, j int) bool { return t[i] < t[j] }
 
-// Swap implements sort.Interface
+// Swap swaps the elements with indexes i and j.
 func (t Texts) Swap(i int, j int) { t[i], t[j] = t[j], t[i] }
 
-func (t Texts) Len() int {
-	return len(t)
-}
+// Len is the number of elements in t.
+func (t Texts) Len() int { return len(t) }
 
 // TotalLen returns the sum len of each Text in t.
 func (t Texts) TotalLen() int {
