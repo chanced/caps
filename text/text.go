@@ -29,6 +29,7 @@
 package text
 
 import (
+	"sort"
 	"strings"
 	"unicode"
 
@@ -37,6 +38,12 @@ import (
 )
 
 type Texts []Text
+
+// Less implements sort.Interface
+func (t Texts) Less(i int, j int) bool { return t[i] < t[j] }
+
+// Swap implements sort.Interface
+func (t Texts) Swap(i int, j int) { t[i], t[j] = t[j], t[i] }
 
 func (t Texts) Len() int {
 	return len(t)
@@ -493,3 +500,5 @@ func collect(slice []string) Texts {
 	}
 	return res
 }
+
+var _ sort.Interface = (*Texts)(nil)
