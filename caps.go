@@ -32,6 +32,7 @@ import (
 	"github.com/chanced/caps/token"
 )
 
+// Caps provides configured case conversion methods.
 type Caps struct {
 	caser          token.Caser
 	allowedSymbols string
@@ -56,19 +57,22 @@ func New(options ...Config) Caps {
 	}
 }
 
+// ReplaceStyle returns the configured ReplaceStyle of c
 func (c Caps) ReplaceStyle() ReplaceStyle {
 	return c.replaceStyle
 }
 
+// NumberRules returns the configured NumberRules of c
 func (c Caps) NumberRules() token.NumberRules {
 	return c.numberRules
 }
 
-// AllowedSymbols is
+// AllowedSymbols returns the configured AllowedSymbols of c
 func (c Caps) AllowedSymbols() string {
 	return c.allowedSymbols
 }
 
+// Converter returns the provided Converter of c
 func (c Caps) Converter() Converter {
 	return c.converter
 }
