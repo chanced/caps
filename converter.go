@@ -26,6 +26,7 @@ package caps
 
 import (
 	"strings"
+	"sync"
 	"unicode"
 
 	"github.com/chanced/caps/index"
@@ -33,7 +34,13 @@ import (
 )
 
 // DefaultConverter is the default Converter instance.
-var DefaultConverter = NewConverter(DefaultReplacements, DefaultTokenizer, token.DefaultCaser)
+var DefaultConverter Converter = NewConverter(DefaultReplacements, DefaultTokenizer, token.DefaultCaser)
+
+var builderPool = sync.Pool{
+	New: func() any {
+		return new(strings.Builder)
+	},
+}
 
 // Converter is an interface satisfied by types which can convert the case of a
 // string.
@@ -121,8 +128,6 @@ func (sc StdConverter) Replacements() []Replacement {
 			Screaming: v.Screaming,
 		}
 	}
-	b := strings.Builder{}
-	b.WriteByte('.')
 	return res
 }
 
@@ -214,10 +219,12 @@ func (sc StdConverter) writeReplaceSplit(b *strings.Builder, style Style, join s
 // Convert formats the string with the desired style.
 func (sc StdConverter) Convert(req ConvertRequest) string {
 	tokens := sc.tokenizer.Tokenize(req.Input, req.AllowedSymbols, req.NumberRules)
-	b := strings.Builder{}
 	if len(tokens) == 0 {
 		return ""
 	}
+	b := builderPool.Get().(*strings.Builder)
+	b.Reset()
+	defer builderPool.Put(b)
 	if len(req.Join) > 0 {
 		b.Grow(len(req.Input) + len(req.Join)*(len(tokens)-1))
 	} else {
@@ -235,7 +242,7 @@ func (sc StdConverter) Convert(req ConvertRequest) string {
 				if idx.LastMatch().HasValue() {
 					// appending the last match
 					//  formatIndexedReplacement(req.Style, req.ReplaceStyle, b.Len(), idx.LastMatch()), req.Join
-					sc.writeIndexReplacement(&b, req.Style, req.ReplaceStyle, req.Join, idx.LastMatch())
+					sc.writeIndexReplacement(b, req.Style, req.ReplaceStyle, req.Join, idx.LastMatch())
 				}
 				if idx.HasPartialMatches() {
 					// checking to make sure it isn't a number
@@ -243,46 +250,46 @@ func (sc StdConverter) Convert(req ConvertRequest) string {
 						b.WriteString(FormatToken(sc.caser, req.Style, b.Len(), token.Append(sc.caser, tok, idx.PartialMatches())))
 						addedAsNumber = true
 					} else {
-						sc.writeReplaceSplit(&b, req.Style, req.Join, idx.PartialMatches())
+						sc.writeReplaceSplit(b, req.Style, req.Join, idx.PartialMatches())
 						addedAsNumber = false
 					}
 				}
 				if !addedAsNumber {
-					sc.writeToken(&b, req.Style, req.Join, tok)
+					sc.writeToken(b, req.Style, req.Join, tok)
 				}
 				// resetting the index
 				idx = sc.Index()
 			}
 		default:
 			if idx.HasMatched() {
-				sc.writeIndexReplacement(&b, req.Style, req.ReplaceStyle, req.Join, idx.LastMatch())
+				sc.writeIndexReplacement(b, req.Style, req.ReplaceStyle, req.Join, idx.LastMatch())
 			}
 			if idx.HasPartialMatches() {
-				sc.writeReplaceSplit(&b, req.Style, req.Join, idx.PartialMatches())
+				sc.writeReplaceSplit(b, req.Style, req.Join, idx.PartialMatches())
 			}
 			if idx.HasMatched() || idx.HasPartialMatches() {
 				// resetting index
 				idx = sc.Index()
 			}
 			if rep, ok := idx.Get(tok); ok {
-				sc.writeIndexReplacement(&b, req.Style, req.ReplaceStyle, req.Join, rep)
+				sc.writeIndexReplacement(b, req.Style, req.ReplaceStyle, req.Join, rep)
 			} else if isNextTokenNumber(tokens, i) {
 				if idx, ok = idx.Match(tok); !ok {
-					sc.writeToken(&b, req.Style, req.Join, tok)
+					sc.writeToken(b, req.Style, req.Join, tok)
 					idx = sc.Index()
 				}
 			} else {
-				sc.writeToken(&b, req.Style, req.Join, tok)
+				sc.writeToken(b, req.Style, req.Join, tok)
 			}
 		}
 	}
 	if idx.HasMatched() {
-		sc.writeIndexReplacement(&b, req.Style, req.ReplaceStyle, req.Join, idx.LastMatch())
+		sc.writeIndexReplacement(b, req.Style, req.ReplaceStyle, req.Join, idx.LastMatch())
 		// parts = append(parts, formatIndexedReplacement(req.Style, req.ReplaceStyle, len(parts), idx.LastMatch()))
 	}
 
 	if idx.HasPartialMatches() {
-		sc.writeReplaceSplit(&b, req.Style, req.Join, idx.PartialMatches())
+		sc.writeReplaceSplit(b, req.Style, req.Join, idx.PartialMatches())
 	}
 	// for _, part := range parts {
 	// 	if shouldWriteDelimiter {
@@ -325,7 +332,9 @@ func isNextTokenNumber(tokens []string, i int) bool {
 }
 
 func lowerAndCheck(input string) (string, bool) {
-	bldr := strings.Builder{}
+	bldr := builderPool.Get().(*strings.Builder)
+	bldr.Reset()
+	defer builderPool.Put(bldr)
 	bldr.Grow(len(input))
 	foundLower := false
 	for _, r := range input {
