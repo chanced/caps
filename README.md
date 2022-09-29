@@ -4,7 +4,7 @@
 [![Latest Version](https://img.shields.io/github/v/tag/chanced/caps.svg?sort=semver&style=flat-square&label=version&color=blue)](https://img.shields.io/github/v/tag/chanced/caps.svg?sort=semver&style=flat-square&label=version&color=blue)
 [![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/gomods/athens.svg?style=flat-square&label=go)](https://github.com/chanced/caps)
 [![GoReportCard](https://goreportcard.com/badge/github.com/chanced/caps?style=flat-square)](https://goreportcard.com/report/github.com/chanced/caps)
-[![codecov](https://codecov.io/gh/chanced/caps/branch/main/graph/badge.svg?style=flat-square&token=6601V8MSG3)](https://codecov.io/gh/chanced/caps)
+[![Codecov](https://img.shields.io/codecov/c/github/chanced/caps?style=flat-square&token=6601V8MSG3)](https://codecov.io/gh/chanced/caps)
 ![Build Status](https://img.shields.io/github/workflow/status/chanced/caps/Build?style=flat-square)
 
 caps is a unicode aware, case conversion library for Go. It
