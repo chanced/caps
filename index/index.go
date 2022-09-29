@@ -26,10 +26,14 @@
 package index
 
 import (
-	"strings"
-
 	"github.com/chanced/caps/token"
 )
+
+// var builderPool = sync.Pool{
+// 	New: func() any {
+// 		return new(strings.Builder)
+// 	},
+// }
 
 // IndexedReplacement is a node in an Index
 // created from a Replacement
@@ -53,7 +57,7 @@ type Index struct {
 	value          IndexedReplacement
 	nodes          map[rune]*Index
 	lastMatch      IndexedReplacement
-	partialMatches strings.Builder
+	partialMatches string
 	caser          token.Caser
 }
 
@@ -103,11 +107,11 @@ func (idx Index) Contains(s string) bool {
 // }
 
 func (idx Index) PartialMatches() string {
-	return idx.partialMatches.String()
+	return idx.partialMatches
 }
 
 func (idx Index) HasPartialMatches() bool {
-	return idx.partialMatches.Len() > 0
+	return len(idx.partialMatches) > 0
 }
 
 func (idx Index) HasMatched() bool {
@@ -152,9 +156,9 @@ func (idx Index) Match(s string) (Index, bool) {
 		}
 		if next.HasValue() {
 			idx.lastMatch = next.value
-			idx.partialMatches.Reset()
+			idx.partialMatches = ""
 		} else {
-			idx.partialMatches.WriteRune(r)
+			idx.partialMatches = idx.partialMatches + string(r)
 		}
 	}
 	return idx, true

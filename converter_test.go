@@ -33,8 +33,7 @@ import (
 
 func TestConverterConvert(t *testing.T) {
 	converter := caps.NewConverter(caps.DefaultReplacements, caps.DefaultTokenizer, nil)
-
-	tests := []struct {
+	type Test struct {
 		input          string
 		expected       string
 		join           string
@@ -43,7 +42,8 @@ func TestConverterConvert(t *testing.T) {
 		allowedSymbols []rune
 		converter      caps.Converter
 		numberRules    token.NumberRules
-	}{
+	}
+	tests := []Test{
 		{"An example string", "AnExampleString", "", caps.StyleCamel, caps.ReplaceStyleScreaming, nil, nil, nil},
 		{"An example string", "anExampleString", "", caps.StyleLowerCamel, caps.ReplaceStyleScreaming, nil, nil, nil},
 		{"aCamelCaseExample", "ACamelCaseExample", "", caps.StyleCamel, caps.ReplaceStyleScreaming, nil, nil, nil},
@@ -66,22 +66,23 @@ func TestConverterConvert(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		t.Run(test.input, func(t *testing.T) {
-			t.Parallel()
-			params := caps.ConvertRequest{
-				Style:          test.style,
-				ReplaceStyle:   test.repStyle,
-				Input:          string(test.input),
-				Join:           test.join,
-				AllowedSymbols: string(test.allowedSymbols),
-				NumberRules:    test.numberRules,
-			}
-
-			output := converter.Convert(params)
-			if output != test.expected {
-				t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
-			}
-		})
+		func(test Test) {
+			t.Run(test.input, func(t *testing.T) {
+				t.Parallel()
+				params := caps.ConvertRequest{
+					Style:          test.style,
+					ReplaceStyle:   test.repStyle,
+					Input:          string(test.input),
+					Join:           test.join,
+					AllowedSymbols: string(test.allowedSymbols),
+					NumberRules:    test.numberRules,
+				}
+				output := converter.Convert(params)
+				if output != test.expected {
+					t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
+				}
+			})
+		}(test)
 	}
 }
 

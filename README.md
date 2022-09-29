@@ -4,7 +4,7 @@
 [![Latest Version](https://img.shields.io/github/v/tag/chanced/caps.svg?sort=semver&style=flat-square&label=version&color=blue)](https://img.shields.io/github/v/tag/chanced/caps.svg?sort=semver&style=flat-square&label=version&color=blue)
 [![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/gomods/athens.svg?style=flat-square&label=go)](https://github.com/chanced/caps)
 [![GoReportCard](https://goreportcard.com/badge/github.com/chanced/caps?style=flat-square)](https://goreportcard.com/report/github.com/chanced/caps)
-[![Coverage](http://gocover.io/_badge/github.com/chanced/caps)](http://gocover.io/github.com/chanced/caps)
+[![Codecov](https://img.shields.io/codecov/c/github/chanced/caps?style=flat-square&token=6601V8MSG3)](https://codecov.io/gh/chanced/caps)
 ![Build Status](https://img.shields.io/github/workflow/status/chanced/caps/Build?style=flat-square)
 
 caps is a unicode aware, case conversion library for Go. It
@@ -380,23 +380,23 @@ Using top-level functions:
 
 ```
 BenchmarkToTitle
-BenchmarkToTitle-10                       	 2375107	       506.0 ns/op	     248 B/op	       9 allocs/op
+BenchmarkToTitle-10                       	 2316468	       519.1 ns/op	     200 B/op	       8 allocs/op
 BenchmarkToCamel
-BenchmarkToCamel-10                       	 2374930	       501.1 ns/op	     248 B/op	       9 allocs/op
+BenchmarkToCamel-10                       	 2327542	       516.8 ns/op	     200 B/op	       8 allocs/op
 BenchmarkToLowerCamel
-BenchmarkToLowerCamel-10                  	 2373976	       495.3 ns/op	     248 B/op	       9 allocs/op
+BenchmarkToLowerCamel-10                  	 2372518	       505.3 ns/op	     200 B/op	       8 allocs/op
 BenchmarkToSnake
-BenchmarkToSnake-10                       	 2370608	       518.8 ns/op	     248 B/op	       9 allocs/op
+BenchmarkToSnake-10                       	 2337992	       511.8 ns/op	     200 B/op	       8 allocs/op
 BenchmarkToScreamingSnake
-BenchmarkToScreamingSnake-10              	 2339785	       500.4 ns/op	     248 B/op	       9 allocs/op
+BenchmarkToScreamingSnake-10              	 2313232	       518.8 ns/op	     200 B/op	       8 allocs/op
 BenchmarkToKebab
-BenchmarkToKebab-10                       	 2424816	       502.7 ns/op	     248 B/op	       9 allocs/op
+BenchmarkToKebab-10                       	 2333046	       513.7 ns/op	     200 B/op	       8 allocs/op
 BenchmarkToScreamingKebab
-BenchmarkToScreamingKebab-10              	 2371681	       510.4 ns/op	     248 B/op	       9 allocs/op
+BenchmarkToScreamingKebab-10              	 2274729	       521.3 ns/op	     200 B/op	       8 allocs/op
 BenchmarkToDotNotation
-BenchmarkToDotNotation-10                 	 2367168	       512.4 ns/op	     248 B/op	       9 allocs/op
+BenchmarkToDotNotation-10                 	 2319278	       511.0 ns/op	     200 B/op	       8 allocs/op
 BenchmarkToScreamingDotNotation
-BenchmarkToScreamingDotNotation-10        	 2295390	       509.7 ns/op	     248 B/op	       9 allocs/op
+BenchmarkToScreamingDotNotation-10        	 2310217	       518.5 ns/op	     200 B/op	       8 allocs/op
 ```
 
 ## License
