@@ -1,11 +1,9 @@
 name: Build
-
 on:
     push:
         branches: ["main"]
     pull_request:
         branches: ["main"]
-
 jobs:
     build:
         runs-on: ubuntu-latest
@@ -21,6 +19,10 @@ jobs:
               run: go build -v ./...
             - name: Test
               run: go test -v ./...
+            - name: Run coverage
+              run: go test -race -coverprofile=coverage.out -covermode=atomic
+            - name: Upload coverage to Codecov
+              uses: codecov/codecov-action@v3
     build-1-18:
         runs-on: ubuntu-latest
         steps:
