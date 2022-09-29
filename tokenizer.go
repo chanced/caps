@@ -110,7 +110,9 @@ func (ti StdTokenizer) Tokenize(str string, allowedSymbols string, numberRules N
 	}
 
 	foundLower := false
-	current := strings.Builder{}
+	current := builderPool.Get().(*strings.Builder)
+	current.Reset()
+	defer builderPool.Put(current)
 	prevNumber := false
 	allowed := newRunes(allowedSymbols)
 
