@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+// Package caps is a unicode aware case conversion library.
 package caps
 
 import (
