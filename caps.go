@@ -39,111 +39,12 @@ type Caps struct {
 	numberRules    token.NumberRules
 }
 
-// Deprecated: Use Config
-type CapsOpts = Config
-
-// Config include configurable options for case conversion.
-//
-// See the documentation for the individual fields for more information.
-type Config struct {
-	// Any characters within this string will be allowed in the output.
-	//
-	// This does not affect delimiters (e.g. "_", "-", ".") as they are added
-	// post-tokenization.
-	//
-	// Default:
-	//  ""
-	AllowedSymbols string
-	// The Converter to use.
-	//
-	// Default:
-	// 	A StdConverter with the Replacements, Caser, and Tokenizer.
-	Converter Converter
-
-	// If not set, this will be DefaultReplacements.
-	Replacements []Replacement
-
-	// ReplaceStyle overwrites the way words are replaced.
-	//
-	// A typical call to ToLowerCamel for "ServeJSON" with a Converter that
-	// contains {"Json": "JSON"} would result in "serveJSON" by using the
-	// ReplaceStyleScreaming variant. If ReplacementStyle was set to
-	// ReplaceStyleCamel, on the call to ToLowerCamel then the result would
-	// be "serveHttp".
-	//
-	// The default replacement style is dependent upon the target Style.
-	ReplaceStyle ReplaceStyle
-	// NumberRules are used by the DefaultTokenizer to augment the standard
-	// rules for determining if a rune is part of a number.
-	//
-	// Note, if you add special characters here, they must be present in the
-	// AllowedSymbols string for them to be part of the output.
-	NumberRules token.NumberRules
-	// Special unicode case rules.
-	// See unicode.SpecialCase or token.Caser for more information.
-	//
-	// Default: token.DefaultCaser (which relies on the default unicode
-	// functions)
-	Caser token.Caser
-
-	// If not set, uses StdTokenizer with the provided delimiters and token.Caser.
-	Tokenizer Tokenizer
-}
-
-func loadCapsOpts(opts []Config) Config {
-	result := Config{
-		AllowedSymbols: "",
-		ReplaceStyle:   ReplaceStyleScreaming,
-	}
-
-	for _, opt := range opts {
-		result.AllowedSymbols += opt.AllowedSymbols
-		if opt.Converter != nil {
-			result.Converter = opt.Converter
-		}
-		if opt.ReplaceStyle != ReplaceStyleNotSpecified {
-			result.ReplaceStyle = opt.ReplaceStyle
-		}
-		if len(opt.NumberRules) > 0 {
-			if result.NumberRules == nil {
-				result.NumberRules = make(NumberRules)
-			}
-			for k, v := range opt.NumberRules {
-				result.NumberRules[k] = v
-			}
-		}
-		if opt.Replacements != nil {
-			result.Replacements = append(result.Replacements, opt.Replacements...)
-		}
-		if opt.Caser != nil {
-			result.Caser = opt.Caser
-		}
-		if opt.Tokenizer != nil {
-			result.Tokenizer = opt.Tokenizer
-		}
-	}
-	if result.Caser == nil {
-		result.Caser = token.DefaultCaser
-	}
-	if result.Replacements == nil {
-		result.Replacements = DefaultReplacements
-	}
-	if result.Tokenizer == nil {
-		result.Tokenizer = NewTokenizer(DEFAULT_DELIMITERS, result.Caser)
-	}
-	if result.Converter == nil {
-		result.Converter = NewConverter(result.Replacements, result.Tokenizer, result.Caser)
-	}
-
-	return result
-}
-
 // New returns a new Caps instance with the provided options.
 //
 // if caser is nil, token.DefaultCaser is used (which relies on the default
 // unicode functions)
 func New(options ...Config) Caps {
-	opts := loadCapsOpts(options)
+	opts := loadConfig(options)
 
 	return Caps{
 		caser:          opts.Caser,

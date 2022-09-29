@@ -197,22 +197,22 @@ func (sc StdConverter) writeToken(b *strings.Builder, style Style, join string, 
 	}
 }
 
-func (sc StdConverter) writeReplaceSplit(b *strings.Builder, style Style, join string, s string) {
+func (sc StdConverter) writeReplaceSplit(b *strings.Builder, style Style, join string, s []rune) {
 	switch style {
 	case StyleCamel:
-		token.WriteSplitUpper(b, sc.caser, join, s)
+		token.WriteSplitUpperRunes(b, sc.caser, join, s)
 	case StyleLowerCamel:
 		if b.Len() == 0 {
-			token.WriteSplitLowerFirstUpperRest(b, sc.caser, join, s)
+			token.WriteSplitLowerFirstUpperRestRunes(b, sc.caser, join, s)
 		} else {
-			token.WriteSplitUpper(b, sc.caser, join, s)
+			token.WriteSplitUpperRunes(b, sc.caser, join, s)
 		}
 	case StyleScreaming:
-		token.WriteSplitUpper(b, sc.caser, join, s)
+		token.WriteSplitUpperRunes(b, sc.caser, join, s)
 	case StyleLower:
-		token.WriteSplitLower(b, sc.caser, join, s)
+		token.WriteSplitLowerRunes(b, sc.caser, join, s)
 	default:
-		token.WriteSplitUpper(b, sc.caser, join, s)
+		token.WriteSplitUpperRunes(b, sc.caser, join, s)
 	}
 }
 
@@ -250,7 +250,7 @@ func (sc StdConverter) Convert(req ConvertRequest) string {
 						b.WriteString(FormatToken(sc.caser, req.Style, b.Len(), token.Append(sc.caser, tok, idx.PartialMatches())))
 						addedAsNumber = true
 					} else {
-						sc.writeReplaceSplit(b, req.Style, req.Join, idx.PartialMatches())
+						sc.writeReplaceSplit(b, req.Style, req.Join, idx.PartialMatchRunes())
 						addedAsNumber = false
 					}
 				}
@@ -265,7 +265,7 @@ func (sc StdConverter) Convert(req ConvertRequest) string {
 				sc.writeIndexReplacement(b, req.Style, req.ReplaceStyle, req.Join, idx.LastMatch())
 			}
 			if idx.HasPartialMatches() {
-				sc.writeReplaceSplit(b, req.Style, req.Join, idx.PartialMatches())
+				sc.writeReplaceSplit(b, req.Style, req.Join, idx.PartialMatchRunes())
 			}
 			if idx.HasMatched() || idx.HasPartialMatches() {
 				// resetting index
@@ -289,7 +289,7 @@ func (sc StdConverter) Convert(req ConvertRequest) string {
 	}
 
 	if idx.HasPartialMatches() {
-		sc.writeReplaceSplit(b, req.Style, req.Join, idx.PartialMatches())
+		sc.writeReplaceSplit(b, req.Style, req.Join, idx.PartialMatchRunes())
 	}
 	// for _, part := range parts {
 	// 	if shouldWriteDelimiter {

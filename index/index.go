@@ -22,18 +22,12 @@
  * SOFTWARE.
  */
 
-// Package index contains a trie index used by Converter to lookup Replacements.
+// Package index contains a trie index used by StdConverter to lookup Replacements.
 package index
 
 import (
 	"github.com/chanced/caps/token"
 )
-
-// var builderPool = sync.Pool{
-// 	New: func() any {
-// 		return new(strings.Builder)
-// 	},
-// }
 
 // IndexedReplacement is a node in an Index
 // created from a Replacement
@@ -57,10 +51,11 @@ type Index struct {
 	value          IndexedReplacement
 	nodes          map[rune]*Index
 	lastMatch      IndexedReplacement
-	partialMatches string
+	partialMatches []rune
 	caser          token.Caser
 }
 
+// Clone creates a copy of the Index
 func (idx *Index) Clone() Index {
 	return Index{
 		value:          idx.value,
@@ -91,22 +86,12 @@ func (idx Index) Contains(s string) bool {
 	return ok
 }
 
-// func (idx Index) HasNode(s string) bool {
-// 	if len(s) == 0 {
-// 		return false
-// 	}
-// 	node := &idx
-// 	for _, r := range token.ToLower(idx.caser, s) {
-// 		if n, ok := node.nodes[r]; ok {
-// 			node = n
-// 		} else {
-// 			return false
-// 		}
-// 	}
-// 	return true
-// }
-
+// PartialMatches returns
 func (idx Index) PartialMatches() string {
+	return string(idx.partialMatches)
+}
+
+func (idx Index) PartialMatchRunes() []rune {
 	return idx.partialMatches
 }
 
@@ -156,9 +141,12 @@ func (idx Index) Match(s string) (Index, bool) {
 		}
 		if next.HasValue() {
 			idx.lastMatch = next.value
-			idx.partialMatches = ""
+			idx.partialMatches = nil
 		} else {
-			idx.partialMatches = idx.partialMatches + string(r)
+			if idx.partialMatches == nil {
+				idx.partialMatches = make([]rune, 0, 8)
+			}
+			idx.partialMatches = append(idx.partialMatches, r)
 		}
 	}
 	return idx, true
@@ -182,6 +170,7 @@ func (idx *Index) Get(s string) (IndexedReplacement, bool) {
 	return node.value, node.value.HasValue()
 }
 
+// Nodes returns all nodes in the Index
 func (idx *Index) Nodes() []Index {
 	nodes := make([]Index, 0, len(idx.nodes))
 	nodes = append(nodes, *idx)
@@ -191,6 +180,7 @@ func (idx *Index) Nodes() []Index {
 	return nodes
 }
 
+// Values returns all IndexedReplacements in the Index
 func (idx *Index) Values() []IndexedReplacement {
 	nodes := idx.Nodes()
 	values := make([]IndexedReplacement, 0, len(nodes))
@@ -261,6 +251,7 @@ func (idx *Index) Add(camel string, screaming string) bool {
 	return exists
 }
 
+// Delete deletes the IndexedReplacement indexed by key from the Index.
 func (idx *Index) Delete(key string) bool {
 	node := idx
 

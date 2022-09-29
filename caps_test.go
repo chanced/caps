@@ -90,7 +90,7 @@ func TestToTitle(t *testing.T) {
 		func(test testcase) {
 			t.Run("Caps::"+test.input, func(t *testing.T) {
 				t.Parallel()
-				c := caps.New(test.opts.toCapsOpts())
+				c := caps.New(test.opts.toConfig())
 				output := c.ToTitle(test.input)
 				if output != test.expected {
 					t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
@@ -128,7 +128,7 @@ func TestToCamel(t *testing.T) {
 			})
 			t.Run("Caps::"+test.input, func(t *testing.T) {
 				t.Parallel()
-				c := caps.New(test.opts.toCapsOpts())
+				c := caps.New(test.opts.toConfig())
 				output := c.ToCamel(test.input)
 				if output != test.expected {
 					t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
@@ -167,7 +167,7 @@ func TestToLowerCamel(t *testing.T) {
 			})
 			t.Run("Caps::"+test.input, func(t *testing.T) {
 				t.Parallel()
-				c := caps.New(test.opts.toCapsOpts())
+				c := caps.New(test.opts.toConfig())
 				output := c.ToLowerCamel(test.input)
 				if output != test.expected {
 					t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
@@ -205,7 +205,7 @@ func TestToKebab(t *testing.T) {
 			})
 			t.Run("Caps::"+test.input, func(t *testing.T) {
 				t.Parallel()
-				c := caps.New(test.opts.toCapsOpts())
+				c := caps.New(test.opts.toConfig())
 				output := c.ToKebab(test.input)
 				if output != test.expected {
 					t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
@@ -243,7 +243,7 @@ func TestToScreamingKebab(t *testing.T) {
 			})
 			t.Run("Caps::"+test.input, func(t *testing.T) {
 				t.Parallel()
-				c := caps.New(test.opts.toCapsOpts())
+				c := caps.New(test.opts.toConfig())
 				output := c.ToScreamingKebab(test.input)
 				if output != test.expected {
 					t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
@@ -281,7 +281,7 @@ func TestToSnake(t *testing.T) {
 			})
 			t.Run("Caps::"+test.input, func(t *testing.T) {
 				t.Parallel()
-				c := caps.New(test.opts.toCapsOpts())
+				c := caps.New(test.opts.toConfig())
 				output := c.ToSnake(test.input)
 				if output != test.expected {
 					t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
@@ -319,7 +319,7 @@ func TestToScreamingSnake(t *testing.T) {
 			})
 			t.Run("Caps::"+test.input, func(t *testing.T) {
 				t.Parallel()
-				c := caps.New(test.opts.toCapsOpts())
+				c := caps.New(test.opts.toConfig())
 				output := c.ToScreamingSnake(test.input)
 				if output != test.expected {
 					t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
@@ -357,7 +357,7 @@ func TestToDotNotation(t *testing.T) {
 			})
 			t.Run("Caps::"+test.input, func(t *testing.T) {
 				t.Parallel()
-				c := caps.New(test.opts.toCapsOpts())
+				c := caps.New(test.opts.toConfig())
 				output := c.ToDotNotation(test.input)
 				if output != test.expected {
 					t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
@@ -395,7 +395,7 @@ func TestToDelimited(t *testing.T) {
 			})
 			t.Run("Caps::"+test.input, func(t *testing.T) {
 				t.Parallel()
-				c := caps.New(test.opts.toCapsOpts())
+				c := caps.New(test.opts.toConfig())
 				output := c.ToDelimited(test.input, ".", true)
 				if output != test.expected {
 					t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
@@ -417,7 +417,7 @@ func TestToScreamingDotNotation(t *testing.T) {
 			})
 			t.Run("Caps::"+test.input, func(t *testing.T) {
 				t.Parallel()
-				c := caps.New(test.opts.toCapsOpts())
+				c := caps.New(test.opts.toConfig())
 				output := c.ToScreamingDotNotation(test.input)
 				if output != test.expected {
 					t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
@@ -628,7 +628,7 @@ func loadOpts(opts Opts) caps.Opts {
 	return result
 }
 
-func (o Opts) toCapsOpts() caps.Config {
+func (o Opts) toConfig() caps.Config {
 	capopts := caps.Config{}
 	opts := loadOpts(o)
 	capopts.AllowedSymbols = opts.AllowedSymbols

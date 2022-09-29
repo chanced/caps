@@ -28,11 +28,14 @@ import "unicode"
 
 var DefaultCaser = Unicode{}
 
+// Unicode is a Caser which uses the default unicode casing functions.
 type Unicode struct{}
 
 var (
+	// Turkish is a Caser which uses unicode.TurkishCase rules.
 	TurkishCaser = &unicode.TurkishCase
-	AzeriCaser   = &unicode.AzeriCase
+	// AzeriCaser is a Caser which uses unicode.AzeriCase rules.
+	AzeriCaser = &unicode.AzeriCase
 )
 
 // ToTitle maps the rune to title case using unicode.ToTitle.
@@ -61,6 +64,7 @@ type Caser interface {
 	ToTitle(r rune) rune
 }
 
+// CaserOrDefault returns the default caser if caser is nil.
 func CaserOrDefault(caser Caser) Caser {
 	if caser == nil {
 		return DefaultCaser
