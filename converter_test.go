@@ -67,6 +67,7 @@ func TestConverterConvert(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.input, func(t *testing.T) {
+			t.Parallel()
 			params := caps.ConvertRequest{
 				Style:          test.style,
 				ReplaceStyle:   test.repStyle,

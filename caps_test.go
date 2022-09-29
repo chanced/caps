@@ -67,6 +67,7 @@ var titleTestCases = testcases{
 func TestToTitle(t *testing.T) {
 	for _, test := range titleTestCases {
 		t.Run(test.input, func(t *testing.T) {
+			t.Parallel()
 			output := caps.ToTitle(test.input, test.opts...)
 			if output != test.expected {
 				t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
@@ -76,12 +77,14 @@ func TestToTitle(t *testing.T) {
 
 	for _, test := range titleTestCases {
 		t.Run(test.input, func(t *testing.T) {
+			t.Parallel()
 			output := caps.ToTitle(test.input, test.opts...)
 			if output != test.expected {
 				t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
 			}
 		})
 		t.Run("Caps::"+test.input, func(t *testing.T) {
+			t.Parallel()
 			c := caps.New(test.opts.toCapsOpts())
 			output := c.ToTitle(test.input)
 			if output != test.expected {
@@ -110,12 +113,14 @@ var camelTestCases = testcases{
 func TestToCamel(t *testing.T) {
 	for _, test := range camelTestCases {
 		t.Run(test.input, func(t *testing.T) {
+			t.Parallel()
 			output := caps.ToCamel(test.input, test.opts...)
 			if output != test.expected {
 				t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
 			}
 		})
 		t.Run("Caps::"+test.input, func(t *testing.T) {
+			t.Parallel()
 			c := caps.New(test.opts.toCapsOpts())
 			output := c.ToCamel(test.input)
 			if output != test.expected {
@@ -145,12 +150,14 @@ var lowerCamelTestCases = testcases{
 func TestToLowerCamel(t *testing.T) {
 	for _, test := range lowerCamelTestCases {
 		t.Run(test.input, func(t *testing.T) {
+			t.Parallel()
 			output := caps.ToLowerCamel(test.input, test.opts...)
 			if output != test.expected {
 				t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
 			}
 		})
 		t.Run("Caps::"+test.input, func(t *testing.T) {
+			t.Parallel()
 			c := caps.New(test.opts.toCapsOpts())
 			output := c.ToLowerCamel(test.input)
 			if output != test.expected {
@@ -179,12 +186,14 @@ var kebabTestCases = testcases{
 func TestToKebab(t *testing.T) {
 	for _, test := range kebabTestCases {
 		t.Run(test.input, func(t *testing.T) {
+			t.Parallel()
 			output := caps.ToKebab(test.input, test.opts...)
 			if output != test.expected {
 				t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
 			}
 		})
 		t.Run("Caps::"+test.input, func(t *testing.T) {
+			t.Parallel()
 			c := caps.New(test.opts.toCapsOpts())
 			output := c.ToKebab(test.input)
 			if output != test.expected {
@@ -213,12 +222,14 @@ var screamingKebabTestCases = testcases{
 func TestToScreamingKebab(t *testing.T) {
 	for _, test := range screamingKebabTestCases {
 		t.Run(test.input, func(t *testing.T) {
+			t.Parallel()
 			output := caps.ToScreamingKebab(test.input, test.opts...)
 			if output != test.expected {
 				t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
 			}
 		})
 		t.Run("Caps::"+test.input, func(t *testing.T) {
+			t.Parallel()
 			c := caps.New(test.opts.toCapsOpts())
 			output := c.ToScreamingKebab(test.input)
 			if output != test.expected {
@@ -247,12 +258,14 @@ var snakeTestCases = testcases{
 func TestToSnake(t *testing.T) {
 	for _, test := range snakeTestCases {
 		t.Run(test.input, func(t *testing.T) {
+			t.Parallel()
 			output := caps.ToSnake(test.input, test.opts...)
 			if output != test.expected {
 				t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
 			}
 		})
 		t.Run("Caps::"+test.input, func(t *testing.T) {
+			t.Parallel()
 			c := caps.New(test.opts.toCapsOpts())
 			output := c.ToSnake(test.input)
 			if output != test.expected {
@@ -281,12 +294,14 @@ var screamingSnakeTestCases = testcases{
 func TestToScreamingSnake(t *testing.T) {
 	for _, test := range screamingSnakeTestCases {
 		t.Run(test.input, func(t *testing.T) {
+			t.Parallel()
 			output := caps.ToScreamingSnake(test.input, test.opts...)
 			if output != test.expected {
 				t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
 			}
 		})
 		t.Run("Caps::"+test.input, func(t *testing.T) {
+			t.Parallel()
 			c := caps.New(test.opts.toCapsOpts())
 			output := c.ToScreamingSnake(test.input)
 			if output != test.expected {
@@ -315,12 +330,14 @@ var dotNotationTestCases = testcases{
 func TestToDotNotation(t *testing.T) {
 	for _, test := range dotNotationTestCases {
 		t.Run(test.input, func(t *testing.T) {
+			t.Parallel()
 			output := caps.ToDotNotation(test.input, test.opts...)
 			if output != test.expected {
 				t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
 			}
 		})
 		t.Run("Caps::"+test.input, func(t *testing.T) {
+			t.Parallel()
 			c := caps.New(test.opts.toCapsOpts())
 			output := c.ToDotNotation(test.input)
 			if output != test.expected {
@@ -349,12 +366,14 @@ var screamingDotNotationTestCases = testcases{
 func TestToDelimited(t *testing.T) {
 	for _, test := range dotNotationTestCases {
 		t.Run(test.input, func(t *testing.T) {
+			t.Parallel()
 			output := caps.ToDelimited(test.input, ".", true, test.opts...)
 			if output != test.expected {
 				t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
 			}
 		})
 		t.Run("Caps::"+test.input, func(t *testing.T) {
+			t.Parallel()
 			c := caps.New(test.opts.toCapsOpts())
 			output := c.ToDelimited(test.input, ".", true)
 			if output != test.expected {
@@ -367,12 +386,14 @@ func TestToDelimited(t *testing.T) {
 func TestToScreamingDotNotation(t *testing.T) {
 	for _, test := range screamingDotNotationTestCases {
 		t.Run(test.input, func(t *testing.T) {
+			t.Parallel()
 			output := caps.ToScreamingDotNotation(test.input, test.opts...)
 			if output != test.expected {
 				t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
 			}
 		})
 		t.Run("Caps::"+test.input, func(t *testing.T) {
+			t.Parallel()
 			c := caps.New(test.opts.toCapsOpts())
 			output := c.ToScreamingDotNotation(test.input)
 			if output != test.expected {
@@ -384,6 +405,7 @@ func TestToScreamingDotNotation(t *testing.T) {
 
 func TestCapsAccessors(t *testing.T) {
 	t.Run("ReplaceStyle", func(t *testing.T) {
+		t.Parallel()
 		c := caps.New()
 		rs := c.ReplaceStyle()
 		if rs != caps.ReplaceStyleScreaming {
@@ -400,6 +422,7 @@ func TestCapsAccessors(t *testing.T) {
 		}
 	})
 	t.Run("NumberRules", func(t *testing.T) {
+		t.Parallel()
 		c := caps.New()
 		nr := c.NumberRules()
 		if nr != nil {
@@ -414,6 +437,7 @@ func TestCapsAccessors(t *testing.T) {
 		}
 	})
 	t.Run("AllowedSymbols", func(t *testing.T) {
+		t.Parallel()
 		c := caps.New()
 		as := c.AllowedSymbols()
 		if as != "" {
