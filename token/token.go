@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-// Package token contains a funcs for working with a string as a token.
+// Package token contains functions for working with a string as a token.
 package token
 
 import (
@@ -30,6 +30,16 @@ import (
 	"unicode"
 )
 
+// NumberRules are a set of rules for determining if rune r at index of val
+// should be considered a number
+//
+// Example:
+//
+//	NumberRules{
+//	    '$': func(i int, r rune, v string) bool {
+//	        return i == 0
+//	    },
+//	}
 type NumberRules map[rune]func(index int, r rune, val string) bool
 
 // Append appends all of elems to t
@@ -53,6 +63,8 @@ func Append(caser Caser, t string, elems ...string) string {
 	return b.String()
 }
 
+// WriteUpperFirstLowerRest writes the first rune as upper case and the rest as
+// lower case
 func WriteUpperFirstLowerRest(b *strings.Builder, caser Caser, s string) {
 	for i, r := range s {
 		switch {
@@ -66,7 +78,15 @@ func WriteUpperFirstLowerRest(b *strings.Builder, caser Caser, s string) {
 	}
 }
 
+// WriteLowerFirstUpperRest writes the first rune as upper case and the rest are
+// seperated by sep and written as lower case
 func WriteSplitLowerFirstUpperRest(b *strings.Builder, caser Caser, sep string, s string) {
+	WriteSplitLowerFirstUpperRestRunes(b, caser, sep, []rune(s))
+}
+
+// WriteSplitLowerFirstUpperRestRunes writes the first rune as upper case and
+// the rest are seperated by sep and written as lower case
+func WriteSplitLowerFirstUpperRestRunes(b *strings.Builder, caser Caser, sep string, s []rune) {
 	for i, r := range s {
 		if i == 0 && b.Len() == 0 {
 			b.WriteRune(caser.ToLower(r))
@@ -83,6 +103,7 @@ func WriteSplitLowerFirstUpperRest(b *strings.Builder, caser Caser, sep string, 
 	}
 }
 
+// WriteSplitLower writes all strings in elems seperated by sep and written as lower case
 func WriteSplitLower(b *strings.Builder, caser Caser, sep string, elems ...string) {
 	for _, s := range elems {
 		for _, r := range s {
@@ -94,17 +115,34 @@ func WriteSplitLower(b *strings.Builder, caser Caser, sep string, elems ...strin
 	}
 }
 
+// WriteSplitUpper writes all runes in elems seperated by sep and written as lower case
+func WriteSplitLowerRunes(b *strings.Builder, caser Caser, sep string, s []rune) {
+	for _, r := range s {
+		if b.Len() > 0 && len(sep) > 0 {
+			b.WriteString(sep)
+		}
+		b.WriteRune(caser.ToLower(r))
+	}
+}
+
+// WriteSplitUpper writes all strings in elems seperated by sep and written as upper case
 func WriteSplitUpper(b *strings.Builder, caser Caser, sep string, elems ...string) {
 	for _, s := range elems {
-		for i, r := range s {
-			if b.Len() > 0 && len(sep) > 0 {
-				b.WriteString(sep)
-			}
-			if i == 0 && b.Len() == 0 {
-				b.WriteRune(caser.ToTitle(r))
-			} else {
-				b.WriteRune(caser.ToUpper(r))
-			}
+		WriteSplitUpperRunes(b, caser, sep, []rune(s))
+	}
+}
+
+// WriteSplitUpperRunes uses caser to upper case each rune and writes each to b,
+// seperated by sep
+func WriteSplitUpperRunes(b *strings.Builder, caser Caser, sep string, s []rune) {
+	for i, r := range s {
+		if b.Len() > 0 && len(sep) > 0 {
+			b.WriteString(sep)
+		}
+		if i == 0 && b.Len() == 0 {
+			b.WriteRune(caser.ToTitle(r))
+		} else {
+			b.WriteRune(caser.ToUpper(r))
 		}
 	}
 }
@@ -124,6 +162,7 @@ func Write(b *strings.Builder, caser Caser, e string) {
 	}
 }
 
+// WriteUpper uses caser to upper case the runes in s and writes to b
 func WriteUpper(b *strings.Builder, caser Caser, s string) {
 	for _, r := range s {
 		if b.Len() == 0 {
@@ -134,6 +173,7 @@ func WriteUpper(b *strings.Builder, caser Caser, s string) {
 	}
 }
 
+// WriteLower uses caser to lower case the runes in s and writes to b
 func WriteLower(b *strings.Builder, caser Caser, s string) {
 	for _, r := range s {
 		b.WriteRune(caser.ToLower(r))
@@ -168,6 +208,7 @@ func AppendRune(caser Caser, t string, runes ...rune) string {
 	return b.String()
 }
 
+// ToLower lower cases each rune of s using caser and writes to b
 func ToLower(caser Caser, s string) string {
 	caser = CaserOrDefault(caser)
 	b := strings.Builder{}
@@ -178,6 +219,7 @@ func ToLower(caser Caser, s string) string {
 	return b.String()
 }
 
+// ToLUpper upper cases cases each rune of s using caser and writes to b
 func ToUpper(caser Caser, s string) string {
 	caser = CaserOrDefault(caser)
 	b := strings.Builder{}
@@ -192,10 +234,12 @@ func ToUpper(caser Caser, s string) string {
 	return b.String()
 }
 
+// IsEmpty reports whether s has a len of 0
 func IsEmpty(s string) bool {
 	return len(s) == 0
 }
 
+// FirstRune returns the first rune of s
 func FirstRune(s string) (rune, bool) {
 	for _, r := range s {
 		return r, true
@@ -203,6 +247,7 @@ func FirstRune(s string) (rune, bool) {
 	return 0, false
 }
 
+// UpperFirstLowerRest title cases the first rune and lower cases the rest of s
 func UpperFirstLowerRest(caser Caser, s string) string {
 	caser = CaserOrDefault(caser)
 	if len(s) == 0 {
@@ -220,6 +265,7 @@ func UpperFirstLowerRest(caser Caser, s string) string {
 	return b.String()
 }
 
+// UpperFirst title cases the first rune of s
 func UpperFirst(caser Caser, s string) string {
 	caser = CaserOrDefault(caser)
 	if len(s) == 0 {
@@ -237,6 +283,7 @@ func UpperFirst(caser Caser, s string) string {
 	return b.String()
 }
 
+// LowerFirst lower cases the first rune of s
 func LowerFirst(caser Caser, s string) string {
 	caser = CaserOrDefault(caser)
 	if len(s) == 0 {
@@ -334,6 +381,7 @@ func IsNumber(s string, additionalRules NumberRules) bool {
 	return true
 }
 
+// Reverse reverses s
 func Reverse(caser Caser, s string) string {
 	caser = CaserOrDefault(caser)
 	if len(s) == 0 {

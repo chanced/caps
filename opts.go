@@ -26,15 +26,12 @@ package caps
 
 import "github.com/chanced/caps/token"
 
-// ReplaceStyle is used to indicate the case style the text should be transformed to
-// when seeking replacement text in a Converter.
+// ReplaceStyle is used to indicate the case style that text should be
+// transformed to when performing replacement in a Converter.
 //
-// When a Converter is configured, the expected input is:
-//
-//	caps.Replacement{ Camel: "Json", Screaming: "JSON" }
-//
-// If the ReplaceStyle equals ReplaceStyleScreaming then an input of "MarshalJson" will return
-// "MarshaalJSON" with the above caps.Replacement.
+// For example, a call to ToCamel with a ReplaceStyleScreaming with an input of
+// "MarshalJson" will return "MarshaalJSON" while ReplaceStyleCamel would return
+// "MarshalJson"
 type ReplaceStyle uint8
 
 const (
@@ -56,14 +53,17 @@ func (rs ReplaceStyle) String() string {
 	return "ReplaceStyleNotSpecified"
 }
 
+// IsCamel returns true if rs equals ReplaceStyleCamel
 func (rs ReplaceStyle) IsCamel() bool {
 	return rs == ReplaceStyleCamel
 }
 
+// IsScreaming returns true if rs equals ReplaceStyleScreaming
 func (rs ReplaceStyle) IsScreaming() bool {
 	return rs == ReplaceStyleScreaming
 }
 
+// IsLower returns true if rs equals ReplaceStyleLower
 func (rs ReplaceStyle) IsLower() bool {
 	return rs == ReplaceStyleLower
 }
@@ -126,15 +126,15 @@ type Opts struct {
 	// 	DefaultConverter
 	Converter Converter
 
-	// ReplaceStyle overwrites the way words are replaced.
+	// ReplaceStyle overwrites the way Replacements are cased.
 	//
 	// A typical call to ToLowerCamel for "ServeJSON" with a Converter that
 	// contains {"Json": "JSON"} would result in "serveJSON" by using the
 	// ReplaceStyleScreaming variant. If ReplacementStyle was set to
-	// ReplaceStyleCamel, on the call to ToLowerCamel then the result would
-	// be "serveHttp".
+	// ReplaceStyleCamel then a call to ToLowerCamel then the result would be
+	// "serveHttp".
 	//
-	// The default replacement style is dependent upon the target Style.
+	// The default ReplaceStyle is dependent upon the target Style.
 	ReplaceStyle ReplaceStyle
 	// NumberRules are used by the DefaultTokenizer to augment the standard
 	// rules for determining if a rune is part of a number.
@@ -198,36 +198,6 @@ func WithAllowedSymbols(symbols string) Opts {
 	}
 }
 
-// // UseConverter sets the Converter to use
-// //
-// // Deprecated: Use WithConverter instead.
-// func UseConverter(converter Converter) Opts {
-// 	return Opts{
-// 		Converter: converter,
-// 	}
-// }
-
-// // Deprecated: Use WithReplaceStyle instead.
-// func UseReplaceStyle(style ReplaceStyle) Opts {
-// 	return Opts{
-// 		ReplaceStyle: style,
-// 	}
-// }
-
-// // Deprecated: Use WithNumberRules instead.
-// func UseNumberRules(rules token.NumberRules) Opts {
-// 	return Opts{
-// 		NumberRules: rules,
-// 	}
-// }
-
-// // Deprecated: Use WithAllowedSymbols instead.
-// func UseAllowedSymbols(symbols string) Opts {
-// 	return Opts{
-// 		AllowedSymbols: symbols,
-// 	}
-// }
-
 func loadOpts(opts []Opts) Opts {
 	result := Opts{
 		AllowedSymbols: "",
@@ -251,5 +221,101 @@ func loadOpts(opts []Opts) Opts {
 			}
 		}
 	}
+	return result
+}
+
+// Config include configurable options for Caps instances.
+//
+// See the documentation for the individual fields for more information.
+type Config struct {
+	// Any characters within this string will be allowed in the output.
+	//
+	// This does not affect delimiters (e.g. "_", "-", ".") as they are added
+	// post-tokenization.
+	//
+	// Default:
+	//  ""
+	AllowedSymbols string
+	// The Converter to use.
+	//
+	// Default:
+	// 	A StdConverter with the Replacements, Caser, and Tokenizer.
+	Converter Converter
+
+	// If not set, this will be DefaultReplacements.
+	Replacements []Replacement
+
+	// ReplaceStyle overwrites the way words are replaced.
+	//
+	// A typical call to ToLowerCamel for "ServeJSON" with a Converter that
+	// contains {"Json": "JSON"} would result in "serveJSON" by using the
+	// ReplaceStyleScreaming variant. If ReplacementStyle was set to
+	// ReplaceStyleCamel, on the call to ToLowerCamel then the result would
+	// be "serveHttp".
+	//
+	// The default replacement style is dependent upon the target Style.
+	ReplaceStyle ReplaceStyle
+	// NumberRules are used by the DefaultTokenizer to augment the standard
+	// rules for determining if a rune is part of a number.
+	//
+	// Note, if you add special characters here, they must be present in the
+	// AllowedSymbols string for them to be part of the output.
+	NumberRules token.NumberRules
+	// Special unicode case rules.
+	// See unicode.SpecialCase or token.Caser for more information.
+	//
+	// Default: token.DefaultCaser (which relies on the default unicode
+	// functions)
+	Caser token.Caser
+
+	// If not set, uses StdTokenizer with the provided delimiters and token.Caser.
+	Tokenizer Tokenizer
+}
+
+func loadConfig(opts []Config) Config {
+	result := Config{
+		AllowedSymbols: "",
+		ReplaceStyle:   ReplaceStyleScreaming,
+	}
+
+	for _, opt := range opts {
+		result.AllowedSymbols += opt.AllowedSymbols
+		if opt.Converter != nil {
+			result.Converter = opt.Converter
+		}
+		if opt.ReplaceStyle != ReplaceStyleNotSpecified {
+			result.ReplaceStyle = opt.ReplaceStyle
+		}
+		if len(opt.NumberRules) > 0 {
+			if result.NumberRules == nil {
+				result.NumberRules = make(NumberRules)
+			}
+			for k, v := range opt.NumberRules {
+				result.NumberRules[k] = v
+			}
+		}
+		if opt.Replacements != nil {
+			result.Replacements = append(result.Replacements, opt.Replacements...)
+		}
+		if opt.Caser != nil {
+			result.Caser = opt.Caser
+		}
+		if opt.Tokenizer != nil {
+			result.Tokenizer = opt.Tokenizer
+		}
+	}
+	if result.Caser == nil {
+		result.Caser = token.DefaultCaser
+	}
+	if result.Replacements == nil {
+		result.Replacements = DefaultReplacements
+	}
+	if result.Tokenizer == nil {
+		result.Tokenizer = NewTokenizer(DEFAULT_DELIMITERS, result.Caser)
+	}
+	if result.Converter == nil {
+		result.Converter = NewConverter(result.Replacements, result.Tokenizer, result.Caser)
+	}
+
 	return result
 }
