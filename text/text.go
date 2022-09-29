@@ -283,9 +283,9 @@ func (t Text) IndexFunc(fn func(r rune) bool) int {
 // The found result reports whether sep appears in t.
 // If sep does not appear in t, cut returns t, "", false.
 func (t Text) Cut(sep string) (before, after Text, found bool) {
-	b, a, f := strings.Cut(t.String(), sep)
+	tbefore, tafter, f := strings.Cut(t.String(), sep)
 
-	return Text(b), Text(a), f
+	return Text(tbefore), Text(tafter), f
 }
 
 // Clone returns a fresh copy of t.

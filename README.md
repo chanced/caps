@@ -7,7 +7,6 @@
 [![Coverage](http://gocover.io/_badge/github.com/chanced/caps)](http://gocover.io/github.com/chanced/caps)
 ![Build Status](https://img.shields.io/github/workflow/status/chanced/caps/Build?style=flat-square)
 
-
 caps is a unicode aware, case conversion library for Go. It
 was built with the following priorites in mind: configurability, consistency,
 correctness, ergonomic, and reasonable performance; in that order.
@@ -319,9 +318,7 @@ func main() {
 The `text` package contains two types:
 
 -   `Text` which has all of the case conversions and relevant functions from strings as methods.
--   `Texts` which is a slice of Text
-
-It does not currently have tests.
+-   `Texts` which is a sortable slice of Text with a few helper methods
 
 ```go
 package main
