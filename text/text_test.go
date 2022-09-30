@@ -9,6 +9,52 @@ import (
 	"github.com/chanced/caps/token"
 )
 
+func TestTexts_Contains(t *testing.T) {
+	type args struct {
+		val Text
+	}
+	tests := []struct {
+		name string
+		tr   Texts
+		args args
+		want bool
+	}{
+		{"contains", Texts{"a", "b"}, args{"a"}, true},
+		{"not contains", Texts{"a", "b"}, args{"c"}, false},
+		{"not contains case sensitive", Texts{"a", "b"}, args{"A"}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.tr.Contains(tt.args.val); got != tt.want {
+				t.Errorf("Texts.Contains() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestTexts_ContainsFold(t *testing.T) {
+	type args struct {
+		val Text
+	}
+	tests := []struct {
+		name string
+		tr   Texts
+		args args
+		want bool
+	}{
+		{"contains", Texts{"a", "b"}, args{"a"}, true},
+		{"not contains", Texts{"a", "b"}, args{"c"}, false},
+		{"contains case insensitive", Texts{"a", "b"}, args{"A"}, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.tr.ContainsFold(tt.args.val); got != tt.want {
+				t.Errorf("Texts.ContainsFold() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestTexts_Less(t *testing.T) {
 	type args struct {
 		i int
@@ -95,7 +141,7 @@ func TestTexts_TotalLen(t *testing.T) {
 
 func TestTexts_Join(t *testing.T) {
 	type args struct {
-		sep string
+		sep Text
 	}
 	tests := []struct {
 		name string
@@ -387,7 +433,7 @@ func TestText_ToTitle(t *testing.T) {
 
 func TestText_ToDelimited(t *testing.T) {
 	type args struct {
-		delimiter string
+		delimiter Text
 		lowercase bool
 		opts      []caps.Opts
 	}
@@ -412,8 +458,8 @@ func TestText_ToDelimited(t *testing.T) {
 
 func TestText_ReplaceAll(t *testing.T) {
 	type args struct {
-		old string
-		new string
+		old Text
+		new Text
 	}
 	tests := []struct {
 		name string
@@ -436,8 +482,8 @@ func TestText_ReplaceAll(t *testing.T) {
 
 func TestText_Replace(t *testing.T) {
 	type args struct {
-		old string
-		new string
+		old Text
+		new Text
 		n   int
 	}
 	tests := []struct {
@@ -461,7 +507,7 @@ func TestText_Replace(t *testing.T) {
 
 func TestText_Compare(t *testing.T) {
 	type args struct {
-		other string
+		other Text
 	}
 	tests := []struct {
 		name string
@@ -484,7 +530,7 @@ func TestText_Compare(t *testing.T) {
 
 func TestText_Trim(t *testing.T) {
 	type args struct {
-		cutset string
+		cutset Text
 	}
 	tests := []struct {
 		name string
@@ -507,7 +553,7 @@ func TestText_Trim(t *testing.T) {
 
 func TestText_TrimLeft(t *testing.T) {
 	type args struct {
-		cutset string
+		cutset Text
 	}
 	tests := []struct {
 		name string
@@ -530,7 +576,7 @@ func TestText_TrimLeft(t *testing.T) {
 
 func TestText_TrimRight(t *testing.T) {
 	type args struct {
-		cutset string
+		cutset Text
 	}
 	tests := []struct {
 		name string
@@ -571,7 +617,7 @@ func TestText_TrimSpace(t *testing.T) {
 
 func TestText_TrimPrefix(t *testing.T) {
 	type args struct {
-		prefix string
+		prefix Text
 	}
 	tests := []struct {
 		name string
@@ -594,7 +640,7 @@ func TestText_TrimPrefix(t *testing.T) {
 
 func TestText_TrimSuffix(t *testing.T) {
 	type args struct {
-		suffix string
+		suffix Text
 	}
 	tests := []struct {
 		name string
@@ -663,7 +709,7 @@ func TestText_TrimRightFunc(t *testing.T) {
 
 func TestText_EqualFold(t *testing.T) {
 	type args struct {
-		v string
+		v Text
 	}
 	tests := []struct {
 		name string
@@ -686,7 +732,7 @@ func TestText_EqualFold(t *testing.T) {
 
 func TestText_Index(t *testing.T) {
 	type args struct {
-		substr string
+		substr Text
 	}
 	tests := []struct {
 		name string
@@ -779,7 +825,7 @@ func TestText_IndexFunc(t *testing.T) {
 
 func TestText_Cut(t *testing.T) {
 	type args struct {
-		sep string
+		sep Text
 	}
 	tests := []struct {
 		name       string
@@ -829,7 +875,7 @@ func TestText_Clone(t *testing.T) {
 
 func TestText_Contains(t *testing.T) {
 	type args struct {
-		substr string
+		substr Text
 	}
 	tests := []struct {
 		name string
@@ -853,7 +899,7 @@ func TestText_Contains(t *testing.T) {
 
 func TestText_ContainsAny(t *testing.T) {
 	type args struct {
-		chars string
+		chars Text
 	}
 	tests := []struct {
 		name string
@@ -901,7 +947,7 @@ func TestText_ContainsRune(t *testing.T) {
 
 func TestText_Count(t *testing.T) {
 	type args struct {
-		substr string
+		substr Text
 	}
 	tests := []struct {
 		name string
@@ -969,7 +1015,7 @@ func TestText_FieldsFunc(t *testing.T) {
 
 func TestText_HasPrefix(t *testing.T) {
 	type args struct {
-		prefix string
+		prefix Text
 	}
 	tests := []struct {
 		name string
@@ -993,7 +1039,7 @@ func TestText_HasPrefix(t *testing.T) {
 
 func TestText_HasSuffix(t *testing.T) {
 	type args struct {
-		suffix string
+		suffix Text
 	}
 	tests := []struct {
 		name string
@@ -1065,7 +1111,7 @@ func TestText_AppendRune(t *testing.T) {
 
 func TestText_LastIndex(t *testing.T) {
 	type args struct {
-		substr string
+		substr Text
 	}
 	tests := []struct {
 		name string
@@ -1090,7 +1136,7 @@ func TestText_LastIndex(t *testing.T) {
 
 func TestText_LastIndexAny(t *testing.T) {
 	type args struct {
-		chars string
+		chars Text
 	}
 	tests := []struct {
 		name string
@@ -1234,7 +1280,7 @@ func TestText_Repeat(t *testing.T) {
 
 func TestText_Split(t *testing.T) {
 	type args struct {
-		sep string
+		sep Text
 	}
 	tests := []struct {
 		name string
@@ -1256,7 +1302,7 @@ func TestText_Split(t *testing.T) {
 
 func TestText_SplitAfter(t *testing.T) {
 	type args struct {
-		sep string
+		sep Text
 	}
 	tests := []struct {
 		name string
@@ -1278,7 +1324,7 @@ func TestText_SplitAfter(t *testing.T) {
 
 func TestText_SplitAfterN(t *testing.T) {
 	type args struct {
-		sep string
+		sep Text
 		n   int
 	}
 	tests := []struct {
@@ -1303,7 +1349,7 @@ func TestText_SplitAfterN(t *testing.T) {
 
 func TestText_SplitN(t *testing.T) {
 	type args struct {
-		sep string
+		sep Text
 		n   int
 	}
 	tests := []struct {
@@ -1393,7 +1439,7 @@ func TestText_ToValidUTF8(t *testing.T) {
 	tests := []struct {
 		name string
 		tr   Text
-		repl string
+		repl Text
 		want Text
 	}{
 		{"empty", "", "", ""},
