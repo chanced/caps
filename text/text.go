@@ -375,19 +375,23 @@ func (t Text) HasSuffix(suffix Text) bool {
 
 // Append appends each elem to a copy of t and returns the result.
 func (t Text) Append(elems ...Text) Text {
+	sb := strings.Builder{}
+	sb.WriteString(t.String())
 	for _, e := range elems {
-		t += e
+		sb.WriteString(e.String())
 	}
-	return t
+	return Text(sb.String())
 }
 
 // AppendRune append each rune in elem to a copy t and returns the result.
 func (t Text) AppendRune(elems ...rune) Text {
+	sb := strings.Builder{}
+	sb.WriteString(t.String())
 	for _, e := range elems {
-		t += Text(e)
+		sb.WriteRune(e)
 	}
 
-	return t
+	return Text(sb.String())
 }
 
 // LastIndex returns the index of the last instance of substr in t, or -1 if substr is not present in t.
