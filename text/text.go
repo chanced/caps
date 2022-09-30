@@ -521,6 +521,11 @@ func (t Text) ToValidUTF8(replacement Text) Text {
 	return Text(strings.ToValidUTF8(t.String(), replacement.String()))
 }
 
+// Pointer returns a pointer to t.
+func Pointer(t Text) *Text {
+	return &t
+}
+
 func collect(slice []string) Texts {
 	res := make([]Text, len(slice))
 	for i, v := range slice {
