@@ -1454,3 +1454,10 @@ func TestText_ToValidUTF8(t *testing.T) {
 		})
 	}
 }
+
+func TestPointer(t *testing.T) {
+	x := Text("abc")
+	if Pointer(x).String() != x.String() {
+		t.Error("Pointer failed")
+	}
+}
