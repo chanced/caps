@@ -79,13 +79,13 @@ func WriteUpperFirstLowerRest(b *strings.Builder, caser Caser, s string) {
 }
 
 // WriteLowerFirstUpperRest writes the first rune as upper case and the rest are
-// seperated by sep and written as lower case
+// separated by sep and written as lower case
 func WriteSplitLowerFirstUpperRest(b *strings.Builder, caser Caser, sep string, s string) {
 	WriteSplitLowerFirstUpperRestRunes(b, caser, sep, []rune(s))
 }
 
 // WriteSplitLowerFirstUpperRestRunes writes the first rune as upper case and
-// the rest are seperated by sep and written as lower case
+// the rest are separated by sep and written as lower case
 func WriteSplitLowerFirstUpperRestRunes(b *strings.Builder, caser Caser, sep string, s []rune) {
 	for i, r := range s {
 		if i == 0 && b.Len() == 0 {
@@ -103,7 +103,7 @@ func WriteSplitLowerFirstUpperRestRunes(b *strings.Builder, caser Caser, sep str
 	}
 }
 
-// WriteSplitLower writes all strings in elems seperated by sep and written as lower case
+// WriteSplitLower writes all strings in elems separated by sep and written as lower case
 func WriteSplitLower(b *strings.Builder, caser Caser, sep string, elems ...string) {
 	for _, s := range elems {
 		for _, r := range s {
@@ -115,7 +115,7 @@ func WriteSplitLower(b *strings.Builder, caser Caser, sep string, elems ...strin
 	}
 }
 
-// WriteSplitUpper writes all runes in elems seperated by sep and written as lower case
+// WriteSplitUpper writes all runes in elems separated by sep and written as lower case
 func WriteSplitLowerRunes(b *strings.Builder, caser Caser, sep string, s []rune) {
 	for _, r := range s {
 		if b.Len() > 0 && len(sep) > 0 {
@@ -125,7 +125,7 @@ func WriteSplitLowerRunes(b *strings.Builder, caser Caser, sep string, s []rune)
 	}
 }
 
-// WriteSplitUpper writes all strings in elems seperated by sep and written as upper case
+// WriteSplitUpper writes all strings in elems separated by sep and written as upper case
 func WriteSplitUpper(b *strings.Builder, caser Caser, sep string, elems ...string) {
 	for _, s := range elems {
 		WriteSplitUpperRunes(b, caser, sep, []rune(s))
@@ -133,7 +133,7 @@ func WriteSplitUpper(b *strings.Builder, caser Caser, sep string, elems ...strin
 }
 
 // WriteSplitUpperRunes uses caser to upper case each rune and writes each to b,
-// seperated by sep
+// separated by sep
 func WriteSplitUpperRunes(b *strings.Builder, caser Caser, sep string, s []rune) {
 	for i, r := range s {
 		if b.Len() > 0 && len(sep) > 0 {
