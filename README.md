@@ -1,4 +1,4 @@
-# caps is a case conversion library
+# caps is a case conversion library for go
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/chanced/caps.svg)](https://pkg.go.dev/github.com/chanced/caps)
 [![Latest Version](https://img.shields.io/github/v/tag/chanced/caps.svg?sort=semver&style=flat-square&label=version&color=blue)](https://img.shields.io/github/v/tag/chanced/caps.svg?sort=semver&style=flat-square&label=version&color=blue)
