@@ -7,9 +7,7 @@
 [![Codecov](https://img.shields.io/codecov/c/github/chanced/caps?style=flat-square&token=6601V8MSG3)](https://codecov.io/gh/chanced/caps)
 ![Build Status](https://img.shields.io/github/actions/workflow/status/chanced/caps/main.yaml?style=flat-square)
 
-caps is a unicode aware, case conversion library for Go. It
-was built with the following priorites in mind: configurability, consistency,
-correctness, ergonomic, and reasonable performance; in that order.
+caps is a unicode aware, case conversion library for Go.
 
 <!-- -   [Supported Case Conversions](#supported-case-conversions)
 -   [Install](#install)
