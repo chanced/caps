@@ -2,7 +2,7 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/chanced/caps.svg)](https://pkg.go.dev/github.com/chanced/caps)
 [![Latest Version](https://img.shields.io/github/v/tag/chanced/caps.svg?sort=semver&style=flat-square&label=version&color=blue)](https://img.shields.io/github/v/tag/chanced/caps.svg?sort=semver&style=flat-square&label=version&color=blue)
-[![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/gomods/athens.svg?style=flat-square&label=go)](https://github.com/chanced/caps)
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/chanced/caps.svg?style=flat-square&label=go)
 [![GoReportCard](https://goreportcard.com/badge/github.com/chanced/caps?style=flat-square)](https://goreportcard.com/report/github.com/chanced/caps)
 [![Codecov](https://img.shields.io/codecov/c/github/chanced/caps?style=flat-square&token=6601V8MSG3)](https://codecov.io/gh/chanced/caps)
 ![Build Status](https://img.shields.io/github/actions/workflow/status/chanced/caps/main.yaml?style=flat-square)
