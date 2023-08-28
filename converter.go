@@ -167,7 +167,11 @@ func (StdConverter) writeIndexReplacement(b *strings.Builder, style Style, repSt
 			b.WriteString(rep.Camel)
 		}
 	case ReplaceStyleScreaming:
-		b.WriteString(rep.Screaming)
+		if b.Len() == 0 && style == StyleLowerCamel {
+			b.WriteString(rep.Lower)
+		} else {
+			b.WriteString(rep.Screaming)
+		}
 	case ReplaceStyleLower:
 		b.WriteString(rep.Lower)
 	default:
@@ -241,7 +245,6 @@ func (sc StdConverter) Convert(req ConvertRequest) string {
 			if idx, ok = idx.Match(tok); !ok {
 				if idx.LastMatch().HasValue() {
 					// appending the last match
-					//  formatIndexedReplacement(req.Style, req.ReplaceStyle, b.Len(), idx.LastMatch()), req.Join
 					sc.writeIndexReplacement(b, req.Style, req.ReplaceStyle, req.Join, idx.LastMatch())
 				}
 				if idx.HasPartialMatches() {
@@ -285,21 +288,11 @@ func (sc StdConverter) Convert(req ConvertRequest) string {
 	}
 	if idx.HasMatched() {
 		sc.writeIndexReplacement(b, req.Style, req.ReplaceStyle, req.Join, idx.LastMatch())
-		// parts = append(parts, formatIndexedReplacement(req.Style, req.ReplaceStyle, len(parts), idx.LastMatch()))
 	}
 
 	if idx.HasPartialMatches() {
 		sc.writeReplaceSplit(b, req.Style, req.Join, idx.PartialMatchRunes())
 	}
-	// for _, part := range parts {
-	// 	if shouldWriteDelimiter {
-	// 		result.WriteString(req.Join)
-	// 	}
-	// 	result.WriteString(part)
-	// 	if !shouldWriteDelimiter {
-	// 		shouldWriteDelimiter = len(part) > 0 && len(req.Join) > 0
-	// 	}
-	// }
 
 	return b.String()
 }
