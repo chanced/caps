@@ -64,6 +64,25 @@ var titleTestCases = testcases{
 	{"test camel initialisms uuid id guid http https", "Test Camel Initialisms Uuid Id Guid Http Https", Opts{caps.WithReplaceStyleCamel()}},
 }
 
+func TestIssue29(t *testing.T) {
+	tests := testcases{
+		{"ID", "id", nil},
+		{"entity id", "entityID", nil},
+	}
+
+	for _, test := range tests {
+		func(test testcase) {
+			t.Run(test.input, func(t *testing.T) {
+				t.Parallel()
+				output := caps.ToLowerCamel(test.input, test.opts...)
+				if output != test.expected {
+					t.Errorf("expected \"%s\", got \"%s\"", test.expected, output)
+				}
+			})
+		}(test)
+	}
+}
+
 func TestToTitle(t *testing.T) {
 	for _, test := range titleTestCases {
 		func(test testcase) {
