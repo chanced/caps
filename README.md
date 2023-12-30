@@ -50,6 +50,7 @@ go get github.com/chanced/caps
 
 ```go
 package main
+
 import (
 	"fmt"
 	"github.com/chanced/caps"
@@ -74,9 +75,10 @@ func main() {
 	// Output:
 	// someId
 }
+
 ```
 
-[go playground link](https://go.dev/play/p/8iSSUFlWTTw)
+[go playground link](https://go.dev/play/p/bJvbMAmtZzV)
 
 ## Word boundaries
 
@@ -179,7 +181,7 @@ import (
 func main() {
 	c := caps.New(caps.Config{
 		Replacements: []caps.Replacement{
-			{"Ex", "EX"},
+			{Camel: "Ex", Screaming: "EX"},
 			// ... your replacements
 		},
 	})
@@ -189,7 +191,7 @@ func main() {
 }
 ```
 
-[go playground link](https://go.dev/play/p/QBJSq39sMCZ)
+[go playground link](https://go.dev/play/p/8G6Yl-9I030)
 
 ### Creating isolated `caps.StdConverter` instances
 
@@ -229,19 +231,24 @@ conversions. Otherwise, you'll need guard your usage of the library accordingly
 
 ```go
 package main
+
 import (
-    "fmt"
-    "github.com/chanced/caps"
+	"fmt"
+
+	"github.com/chanced/caps"
 )
+
 func main() {
-    caps.DefaultConverter.Set("Gcp", "GCP")
-    fmt.Println(caps.ToCamel("some_gcp_var"))
-    // Output:
-    // SomeGCPVar
+	converter, _ := caps.DefaultConverter.(caps.StdConverter)
+	converter.Set("Gcp", "GCP")
+	fmt.Println(caps.ToCamel("some_gcp_var"))
+	// Output:
+	// SomeGCPVar
 }
+
 ```
 
-[go playground link](https://go.dev/play/p/QARyN7-fUQ5)
+[go playground link](https://go.dev/play/p/GcEHFAR8zHK)
 
 ### Creating a custom `caps.Converter`
 
@@ -270,7 +277,7 @@ func main() {
 }
 ```
 
-[go playground link](https://go.dev/play/p/dg19iBIsHvh)
+[go playground link](https://go.dev/play/p/kmtwZlP41S9)
 
 ## Support for special case unicode (e.g. Turkish, Azeri)
 
